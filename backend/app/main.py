@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.core.database import init_db
 from app.core.redis import init_redis, close_redis
 from app.api.v1.router import api_router
+from app.services.init_db import init_sample_data
 
 
 def create_app() -> FastAPI:
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     async def startup_event():
         await init_db()
+        await init_sample_data()
         await init_redis()
 
     # Shutdown

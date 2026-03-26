@@ -17,9 +17,11 @@ class User(Base):
     is_superuser = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
 
     assets = relationship("Asset", back_populates="assigned_to_user")
     purchase_requests = relationship("PurchaseRequest", back_populates="requester")
+    department = relationship("Department", back_populates="users")
 
 
 class Category(Base):

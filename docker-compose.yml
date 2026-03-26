@@ -49,7 +49,6 @@ services:
         condition: service_healthy
     command: >
       sh -c "sleep 5 && 
-             python -m app.services.init_db &&
              gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker app.main:app --workers 2"
 
   frontend:
@@ -57,7 +56,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "3030:80"
     depends_on:
       - backend
 

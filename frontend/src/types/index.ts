@@ -25,8 +25,8 @@ export interface LoginRequest {
 }
 
 export interface Token {
-  access_token: string
-  token_type: string
+  accessToken: string
+  tokenType: string
 }
 
 // Category types

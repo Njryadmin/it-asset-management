@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import User, Category, Supplier, Department, Asset, AssetStatus
 from app.core.security import get_password_hash
-from app.core.database import AsyncSessionLocal
+from app.core.database import AsyncSessionLocal, init_db
 import asyncio
 
 
@@ -89,6 +89,9 @@ async def create_sample_departments(db: AsyncSession):
 
 async def init_sample_data():
     """Initialize sample data"""
+    # First create all tables
+    await init_db()
+    # Then insert sample data
     async with AsyncSessionLocal() as db:
         try:
             await create_default_admin(db)
