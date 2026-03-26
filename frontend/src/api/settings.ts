@@ -2,12 +2,16 @@ import request from './request'
 
 export interface SystemSettings {
   system_name: string
+  site_title: string
+  site_description: string
   company_name: string
   contact_email: string
   contact_phone: string
   asset_code_prefix: string
   auto_backup: boolean
   backup_retention_days: number
+  logo_url: string
+  favicon_url: string
 }
 
 export interface UserProfile {
@@ -46,6 +50,22 @@ export const settingsApi = {
   changePassword(oldPassword: string, newPassword: string) {
     return request.put('/settings/password', null, {
       params: { old_password: oldPassword, new_password: newPassword }
+    })
+  },
+  
+  uploadLogo(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request.post<{ url: string }>('/settings/upload-logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  
+  uploadFavicon(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request.post<{ url: string }>('/settings/upload-favicon', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
   }
 }

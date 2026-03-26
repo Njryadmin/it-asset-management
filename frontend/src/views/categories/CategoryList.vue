@@ -326,8 +326,8 @@ function submitImport() {
 }
 
 function downloadTemplate() {
-  const template = '\ufeff分类名称,编码,上级分类ID,描述\n'
-  const example = '电脑设备,,,办公用电脑设备\n台式机,DESKTOP,1,台式机分类'
+  const template = '\ufeff分类名称,编码,上级分类名称,描述\n'
+  const example = '电脑设备,,,办公用电脑设备\n台式机,DESKTOP,电脑设备,台式机分类\n笔记本,NOTEBOOK,电脑设备,笔记本分类'
   const blob = new Blob([template + example], { type: 'text/csv;charset=utf-8' })
   const url = window.URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -403,19 +403,36 @@ onMounted(() => {
   background: transparent;
 }
 
+.category-tree :deep(.el-tree-node) {
+  padding: 4px 0;
+}
+
+.category-tree :deep(.el-tree-node__content) {
+  height: auto !important;
+  min-height: 72px;
+  padding: 0 12px;
+  align-items: stretch;
+}
+
+.category-tree :deep(.el-tree-node__expand-icon) {
+  padding: 24px 8px;
+}
+
 .tree-node-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 12px;
   margin: 4px 0;
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
+  min-height: 72px;
+  box-sizing: border-box;
 }
 
 .tree-node-wrapper:hover {
-  background: var(--theme-border-light);
+  background: var(--theme-border-light) !important;
 }
 
 .node-content {

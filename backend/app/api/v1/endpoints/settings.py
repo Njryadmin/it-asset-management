@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import Dict, Any
+import os
+import uuid
+import shutil
 
 from app.core.database import get_db
 from app.models import User
@@ -10,16 +14,24 @@ from app.core.security import get_password_hash, verify_password
 
 router = APIRouter(prefix="/settings", tags=["系统设置"])
 
+# Ensure static directory exists
+STATIC_DIR = "/app/static"
+os.makedirs(STATIC_DIR, exist_ok=True)
+os.makedirs(f"{STATIC_DIR}/icons", exist_ok=True)
 
 # In-memory settings (in production, use database)
 SETTINGS: Dict[str, Any] = {
     "system_name": "IT资产管理系统",
+    "site_title": "IT资产管理系统",
+    "site_description": "高效的IT资产管理系统",
     "company_name": "",
     "contact_email": "",
     "contact_phone": "",
     "asset_code_prefix": "ASSET",
     "auto_backup": True,
-    "backup_retention_days": 30
+    "backup_retention_days": 30,
+    "logo_url": "",
+    "favicon_url": ""
 }
 
 # Theme presets
@@ -133,8 +145,9 @@ async def update_settings(
         raise HTTPException(status_code=403, detail="需要管理员权限")
     
     allowed_keys = {
-        "system_name", "company_name", "contact_email", "contact_phone",
-        "asset_code_prefix", "auto_backup", "backup_retention_days"
+        "system_name", "site_title", "site_description", "company_name", 
+        "contact_email", "contact_phone", "asset_code_prefix", 
+        "auto_backup", "backup_retention_days", "logo_url", "favicon_url"
     }
     
     for key, value in settings.items():
@@ -224,3 +237,70 @@ async def change_current_password(
     current_user.password_hash = get_password_hash(new_password)
     await db.commit()
     return {"message": "密码修改成功"}
+
+
+@router.post("/upload-logo")
+async def upload_logo(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user)
+):
+    """上传站点LOGO"""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="需要管理员权限")
+    
+    # Validate file type
+    allowed_types = ["image/png", "image/jpeg", "image/gif", "image/svg+xml", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="仅支持 PNG/JPEG/GIF/SVG/WebP 格式")
+    
+    # Generate unique filename
+    ext = file.filename.split(".")[-1] if "." in file.filename else "png"
+    filename = f"logo_{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join(STATIC_DIR, filename)
+    
+    # Save file
+    with open(filepath, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    
+    # Update settings
+    SETTINGS["logo_url"] = f"/static/{filename}"
+    
+    return {"url": SETTINGS["logo_url"]}
+
+
+@router.post("/upload-favicon")
+async def upload_favicon(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user)
+):
+    """上传站点图标"""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="需要管理员权限")
+    
+    # Validate file type
+    allowed_types = ["image/png", "image/x-icon", "image/vnd.microsoft.icon", "image/svg+xml"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="仅支持 PNG/ICO/SVG 格式")
+    
+    # Generate unique filename
+    ext = file.filename.split(".")[-1] if "." in file.filename else "ico"
+    filename = f"favicon_{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join(STATIC_DIR, filename)
+    
+    # Save file
+    with open(filepath, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    
+    # Update settings
+    SETTINGS["favicon_url"] = f"/static/{filename}"
+    
+    return {"url": SETTINGS["favicon_url"]}
+
+
+@router.get("/static/{filename}")
+async def get_static_file(filename: str):
+    """获取静态文件"""
+    filepath = os.path.join(STATIC_DIR, filename)
+    if os.path.exists(filepath):
+        return FileResponse(filepath)
+    raise HTTPException(status_code=404, detail="文件不存在")

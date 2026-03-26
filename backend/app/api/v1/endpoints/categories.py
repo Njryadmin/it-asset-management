@@ -163,16 +163,21 @@ async def export_categories(
     result = await db.execute(select(Category))
     categories = result.scalars().all()
     
+    # Build parent name lookup
+    category_map = {cat.id: cat.name for cat in categories}
+    
     output = io.StringIO()
     writer = csv.writer(output)
     
-    writer.writerow(['分类名称', '编码', '上级分类ID', '描述', '创建时间'])
+    # Header with Chinese descriptions
+    writer.writerow(['分类名称', '编码', '上级分类名称', '描述', '创建时间'])
     
     for cat in categories:
+        parent_name = category_map.get(cat.parent_id, '') if cat.parent_id else ''
         writer.writerow([
             cat.name,
             cat.code or '',
-            cat.parent_id or '',
+            parent_name,
             cat.description or '',
             cat.created_at.strftime('%Y-%m-%d %H:%M:%S') if cat.created_at else ''
         ])
@@ -205,6 +210,12 @@ async def import_categories(
     errors = []
     skipped = 0
     
+    # Build name -> id lookup for parent resolution
+    name_to_id = {}
+    result = await db.execute(select(Category))
+    for cat in result.scalars().all():
+        name_to_id[cat.name] = cat.id
+    
     for row_num, row in enumerate(reader, start=2):
         try:
             if not row.get('分类名称'):
@@ -212,17 +223,23 @@ async def import_categories(
                 skipped += 1
                 continue
             
+            # Resolve parent by name
             parent_id = None
-            if row.get('上级分类ID'):
-                parent_id = int(row['上级分类ID'])
+            parent_name = row.get('上级分类名称', '').strip()
+            if parent_name:
+                parent_id = name_to_id.get(parent_name)
+                if parent_id is None:
+                    errors.append(f"第{row_num}行: 未找到上级分类'{parent_name}'，已设为空")
             
             cat = Category(
                 name=row['分类名称'],
-                code=row.get('编码') or None,
+                code=row.get('编码', '').strip() or None,
                 parent_id=parent_id,
-                description=row.get('描述') or None
+                description=row.get('描述', '').strip() or None
             )
             db.add(cat)
+            # Add to lookup for nested categories
+            name_to_id[cat.name] = cat.id
             imported += 1
             
         except Exception as e:

@@ -6,6 +6,63 @@
       </template>
       
       <el-tabs v-model="activeTab">
+        <!-- 站点信息 -->
+        <el-tab-pane label="站点信息" name="site">
+          <el-form label-width="120px" class="settings-form">
+            <el-divider content-position="left">站点标识</el-divider>
+            
+            <el-form-item label="站点LOGO">
+              <div class="logo-upload">
+                <el-upload
+                  class="logo-uploader"
+                  :show-file-list="false"
+                  :http-request="uploadLogo"
+                  accept="image/*"
+                >
+                  <img v-if="basicForm.logo_url" :src="basicForm.logo_url" class="logo-image" />
+                  <el-icon v-else class="logo-uploader-icon"><Plus /></el-icon>
+                </el-upload>
+                <div class="logo-tip">支持 PNG、JPG、GIF、SVG 格式，建议尺寸 200x60</div>
+              </div>
+            </el-form-item>
+            
+            <el-form-item label="站点图标">
+              <div class="favicon-upload">
+                <el-upload
+                  class="favicon-uploader"
+                  :show-file-list="false"
+                  :http-request="uploadFavicon"
+                  accept="image/*"
+                >
+                  <img v-if="basicForm.favicon_url" :src="basicForm.favicon_url" class="favicon-image" />
+                  <el-icon v-else class="favicon-uploader-icon"><Picture /></el-icon>
+                </el-upload>
+                <div class="favicon-tip">支持 PNG、ICO 格式，建议尺寸 32x32 或 64x64</div>
+              </div>
+            </el-form-item>
+            
+            <el-divider content-position="left">基本信息</el-divider>
+            
+            <el-form-item label="站点名称">
+              <el-input v-model="basicForm.system_name" placeholder="请输入站点名称" />
+            </el-form-item>
+            
+            <el-form-item label="站点标题">
+              <el-input v-model="basicForm.site_title" placeholder="请输入站点标题（浏览器标签页显示）" />
+            </el-form-item>
+            
+            <el-form-item label="站点描述">
+              <el-input v-model="basicForm.site_description" type="textarea" :rows="3" placeholder="请输入站点描述" />
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button type="primary" :loading="basicLoading" @click="saveBasicSettings">
+                保存设置
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+
         <!-- 基础设置 -->
         <el-tab-pane label="基础设置" name="basic">
           <el-form ref="basicFormRef" :model="basicForm" label-width="140px" class="settings-form">
@@ -232,12 +289,16 @@ const currentTheme = ref(localStorage.getItem('app-theme') || 'default')
 
 const basicForm = reactive({
   system_name: '',
+  site_title: '',
+  site_description: '',
   company_name: '',
   contact_email: '',
   contact_phone: '',
   asset_code_prefix: 'ASSET',
   auto_backup: true,
-  backup_retention_days: 30
+  backup_retention_days: 30,
+  logo_url: '',
+  favicon_url: ''
 })
 
 const profileForm = reactive({
@@ -272,6 +333,26 @@ async function fetchSettings() {
     Object.assign(basicForm, response.data)
   } catch (error) {
     ElMessage.error('获取设置失败')
+  }
+}
+
+async function uploadLogo(options: any) {
+  try {
+    const response = await settingsApi.uploadLogo(options.file)
+    basicForm.logo_url = response.data.url
+    ElMessage.success('LOGO上传成功')
+  } catch (error) {
+    ElMessage.error('LOGO上传失败')
+  }
+}
+
+async function uploadFavicon(options: any) {
+  try {
+    const response = await settingsApi.uploadFavicon(options.file)
+    basicForm.favicon_url = response.data.url
+    ElMessage.success('图标上传成功')
+  } catch (error) {
+    ElMessage.error('图标上传失败')
   }
 }
 
@@ -486,5 +567,56 @@ onMounted(() => {
   right: 8px;
   color: #409eff;
   font-size: 20px;
+}
+
+/* Logo upload */
+.logo-upload,
+.favicon-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-uploader,
+.favicon-uploader {
+  width: 120px;
+  height: 60px;
+  border: 1px dashed var(--theme-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.logo-uploader:hover,
+.favicon-uploader:hover {
+  border-color: var(--theme-primary);
+}
+
+.favicon-uploader {
+  width: 60px;
+  height: 60px;
+}
+
+.logo-uploader-icon,
+.favicon-uploader-icon {
+  font-size: 24px;
+  color: var(--theme-text-secondary);
+}
+
+.logo-image,
+.favicon-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo-tip,
+.favicon-tip {
+  font-size: 12px;
+  color: var(--theme-text-secondary);
 }
 </style>
