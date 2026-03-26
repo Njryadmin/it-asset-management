@@ -65,8 +65,9 @@ request.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    // Convert camelCase to snake_case for request body
-    if (config.data && typeof config.data === 'object') {
+    // Convert camelCase to snake_case for request body (skip FormData/URLSearchParams)
+    if (config.data && typeof config.data === 'object' && 
+        !(config.data instanceof FormData) && !(config.data instanceof URLSearchParams)) {
       config.data = camelToSnake(config.data)
     }
     
