@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List, Optional
+import csv
+import io
+from datetime import datetime
 
 from app.core.database import get_db
 from app.models import Category
@@ -148,3 +152,88 @@ async def delete_category(
     await db.delete(category)
     await db.commit()
     return {"message": "删除成功"}
+
+
+@router.get("/export")
+async def export_categories(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    """导出所有分类为CSV"""
+    result = await db.execute(select(Category))
+    categories = result.scalars().all()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    writer.writerow(['分类名称', '编码', '上级分类ID', '描述', '创建时间'])
+    
+    for cat in categories:
+        writer.writerow([
+            cat.name,
+            cat.code or '',
+            cat.parent_id or '',
+            cat.description or '',
+            cat.created_at.strftime('%Y-%m-%d %H:%M:%S') if cat.created_at else ''
+        ])
+    
+    output.seek(0)
+    bom = '\ufeff'
+    return StreamingResponse(
+        iter([bom + output.getvalue()]),
+        media_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": f"attachment; filename=categories_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
+
+
+@router.post("/import")
+async def import_categories(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    """批量导入分类(CSV格式)"""
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="仅支持CSV文件")
+    
+    content = await file.read()
+    decoded_content = content.decode('utf-8-sig')
+    
+    reader = csv.DictReader(io.StringIO(decoded_content))
+    
+    imported = 0
+    errors = []
+    skipped = 0
+    
+    for row_num, row in enumerate(reader, start=2):
+        try:
+            if not row.get('分类名称'):
+                errors.append(f"第{row_num}行: 缺少必填字段(分类名称)")
+                skipped += 1
+                continue
+            
+            parent_id = None
+            if row.get('上级分类ID'):
+                parent_id = int(row['上级分类ID'])
+            
+            cat = Category(
+                name=row['分类名称'],
+                code=row.get('编码') or None,
+                parent_id=parent_id,
+                description=row.get('描述') or None
+            )
+            db.add(cat)
+            imported += 1
+            
+        except Exception as e:
+            errors.append(f"第{row_num}行: {str(e)}")
+            skipped += 1
+    
+    await db.commit()
+    
+    return {
+        "message": f"导入完成",
+        "imported": imported,
+        "skipped": skipped,
+        "errors": errors[:20]
+    }
