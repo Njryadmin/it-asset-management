@@ -1,29 +1,56 @@
 <template>
-  <div class="supplier-list">
-    <el-card>
+  <div class="supplier-list page-container">
+    <el-card class="main-card">
       <template #header>
         <div class="card-header">
-          <span>供应商管理</span>
-          <el-button type="primary" @click="showDialog('create')">
-            <el-icon><Plus /></el-icon>
-            新增供应商
-          </el-button>
+          <div class="header-left">
+            <h3 class="page-title">供应商管理</h3>
+            <span class="item-count">共 {{ supplierStore.total }} 条</span>
+          </div>
+          <div class="header-actions">
+            <el-dropdown trigger="click" @command="handleExport">
+              <el-button>
+                <el-icon><Download /></el-icon>
+                导出
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="all">导出全部</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <el-button @click="showImportDialog = true">
+              <el-icon><Upload /></el-icon>
+              导入
+            </el-button>
+            <el-button type="primary" @click="showDialog('create')">
+              <el-icon><Plus /></el-icon>
+              新增供应商
+            </el-button>
+          </div>
         </div>
       </template>
 
       <!-- Search -->
-      <el-form :inline="true" class="search-form">
-        <el-form-item label="关键词">
-          <el-input v-model="supplierStore.params.keyword" placeholder="搜索名称/编码/联系人" clearable @clear="search" @keyup.enter="search" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="reset">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <div class="search-bar">
+        <el-input
+          v-model="supplierStore.params.keyword"
+          placeholder="搜索名称/编码/联系人..."
+          clearable
+          class="search-input"
+          @clear="search"
+          @keyup.enter="search"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-button type="primary" @click="search">查询</el-button>
+        <el-button @click="reset">重置</el-button>
+      </div>
 
       <!-- Table -->
-      <el-table :data="supplierStore.suppliers" v-loading="supplierStore.loading" style="width: 100%">
+      <el-table :data="supplierStore.suppliers" v-loading="supplierStore.loading" style="width: 100%" class="data-table">
         <el-table-column prop="name" label="供应商名称" min-width="150" />
         <el-table-column prop="code" label="编码" width="120" />
         <el-table-column prop="contactPerson" label="联系人" width="100" />
@@ -39,17 +66,17 @@
             {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="showDialog('edit', row)">编辑</el-button>
-            <el-button v-if="row.isActive" type="warning" link @click="handleToggleStatus(row)">禁用</el-button>
-            <el-button v-else type="success" link @click="handleToggleStatus(row)">启用</el-button>
-            <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
+            <el-button type="primary" link size="small" @click="showDialog('edit', row)">编辑</el-button>
+            <el-button v-if="row.isActive" type="warning" link size="small" @click="handleToggleStatus(row)">禁用</el-button>
+            <el-button v-else type="success" link size="small" @click="handleToggleStatus(row)">启用</el-button>
+            <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <div class="pagination">
+      <div class="pagination-wrapper">
         <el-pagination
           v-model:current-page="supplierStore.params.page"
           :page-size="supplierStore.params.page_size"
@@ -61,7 +88,7 @@
     </el-card>
 
     <!-- Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="供应商名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入供应商名称" />
@@ -79,7 +106,7 @@
           <el-input v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
         <el-form-item label="地址">
-          <el-input v-model="form.address" type="textarea" :rows="2" placeholder="请输入地址" />
+          <el-input v-model="form.address" placeholder="请输入地址" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入描述" />
@@ -88,6 +115,33 @@
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Import Dialog -->
+    <el-dialog v-model="showImportDialog" title="导入供应商" width="500px" class="custom-dialog">
+      <el-upload
+        ref="uploadRef"
+        class="upload-demo"
+        drag
+        :action="importUrl"
+        :headers="{ Authorization: `Bearer ${token}` }"
+        :before-upload="beforeUpload"
+        :on-success="handleImportSuccess"
+        :on-error="handleImportError"
+        accept=".csv"
+        :auto-upload="false"
+      >
+        <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+        <div class="el-upload__text">拖拽CSV文件到此处 或 <em>点击上传</em></div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传CSV文件，请先下载模板</div>
+          <el-button size="small" type="primary" @click="downloadTemplate">下载模板</el-button>
+        </template>
+      </el-upload>
+      <template #footer>
+        <el-button @click="showImportDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitImport">确定导入</el-button>
       </template>
     </el-dialog>
   </div>
@@ -108,6 +162,10 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const currentId = ref<number | null>(null)
+const token = localStorage.getItem('token') || ''
+const importUrl = '/api/v1/suppliers/import'
+const uploadRef = ref()
+const showImportDialog = ref(false)
 
 const form = reactive({
   name: '',
@@ -161,10 +219,10 @@ async function handleSubmit() {
       loading.value = true
       try {
         if (dialogMode.value === 'create') {
-          await supplierStore.create(form)
+          await supplierStore.create(form as any)
           ElMessage.success('创建成功')
         } else {
-          await supplierStore.update(currentId.value!, form)
+          await supplierStore.update(currentId.value!, form as any)
           ElMessage.success('保存成功')
         }
         dialogVisible.value = false
@@ -228,16 +286,78 @@ async function handlePageChange(page: number) {
   await supplierStore.fetchSuppliers()
 }
 
+async function handleExport(command: string) {
+  try {
+    const response = await fetch('/api/v1/suppliers/export', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `suppliers_${dayjs().format('YYYYMMDD_HHmmss')}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
+}
+
+function beforeUpload(file: any) {
+  const isCSV = file.name.endsWith('.csv')
+  if (!isCSV) {
+    ElMessage.error('只能上传CSV文件')
+  }
+  return isCSV
+}
+
+function handleImportSuccess(response: any) {
+  if (response.imported !== undefined) {
+    ElMessage.success(`导入完成：成功${response.imported}条，跳过${response.skipped}条`)
+    showImportDialog.value = false
+    supplierStore.fetchSuppliers()
+  }
+}
+
+function handleImportError(error: any) {
+  ElMessage.error('导入失败')
+}
+
+function submitImport() {
+  uploadRef.value?.submit()
+}
+
+function downloadTemplate() {
+  const template = '\ufeff供应商名称,编码,联系人,电话,邮箱,地址,描述\n'
+  const example = 'Dell公司,DELL,张三,13800138000,dell@example.com,北京市朝阳区,电脑设备供应商'
+  const blob = new Blob([template + example], { type: 'text/csv;charset=utf-8' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'supplier_template.csv'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
+
 onMounted(() => {
   supplierStore.fetchSuppliers()
 })
 </script>
 
 <style scoped>
-.supplier-list,
 .page-container {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0;
+}
+
+.main-card {
+  border-radius: var(--radius-lg) !important;
 }
 
 .card-header {
@@ -245,20 +365,60 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
   gap: 12px;
 }
 
-.search-form {
-  margin-bottom: 16px;
+.page-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--theme-text-primary);
 }
 
-.pagination {
+.item-count {
+  font-size: 13px;
+  color: var(--theme-text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-input {
+  width: 320px;
+}
+
+.data-table {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.pagination-wrapper {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
 }
 
-.el-card {
+.custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
+  background: var(--theme-card);
+}
+
+.upload-demo {
+  text-align: center;
 }
 </style>

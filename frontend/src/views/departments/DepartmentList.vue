@@ -1,9 +1,12 @@
 <template>
-  <div class="department-list">
-    <el-card>
+  <div class="department-list page-container">
+    <el-card class="main-card">
       <template #header>
         <div class="card-header">
-          <span>部门管理</span>
+          <div class="header-left">
+            <h3 class="page-title">部门管理</h3>
+            <span class="item-count">共 {{ departmentStore.total }} 条</span>
+          </div>
           <div class="header-actions">
             <el-dropdown trigger="click" @command="handleExport">
               <el-button>
@@ -29,30 +32,37 @@
       </template>
 
       <!-- Search -->
-      <el-form :inline="true" class="search-form">
-        <el-form-item label="关键词">
-          <el-input v-model="departmentStore.params.keyword" placeholder="搜索部门名称" clearable @clear="search" @keyup.enter="search" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="reset">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <div class="search-bar">
+        <el-input
+          v-model="departmentStore.params.keyword"
+          placeholder="搜索部门名称..."
+          clearable
+          class="search-input"
+          @clear="search"
+          @keyup.enter="search"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-button type="primary" @click="search">查询</el-button>
+        <el-button @click="reset">重置</el-button>
+      </div>
 
       <!-- Tree Table -->
-      <el-table :data="flatDepartments" v-loading="departmentStore.loading" row-key="id" style="width: 100%">
+      <el-table :data="flatDepartments" v-loading="departmentStore.loading" row-key="id" style="width: 100%" class="data-table">
         <el-table-column prop="name" label="部门名称" min-width="200" />
         <el-table-column prop="code" label="编码" width="120" />
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="showDialog('edit', row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
+            <el-button type="primary" link size="small" @click="showDialog('edit', row)">编辑</el-button>
+            <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <div class="pagination">
+      <div class="pagination-wrapper">
         <el-pagination
           v-model:current-page="departmentStore.params.page"
           :page-size="departmentStore.params.page_size"
@@ -64,7 +74,7 @@
     </el-card>
 
     <!-- Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="部门名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入部门名称" />
@@ -88,7 +98,7 @@
     </el-dialog>
 
     <!-- Import Dialog -->
-    <el-dialog v-model="showImportDialog" title="导入部门" width="500px">
+    <el-dialog v-model="showImportDialog" title="导入部门" width="500px" class="custom-dialog">
       <el-upload
         ref="uploadRef"
         class="upload-demo"
@@ -225,6 +235,11 @@ async function handleDelete(id: number) {
   }
 }
 
+async function handlePageChange(page: number) {
+  departmentStore.params.page = page
+  await departmentStore.fetchDepartments()
+}
+
 async function search() {
   departmentStore.params.page = 1
   await departmentStore.fetchDepartments()
@@ -233,11 +248,6 @@ async function search() {
 async function reset() {
   departmentStore.params.keyword = ''
   departmentStore.params.page = 1
-  await departmentStore.fetchDepartments()
-}
-
-async function handlePageChange(page: number) {
-  departmentStore.params.page = page
   await departmentStore.fetchDepartments()
 }
 
@@ -305,10 +315,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.department-list,
 .page-container {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0;
+}
+
+.main-card {
+  border-radius: var(--radius-lg) !important;
 }
 
 .card-header {
@@ -316,7 +330,25 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
   gap: 12px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--theme-text-primary);
+}
+
+.item-count {
+  font-size: 13px;
+  color: var(--theme-text-secondary);
 }
 
 .header-actions {
@@ -324,17 +356,34 @@ onMounted(() => {
   gap: 8px;
 }
 
-.search-form {
-  margin-bottom: 16px;
+.search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
-.pagination {
+.search-input {
+  width: 320px;
+}
+
+.data-table {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.pagination-wrapper {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
 }
 
-.el-card {
+.custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
+  background: var(--theme-card);
+}
+
+.upload-demo {
+  text-align: center;
 }
 </style>

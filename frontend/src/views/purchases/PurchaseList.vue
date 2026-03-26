@@ -1,38 +1,48 @@
 <template>
-  <div class="purchase-list">
-    <el-card>
+  <div class="purchase-list page-container">
+    <el-card class="main-card">
       <template #header>
         <div class="card-header">
-          <span>采购管理</span>
-          <el-button type="primary" @click="showDialog('create')">
-            <el-icon><Plus /></el-icon>
-            新增采购申请
-          </el-button>
+          <div class="header-left">
+            <h3 class="page-title">采购管理</h3>
+            <span class="item-count">共 {{ purchaseStore.total }} 条</span>
+          </div>
+          <div class="header-actions">
+            <el-button type="primary" @click="showDialog('create')">
+              <el-icon><Plus /></el-icon>
+              新增采购申请
+            </el-button>
+          </div>
         </div>
       </template>
 
       <!-- Search -->
-      <el-form :inline="true" class="search-form">
-        <el-form-item label="关键词">
-          <el-input v-model="purchaseStore.params.keyword" placeholder="搜索标题/描述" clearable @clear="search" @keyup.enter="search" />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="purchaseStore.params.status" placeholder="选择状态" clearable @change="search">
-            <el-option label="草稿" value="draft" />
-            <el-option label="待审批" value="pending" />
-            <el-option label="已通过" value="approved" />
-            <el-option label="已拒绝" value="rejected" />
-            <el-option label="已采购" value="purchased" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="reset">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <div class="search-bar">
+        <el-input
+          v-model="purchaseStore.params.keyword"
+          placeholder="搜索标题/描述..."
+          clearable
+          class="search-input"
+          @clear="search"
+          @keyup.enter="search"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-select v-model="purchaseStore.params.status" placeholder="选择状态" clearable style="width: 150px" @change="search">
+          <el-option label="草稿" value="draft" />
+          <el-option label="待审批" value="pending" />
+          <el-option label="已通过" value="approved" />
+          <el-option label="已拒绝" value="rejected" />
+          <el-option label="已采购" value="purchased" />
+        </el-select>
+        <el-button type="primary" @click="search">查询</el-button>
+        <el-button @click="reset">重置</el-button>
+      </div>
 
       <!-- Table -->
-      <el-table :data="purchaseStore.requests" v-loading="purchaseStore.loading" style="width: 100%">
+      <el-table :data="purchaseStore.requests" v-loading="purchaseStore.loading" style="width: 100%" class="data-table">
         <el-table-column prop="title" label="标题" min-width="150" />
         <el-table-column prop="quantity" label="数量" width="80" />
         <el-table-column prop="estimatedPrice" label="预估价格" width="110">
@@ -62,28 +72,24 @@
         </el-table-column>
         <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
-            <!-- 草稿状态：申请人可提交、编辑、删除 -->
             <template v-if="row.status === 'draft'">
-              <el-button type="primary" link @click="handleSubmitRequest(row.id)">提交</el-button>
-              <el-button type="primary" link @click="showDialog('edit', row)">编辑</el-button>
-              <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
+              <el-button type="primary" link size="small" @click="handleSubmitRequest(row.id)">提交</el-button>
+              <el-button type="primary" link size="small" @click="showDialog('edit', row)">编辑</el-button>
+              <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
             </template>
-            <!-- 待审批状态：管理员可审批通过/拒绝 -->
             <template v-else-if="row.status === 'pending' && isAdmin">
-              <el-button type="success" link @click="handleApprove(row)">通过</el-button>
-              <el-button type="danger" link @click="handleReject(row)">拒绝</el-button>
+              <el-button type="success" link size="small" @click="handleApprove(row)">通过</el-button>
+              <el-button type="danger" link size="small" @click="handleReject(row)">拒绝</el-button>
             </template>
-            <!-- 已通过状态：管理员可标记已采购 -->
             <template v-else-if="row.status === 'approved' && isAdmin">
-              <el-button type="warning" link @click="handlePurchase(row)">标记已采购</el-button>
+              <el-button type="warning" link size="small" @click="handlePurchase(row)">标记已采购</el-button>
             </template>
-            <!-- 其他状态：只可查看 -->
             <span v-else class="no-action">-</span>
           </template>
         </el-table-column>
       </el-table>
 
-      <div class="pagination">
+      <div class="pagination-wrapper">
         <el-pagination
           v-model:current-page="purchaseStore.params.page"
           :page-size="purchaseStore.params.page_size"
@@ -95,7 +101,7 @@
     </el-card>
 
     <!-- Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="标题" prop="title">
           <el-input v-model="form.title" placeholder="请输入标题" />
@@ -117,7 +123,7 @@
     </el-dialog>
 
     <!-- Approve/Reject Dialog -->
-    <el-dialog v-model="actionDialogVisible" :title="actionTitle" width="400px">
+    <el-dialog v-model="actionDialogVisible" :title="actionTitle" width="400px" class="custom-dialog">
       <el-form>
         <el-form-item label="审批意见">
           <el-input v-model="actionComment" type="textarea" :rows="3" placeholder="请输入审批意见" />
@@ -130,7 +136,7 @@
     </el-dialog>
 
     <!-- Purchase Dialog -->
-    <el-dialog v-model="purchaseDialogVisible" title="标记已采购" width="400px">
+    <el-dialog v-model="purchaseDialogVisible" title="标记已采购" width="400px" class="custom-dialog">
       <el-form>
         <el-form-item label="实际价格">
           <el-input-number v-model="actualPrice" :min="0" :precision="2" placeholder="请输入实际价格" />
@@ -150,7 +156,7 @@ import { usePurchaseStore } from '@/stores/purchases'
 import { useAuthStore } from '@/stores/auth'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import type { PurchaseRequest, PurchaseRequestForm } from '@/types'
+import type { PurchaseRequest } from '@/types'
 import dayjs from 'dayjs'
 
 const purchaseStore = usePurchaseStore()
@@ -173,11 +179,11 @@ const purchaseRequestId = ref<number | null>(null)
 
 const isAdmin = computed(() => authStore.user?.isSuperuser)
 
-const form = reactive<PurchaseRequestForm>({
+const form = reactive({
   title: '',
   description: '',
   quantity: 1,
-  estimated_price: undefined
+  estimated_price: undefined as number | undefined
 })
 
 const rules: FormRules = {
@@ -240,10 +246,10 @@ async function handleSubmit() {
       loading.value = true
       try {
         if (dialogMode.value === 'create') {
-          await purchaseStore.create(form)
+          await purchaseStore.create(form as any)
           ElMessage.success('创建成功')
         } else {
-          await purchaseStore.update(currentId.value!, form)
+          await purchaseStore.update(currentId.value!, form as any)
           ElMessage.success('保存成功')
         }
         dialogVisible.value = false
@@ -358,9 +364,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.purchase-list {
+.page-container {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0;
+}
+
+.main-card {
+  border-radius: var(--radius-lg) !important;
 }
 
 .card-header {
@@ -368,25 +379,61 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
   gap: 12px;
 }
 
-.search-form {
-  margin-bottom: 16px;
+.page-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--theme-text-primary);
 }
 
-.pagination {
+.item-count {
+  font-size: 13px;
+  color: var(--theme-text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-input {
+  width: 320px;
+}
+
+.data-table {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.pagination-wrapper {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
 }
 
 .no-action {
-  color: var(--theme-text-placeholder);
+  color: #999;
   font-size: 12px;
 }
 
-.el-card {
+.custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
+  background: var(--theme-card);
 }
 </style>

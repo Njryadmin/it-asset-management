@@ -1,9 +1,12 @@
 <template>
-  <div class="asset-list">
-    <el-card>
+  <div class="asset-list page-container">
+    <el-card class="main-card">
       <template #header>
         <div class="card-header">
-          <span>资产管理</span>
+          <div class="header-left">
+            <h3 class="page-title">资产管理</h3>
+            <span class="item-count">共 {{ assetStore.total }} 条</span>
+          </div>
           <div class="header-actions">
             <el-button @click="showFilterDrawer = true">
               <el-icon><Filter /></el-icon>
@@ -54,15 +57,22 @@
       </template>
 
       <!-- Quick search -->
-      <el-form :inline="true" class="search-form">
-        <el-form-item label="关键词">
-          <el-input v-model="assetStore.params.keyword" placeholder="搜索名称/编号/序列号" clearable @clear="search" @keyup.enter="search" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="reset">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <div class="search-bar">
+        <el-input
+          v-model="assetStore.params.keyword"
+          placeholder="搜索名称/编号/序列号..."
+          clearable
+          class="search-input"
+          @clear="search"
+          @keyup.enter="search"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-button type="primary" @click="search">查询</el-button>
+        <el-button @click="reset">重置</el-button>
+      </div>
 
       <!-- Active filters tags -->
       <div v-if="hasActiveFilters" class="filter-tags">
@@ -79,7 +89,7 @@
       </div>
 
       <!-- Table -->
-      <el-table :data="assetStore.assets" v-loading="assetStore.loading" style="width: 100%">
+      <el-table :data="assetStore.assets" v-loading="assetStore.loading" style="width: 100%" class="data-table">
         <el-table-column v-if="columnOptions.find(c => c.key === 'name')?.visible" prop="name" label="资产名称" min-width="150" />
         <el-table-column v-if="columnOptions.find(c => c.key === 'assetCode')?.visible" prop="assetCode" label="资产编号" width="140" />
         <el-table-column v-if="columnOptions.find(c => c.key === 'serialNumber')?.visible" prop="serialNumber" label="序列号" width="140" />
@@ -126,14 +136,13 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="$router.push(`/assets/${row.id}/edit`)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
+            <el-button type="primary" link size="small" @click="$router.push(`/assets/${row.id}/edit`)">编辑</el-button>
+            <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!-- Pagination -->
-      <div class="pagination">
+      <div class="pagination-wrapper">
         <el-pagination
           v-model:current-page="assetStore.params.page"
           :page-size="assetStore.params.page_size"
@@ -179,7 +188,7 @@
     </el-drawer>
 
     <!-- Import Dialog -->
-    <el-dialog v-model="showImportDialog" title="导入资产" width="500px">
+    <el-dialog v-model="showImportDialog" title="导入资产" width="500px" class="custom-dialog">
       <el-upload
         ref="uploadRef"
         class="upload-demo"
@@ -208,7 +217,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetStore } from '@/stores/assets'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -222,7 +231,6 @@ const uploadRef = ref()
 const showImportDialog = ref(false)
 const showFilterDrawer = ref(false)
 
-// Column visibility options
 const columnOptions = ref([
   { key: 'name', label: '资产名称', visible: true },
   { key: 'assetCode', label: '资产编号', visible: true },
@@ -238,7 +246,6 @@ const columnOptions = ref([
   { key: 'createdAt', label: '添加时间', visible: true }
 ])
 
-// Temp params for filter drawer
 const tempParams = reactive({
   keyword: '',
   category_id: undefined as number | undefined,
@@ -351,9 +358,7 @@ async function handleDelete(id: number) {
   }
 }
 
-function handleColumnToggle() {
-  // Column toggle is handled by v-model on checkbox
-}
+function handleColumnToggle() {}
 
 function clearKeyword() {
   assetStore.params.keyword = ''
@@ -396,7 +401,6 @@ async function handleExport(command: string) {
     let filename = 'assets'
     
     if (command === 'filtered') {
-      // Export with current filters
       const params = new URLSearchParams()
       if (assetStore.params.keyword) params.append('keyword', assetStore.params.keyword)
       if (assetStore.params.category_id) params.append('category_id', String(assetStore.params.category_id))
@@ -405,7 +409,6 @@ async function handleExport(command: string) {
       url += '?' + params.toString()
       filename = `assets_filtered_${dayjs().format('YYYYMMDD_HHmmss')}`
     } else {
-      // Export all
       filename = `assets_all_${dayjs().format('YYYYMMDD_HHmmss')}`
     }
     
@@ -472,9 +475,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.asset-list {
+.page-container {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0;
+}
+
+.main-card {
+  border-radius: var(--radius-lg) !important;
 }
 
 .card-header {
@@ -482,17 +490,41 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
   gap: 12px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--theme-text-primary);
+}
+
+.item-count {
+  font-size: 13px;
+  color: var(--theme-text-secondary);
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
-.search-form {
+.search-bar {
   margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-input {
+  width: 320px;
 }
 
 .filter-tags {
@@ -503,7 +535,12 @@ onMounted(async () => {
   align-items: center;
 }
 
-.pagination {
+.data-table {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.pagination-wrapper {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
@@ -515,7 +552,12 @@ onMounted(async () => {
   gap: 12px;
 }
 
-.el-card {
+.custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
+  background: var(--theme-card);
+}
+
+.upload-demo {
+  text-align: center;
 }
 </style>
