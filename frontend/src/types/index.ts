@@ -109,16 +109,16 @@ export interface PurchaseRequest {
 
 // Dashboard types
 export interface DashboardStats {
-  total_assets: number
-  total_categories: number
-  total_suppliers: number
-  total_departments: number
-  total_users: number
-  total_purchase_requests: number
-  assets_by_status: Record<string, number>
-  assets_by_category: Record<string, number>
-  recent_assets: Asset[]
-  pending_purchase_requests: PurchaseRequest[]
+  totalAssets: number
+  totalCategories: number
+  totalSuppliers: number
+  totalDepartments: number
+  totalUsers: number
+  totalPurchaseRequests: number
+  assetsByStatus: Record<string, number>
+  assetsByCategory: Record<string, number>
+  recentAssets: Asset[]
+  pendingPurchaseRequests: PurchaseRequest[]
 }
 
 // Form types

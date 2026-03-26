@@ -6,7 +6,7 @@
           <div class="stat-content">
             <el-icon class="stat-icon" color="#409eff"><Box /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.total_assets || 0 }}</div>
+              <div class="stat-value">{{ stats.totalAssets || 0 }}</div>
               <div class="stat-label">资产总数</div>
             </div>
           </div>
@@ -17,7 +17,7 @@
           <div class="stat-content">
             <el-icon class="stat-icon" color="#67c23a"><Grid /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.total_categories || 0 }}</div>
+              <div class="stat-value">{{ stats.totalCategories || 0 }}</div>
               <div class="stat-label">资产分类</div>
             </div>
           </div>
@@ -28,7 +28,7 @@
           <div class="stat-content">
             <el-icon class="stat-icon" color="#e6a23c"><Shop /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.total_suppliers || 0 }}</div>
+              <div class="stat-value">{{ stats.totalSuppliers || 0 }}</div>
               <div class="stat-label">供应商</div>
             </div>
           </div>
@@ -39,7 +39,7 @@
           <div class="stat-content">
             <el-icon class="stat-icon" color="#f56c6c"><ShoppingCart /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.total_purchase_requests || 0 }}</div>
+              <div class="stat-value">{{ stats.totalPurchaseRequests || 0 }}</div>
               <div class="stat-label">采购申请</div>
             </div>
           </div>
@@ -54,12 +54,12 @@
             <span>资产状态分布</span>
           </template>
           <div class="status-list">
-            <div v-for="(count, status) in stats.assets_by_status" :key="status" class="status-item">
+            <div v-for="(count, status) in stats.assetsByStatus" :key="status" class="status-item">
               <span class="status-name">{{ statusLabel(status) }}</span>
               <el-progress :percentage="getPercentage(count)" :color="statusColor(status)" />
               <span class="status-count">{{ count }}</span>
             </div>
-            <el-empty v-if="!stats.assets_by_status || Object.keys(stats.assets_by_status).length === 0" description="暂无数据" />
+            <el-empty v-if="!stats.assetsByStatus || Object.keys(stats.assetsByStatus).length === 0" description="暂无数据" />
           </div>
         </el-card>
       </el-col>
@@ -68,21 +68,21 @@
           <template #header>
             <span>待审批采购申请</span>
           </template>
-          <el-table :data="stats.pending_purchase_requests" style="width: 100%">
+          <el-table :data="stats.pendingPurchaseRequests" style="width: 100%">
             <el-table-column prop="title" label="标题" />
             <el-table-column prop="quantity" label="数量" width="60" />
-            <el-table-column prop="estimated_price" label="预估价格" width="100">
+            <el-table-column prop="estimatedPrice" label="预估价格" width="100">
               <template #default="{ row }">
-                {{ row.estimated_price ? `¥${row.estimated_price}` : '-' }}
+                {{ row.estimatedPrice ? `¥${row.estimatedPrice}` : '-' }}
               </template>
             </el-table-column>
-            <el-table-column prop="created_at" label="申请时间" width="160">
+            <el-table-column prop="createdAt" label="申请时间" width="160">
               <template #default="{ row }">
-                {{ formatDate(row.created_at) }}
+                {{ formatDate(row.createdAt) }}
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!stats.pending_purchase_requests || stats.pending_purchase_requests.length === 0" description="暂无待审批申请" />
+          <el-empty v-if="!stats.pendingPurchaseRequests || stats.pendingPurchaseRequests.length === 0" description="暂无待审批申请" />
         </el-card>
       </el-col>
     </el-row>
@@ -93,26 +93,26 @@
           <template #header>
             <span>最近添加的资产</span>
           </template>
-          <el-table :data="stats.recent_assets" style="width: 100%">
+          <el-table :data="stats.recentAssets" style="width: 100%">
             <el-table-column prop="name" label="资产名称" />
-            <el-table-column prop="asset_code" label="资产编号" width="140" />
+            <el-table-column prop="assetCode" label="资产编号" width="140" />
             <el-table-column prop="status" label="状态" width="100">
               <template #default="{ row }">
                 <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="purchase_price" label="购买价格" width="100">
+            <el-table-column prop="purchasePrice" label="购买价格" width="100">
               <template #default="{ row }">
-                {{ row.purchase_price ? `¥${row.purchase_price}` : '-' }}
+                {{ row.purchasePrice ? `¥${row.purchasePrice}` : '-' }}
               </template>
             </el-table-column>
-            <el-table-column prop="created_at" label="添加时间" width="160">
+            <el-table-column prop="createdAt" label="添加时间" width="160">
               <template #default="{ row }">
-                {{ formatDate(row.created_at) }}
+                {{ formatDate(row.createdAt) }}
               </template>
             </el-table-column>
           </el-table>
-          <el-empty v-if="!stats.recent_assets || stats.recent_assets.length === 0" description="暂无资产" />
+          <el-empty v-if="!stats.recentAssets || stats.recentAssets.length === 0" description="暂无资产" />
         </el-card>
       </el-col>
     </el-row>
@@ -126,16 +126,16 @@ import type { DashboardStats } from '@/types'
 import dayjs from 'dayjs'
 
 const stats = ref<DashboardStats>({
-  total_assets: 0,
-  total_categories: 0,
-  total_suppliers: 0,
-  total_departments: 0,
-  total_users: 0,
-  total_purchase_requests: 0,
-  assets_by_status: {},
-  assets_by_category: {},
-  recent_assets: [],
-  pending_purchase_requests: []
+  totalAssets: 0,
+  totalCategories: 0,
+  totalSuppliers: 0,
+  totalDepartments: 0,
+  totalUsers: 0,
+  totalPurchaseRequests: 0,
+  assetsByStatus: {},
+  assetsByCategory: {},
+  recentAssets: [],
+  pendingPurchaseRequests: []
 })
 
 const statusMap: Record<string, string> = {
@@ -178,8 +178,8 @@ function formatDate(date: string) {
 }
 
 function getPercentage(count: number) {
-  if (!stats.value.total_assets) return 0
-  return Math.round((count / stats.value.total_assets) * 100)
+  if (!stats.value.totalAssets) return 0
+  return Math.round((count / stats.value.totalAssets) * 100)
 }
 
 async function fetchStats() {
