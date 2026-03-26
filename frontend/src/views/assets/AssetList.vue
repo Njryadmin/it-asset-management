@@ -22,10 +22,25 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-button @click="handleExport">
-              <el-icon><Download /></el-icon>
-              导出
-            </el-button>
+            <el-dropdown trigger="click" @command="handleExport">
+              <el-button type="primary">
+                <el-icon><Download /></el-icon>
+                导出
+                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="filtered">
+                    <el-icon><Filter /></el-icon>
+                    导出筛选结果 ({{ assetStore.total }} 条)
+                  </el-dropdown-item>
+                  <el-dropdown-item command="all">
+                    <el-icon><Download /></el-icon>
+                    导出全部
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <el-button @click="showImportDialog = true">
               <el-icon><Upload /></el-icon>
               导入
@@ -375,20 +390,37 @@ function applyFilters() {
   search()
 }
 
-async function handleExport() {
+async function handleExport(command: string) {
   try {
-    const response = await fetch('/api/v1/assets/export', {
+    let url = '/api/v1/assets/export'
+    let filename = 'assets'
+    
+    if (command === 'filtered') {
+      // Export with current filters
+      const params = new URLSearchParams()
+      if (assetStore.params.keyword) params.append('keyword', assetStore.params.keyword)
+      if (assetStore.params.category_id) params.append('category_id', String(assetStore.params.category_id))
+      if (assetStore.params.status) params.append('status', assetStore.params.status)
+      if (assetStore.params.department_id) params.append('department_id', String(assetStore.params.department_id))
+      url += '?' + params.toString()
+      filename = `assets_filtered_${dayjs().format('YYYYMMDD_HHmmss')}`
+    } else {
+      // Export all
+      filename = `assets_all_${dayjs().format('YYYYMMDD_HHmmss')}`
+    }
+    
+    const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` }
     })
     const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
+    const downloadUrl = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
-    a.download = `assets_${dayjs().format('YYYYMMDD_HHmmss')}.csv`
+    a.href = downloadUrl
+    a.download = `${filename}.csv`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    window.URL.revokeObjectURL(downloadUrl)
     ElMessage.success('导出成功')
   } catch (error) {
     ElMessage.error('导出失败')

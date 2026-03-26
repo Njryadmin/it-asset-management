@@ -91,11 +91,30 @@ async def get_asset_stats(
 
 @router.get("/export")
 async def export_assets(
+    keyword: Optional[str] = Query(None, description="搜索关键词"),
+    category_id: Optional[int] = Query(None, description="分类ID"),
+    status: Optional[str] = Query(None, description="资产状态"),
+    department_id: Optional[int] = Query(None, description="部门ID"),
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    """导出所有资产为CSV"""
-    result = await db.execute(select(Asset))
+    """导出资产为CSV（支持筛选）"""
+    query = select(Asset)
+    
+    if keyword:
+        query = query.where(
+            Asset.name.ilike(f"%{keyword}%") |
+            Asset.asset_code.ilike(f"%{keyword}%") |
+            Asset.serial_number.ilike(f"%{keyword}%")
+        )
+    if category_id is not None:
+        query = query.where(Asset.category_id == category_id)
+    if status:
+        query = query.where(Asset.status == status)
+    if department_id is not None:
+        query = query.where(Asset.department_id == department_id)
+    
+    result = await db.execute(query)
     assets = result.scalars().all()
     
     output = io.StringIO()
