@@ -108,7 +108,7 @@ function showDialog(mode: 'create' | 'edit', data?: Category) {
     currentId.value = data!.id
     form.name = data!.name
     form.code = data!.code || ''
-    form.parent_id = data!.parent_id ?? undefined
+    form.parent_id = data!.parentId ?? undefined
     form.description = data!.description || ''
   }
   dialogVisible.value = true

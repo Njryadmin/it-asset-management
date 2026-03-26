@@ -26,17 +26,17 @@
       <el-table :data="supplierStore.suppliers" v-loading="supplierStore.loading" style="width: 100%">
         <el-table-column prop="name" label="供应商名称" min-width="150" />
         <el-table-column prop="code" label="编码" width="120" />
-        <el-table-column prop="contact_person" label="联系人" width="100" />
+        <el-table-column prop="contactPerson" label="联系人" width="100" />
         <el-table-column prop="phone" label="电话" width="130" />
         <el-table-column prop="email" label="邮箱" width="180" />
-        <el-table-column prop="is_active" label="状态" width="80">
+        <el-table-column prop="isActive" label="状态" width="80">
           <template #default="{ row }">
-            <el-tag :type="row.is_active ? 'success' : 'info'">{{ row.is_active ? '启用' : '禁用' }}</el-tag>
+            <el-tag :type="row.isActive ? 'success' : 'info'">{{ row.isActive ? '启用' : '禁用' }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" width="160">
+        <el-table-column prop="createdAt" label="创建时间" width="160">
           <template #default="{ row }">
-            {{ dayjs(row.created_at).format('YYYY-MM-DD HH:mm') }}
+            {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
@@ -140,7 +140,7 @@ function showDialog(mode: 'create' | 'edit', data?: Supplier) {
     Object.assign(form, {
       name: data!.name,
       code: data!.code || '',
-      contact_person: data!.contact_person || '',
+      contact_person: data!.contactPerson || '',
       phone: data!.phone || '',
       email: data!.email || '',
       address: data!.address || '',

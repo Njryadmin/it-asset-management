@@ -13,10 +13,10 @@ export interface User {
   id: number
   username: string
   email: string
-  full_name: string | null
-  is_active: boolean
-  is_superuser: boolean
-  created_at: string
+  fullName: string | null
+  isActive: boolean
+  isSuperuser: boolean
+  createdAt: string
 }
 
 export interface LoginRequest {
@@ -34,9 +34,9 @@ export interface Category {
   id: number
   name: string
   code: string | null
-  parent_id: number | null
+  parentId: number | null
   description: string | null
-  created_at: string
+  createdAt: string
   children?: Category[]
 }
 
@@ -45,13 +45,13 @@ export interface Supplier {
   id: number
   name: string
   code: string | null
-  contact_person: string | null
+  contactPerson: string | null
   phone: string | null
   email: string | null
   address: string | null
   description: string | null
-  is_active: boolean
-  created_at: string
+  isActive: boolean
+  createdAt: string
 }
 
 // Department types
@@ -59,9 +59,9 @@ export interface Department {
   id: number
   name: string
   code: string | null
-  parent_id: number | null
+  parentId: number | null
   description: string | null
-  created_at: string
+  createdAt: string
   children?: Department[]
 }
 
@@ -71,20 +71,20 @@ export type AssetStatus = 'in_use' | 'idle' | 'maintenance' | 'retired' | 'scrap
 export interface Asset {
   id: number
   name: string
-  asset_code: string
-  serial_number: string | null
-  category_id: number
-  supplier_id: number | null
-  department_id: number | null
-  assigned_to: number | null
+  assetCode: string
+  serialNumber: string | null
+  categoryId: number
+  supplierId: number | null
+  departmentId: number | null
+  assignedTo: number | null
   status: AssetStatus
-  purchase_date: string | null
-  purchase_price: number | null
-  warranty_expire_date: string | null
+  purchaseDate: string | null
+  purchasePrice: number | null
+  warrantyExpireDate: string | null
   description: string | null
   specs: string | null
-  created_at: string
-  updated_at: string | null
+  createdAt: string
+  updatedAt: string | null
 }
 
 // Purchase Request types
@@ -94,17 +94,17 @@ export interface PurchaseRequest {
   id: number
   title: string
   description: string | null
-  category_id: number | null
-  supplier_id: number | null
-  requester_id: number
+  categoryId: number | null
+  supplierId: number | null
+  requesterId: number
   quantity: number
-  estimated_price: number | null
-  actual_price: number | null
+  estimatedPrice: number | null
+  actualPrice: number | null
   status: PurchaseRequestStatus
-  approver_comment: string | null
-  approved_at: string | null
-  purchased_at: string | null
-  created_at: string
+  approverComment: string | null
+  approvedAt: string | null
+  purchasedAt: string | null
+  createdAt: string
 }
 
 // Dashboard types
@@ -121,7 +121,7 @@ export interface DashboardStats {
   pendingPurchaseRequests: PurchaseRequest[]
 }
 
-// Form types
+// Form types (for API requests - these are snake_case since sent to API)
 export interface CategoryForm {
   name: string
   code?: string
@@ -171,12 +171,10 @@ export interface PurchaseRequestForm {
   estimated_price?: number
 }
 
-// Pagination
+// Pagination (params for API - snake_case since sent to API)
 export interface PaginationParams {
   page: number
   page_size: number
   keyword?: string
   category_id?: number
-  status?: string
-  department_id?: number
 }

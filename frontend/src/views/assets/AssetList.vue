@@ -49,26 +49,26 @@
       <!-- Table -->
       <el-table :data="assetStore.assets" v-loading="assetStore.loading" style="width: 100%">
         <el-table-column prop="name" label="资产名称" min-width="150" />
-        <el-table-column prop="asset_code" label="资产编号" width="140" />
-        <el-table-column prop="serial_number" label="序列号" width="140" />
+        <el-table-column prop="assetCode" label="资产编号" width="140" />
+        <el-table-column prop="serialNumber" label="序列号" width="140" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="purchase_price" label="购买价格" width="100">
+        <el-table-column prop="purchasePrice" label="购买价格" width="100">
           <template #default="{ row }">
-            {{ row.purchase_price ? `¥${row.purchase_price}` : '-' }}
+            {{ row.purchasePrice ? `¥${row.purchasePrice}` : '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="purchase_date" label="购买日期" width="120">
+        <el-table-column prop="purchaseDate" label="购买日期" width="120">
           <template #default="{ row }">
-            {{ row.purchase_date ? dayjs(row.purchase_date).format('YYYY-MM-DD') : '-' }}
+            {{ row.purchaseDate ? dayjs(row.purchaseDate).format('YYYY-MM-DD') : '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="添加时间" width="160">
+        <el-table-column prop="createdAt" label="添加时间" width="160">
           <template #default="{ row }">
-            {{ dayjs(row.created_at).format('YYYY-MM-DD HH:mm') }}
+            {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">

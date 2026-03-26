@@ -41,7 +41,7 @@
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-icon><User /></el-icon>
-              <span>{{ authStore.user?.full_name || authStore.user?.username }}</span>
+              <span>{{ authStore.user?.fullName || authStore.user?.username }}</span>
               <el-icon><ArrowDown /></el-icon>
             </span>
             <template #dropdown>

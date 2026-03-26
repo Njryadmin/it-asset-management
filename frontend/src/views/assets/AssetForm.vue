@@ -178,15 +178,15 @@ onMounted(async () => {
       const data = response.data
       Object.assign(form, {
         name: data.name,
-        asset_code: data.asset_code,
-        serial_number: data.serial_number,
-        category_id: data.category_id,
-        supplier_id: data.supplier_id,
-        department_id: data.department_id,
+        asset_code: data.assetCode,
+        serial_number: data.serialNumber,
+        category_id: data.categoryId,
+        supplier_id: data.supplierId,
+        department_id: data.departmentId,
         status: data.status,
-        purchase_date: data.purchase_date,
-        purchase_price: data.purchase_price,
-        warranty_expire_date: data.warranty_expire_date,
+        purchase_date: data.purchaseDate,
+        purchase_price: data.purchasePrice,
+        warranty_expire_date: data.warrantyExpireDate,
         description: data.description
       })
     } catch (error) {

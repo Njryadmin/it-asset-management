@@ -35,14 +35,14 @@
       <el-table :data="purchaseStore.requests" v-loading="purchaseStore.loading" style="width: 100%">
         <el-table-column prop="title" label="标题" min-width="150" />
         <el-table-column prop="quantity" label="数量" width="80" />
-        <el-table-column prop="estimated_price" label="预估价格" width="110">
+        <el-table-column prop="estimatedPrice" label="预估价格" width="110">
           <template #default="{ row }">
-            {{ row.estimated_price ? `¥${row.estimated_price}` : '-' }}
+            {{ row.estimatedPrice ? `¥${row.estimatedPrice}` : '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="actual_price" label="实际价格" width="110">
+        <el-table-column prop="actualPrice" label="实际价格" width="110">
           <template #default="{ row }">
-            {{ row.actual_price ? `¥${row.actual_price}` : '-' }}
+            {{ row.actualPrice ? `¥${row.actualPrice}` : '-' }}
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
@@ -50,9 +50,9 @@
             <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="申请时间" width="160">
+        <el-table-column prop="createdAt" label="申请时间" width="160">
           <template #default="{ row }">
-            {{ dayjs(row.created_at).format('YYYY-MM-DD HH:mm') }}
+            {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="280" fixed="right">
@@ -206,7 +206,7 @@ function showDialog(mode: 'create' | 'edit', data?: PurchaseRequest) {
       title: data!.title,
       description: data!.description || '',
       quantity: data!.quantity,
-      estimated_price: data!.estimated_price
+      estimated_price: data!.estimatedPrice
     })
   }
   dialogVisible.value = true
@@ -285,7 +285,7 @@ async function confirmAction() {
 
 function handlePurchase(row: PurchaseRequest) {
   purchaseRequestId.value = row.id ?? null
-  actualPrice.value = row.estimated_price ?? undefined
+  actualPrice.value = row.estimatedPrice ?? undefined
   purchaseDialogVisible.value = true
 }
 
