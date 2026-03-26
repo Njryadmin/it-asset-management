@@ -1,0 +1,150 @@
+# IT资产管理系统 All-in-One Docker 镜像
+# 包含: PostgreSQL + Redis + Backend + Frontend
+
+FROM ubuntu:22.04
+
+# 设置环境变量
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
+
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    gnupg \
+    ca-certificates \
+    lsb-release \
+    vim \
+    net-tools \
+    iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 Node.js 18
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g pnpm
+
+# 安装 Python 3.11
+RUN apt-get update && apt-get install -y \
+    python3.11 \
+    python3.11-venv \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 PostgreSQL 15
+RUN apt-get update && apt-get install -y \
+    postgresql-15 \
+    postgresql-client-15 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 Redis
+RUN apt-get update && apt-get install -y \
+    redis-server \
+    && rm -rf /var/lib/apt/lists/*
+
+# 配置 PostgreSQL
+RUN mkdir -p /var/run/postgresql \
+    && chown -R postgres:postgres /var/run/postgresql \
+    && chown -R postgres:postgres /var/lib/postgresql
+
+# 安装 Python 依赖
+WORKDIR /app
+COPY backend/requirements.txt /app/backend/requirements.txt
+RUN pip3 install --no-cache-dir -r /app/backend/requirements.txt gunicorn
+
+# 复制后端代码
+COPY backend/ /app/backend/
+
+# 构建前端
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
+
+# 复制静态文件
+RUN mkdir -p /app/static /app/static/icons
+
+# 清理
+WORKDIR /app
+
+# 复制启动脚本
+COPY << 'EOFSTARTUP'
+#!/bin/bash
+set -e
+
+# 配置
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=postgres
+export POSTGRES_DB=itasset
+export POSTGRES_PORT=5432
+export REDIS_PORT=6379
+export SECRET_KEY=it-asset-mgmt-dev-secret-key-do-not-use-in-production
+
+# 启动 PostgreSQL
+echo "Starting PostgreSQL..."
+service postgresql start
+su - postgres -c "pg_ctl -D /var/lib/postgresql/data -l /var/log/postgresql/postgresql.log start" 2>/dev/null || true
+
+# 等待 PostgreSQL 就绪
+until pg_isready -q; do
+    sleep 1
+done
+
+# 初始化数据库
+echo "Initializing database..."
+mkdir -p /var/lib/postgresql/data
+chown -R postgres:postgres /var/lib/postgresql/data
+
+# 启动 Redis
+echo "Starting Redis..."
+service redis-server start
+
+# 等待 Redis
+until redis-cli ping 2>/dev/null | grep -q PONG; do
+    sleep 1
+done
+
+# 设置数据库
+su - postgres -c "psql -c \"CREATE USER postgres WITH PASSWORD 'postgres' SUPERUSER;\"" 2>/dev/null || true
+su - postgres -c "createdb itasset" 2>/dev/null || true
+
+# 启动后端 (后台)
+echo "Starting Backend..."
+cd /app/backend
+nohup python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > /var/log/backend.log 2>&1 &
+BACKEND_PID=$!
+
+# 等待后端启动
+sleep 3
+
+# 启动 Nginx (前台)
+echo "Starting Frontend..."
+nginx -c /app/frontend/nginx.conf
+
+# 等待
+echo ""
+echo "=========================================="
+echo "  IT资产管理系统 v1.0.0-beta 已启动!"
+echo "=========================================="
+echo "  前端: http://localhost:3030"
+echo "  后端: http://localhost:8000"
+echo "  API文档: http://localhost:8000/api/v1/docs"
+echo "=========================================="
+echo ""
+echo "  默认账号: admin / admin123"
+echo ""
+echo "按 Ctrl+C 停止服务"
+echo ""
+
+# 等待信号
+wait $BACKEND_PID
+EOFSTARTUP
+
+RUN chmod +x /app/start.sh
+
+# 暴露端口
+EXPOSE 3030 8000
+
+# 启动命令
+CMD ["/app/start.sh"]
