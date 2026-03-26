@@ -4,10 +4,27 @@
       <template #header>
         <div class="card-header">
           <span>部门管理</span>
-          <el-button type="primary" @click="showDialog('create')">
-            <el-icon><Plus /></el-icon>
-            新增部门
-          </el-button>
+          <div class="header-actions">
+            <el-dropdown trigger="click" @command="handleExport">
+              <el-button>
+                <el-icon><Download /></el-icon>
+                导出
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="all">导出全部</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <el-button @click="showImportDialog = true">
+              <el-icon><Upload /></el-icon>
+              导入
+            </el-button>
+            <el-button type="primary" @click="showDialog('create')">
+              <el-icon><Plus /></el-icon>
+              新增部门
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -69,15 +86,44 @@
         <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- Import Dialog -->
+    <el-dialog v-model="showImportDialog" title="导入部门" width="500px">
+      <el-upload
+        ref="uploadRef"
+        class="upload-demo"
+        drag
+        :action="importUrl"
+        :headers="{ Authorization: `Bearer ${token}` }"
+        :before-upload="beforeUpload"
+        :on-success="handleImportSuccess"
+        :on-error="handleImportError"
+        accept=".csv"
+        :auto-upload="false"
+      >
+        <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+        <div class="el-upload__text">拖拽CSV文件到此处 或 <em>点击上传</em></div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传CSV文件，请先下载模板</div>
+          <el-button size="small" type="primary" @click="downloadTemplate">下载模板</el-button>
+        </template>
+      </el-upload>
+      <template #footer>
+        <el-button @click="showImportDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitImport">确定导入</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useDepartmentStore } from '@/stores/departments'
+import { departmentsApi } from '@/api/departments'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Department } from '@/types'
+import dayjs from 'dayjs'
 
 const departmentStore = useDepartmentStore()
 const formRef = ref<FormInstance>()
@@ -85,6 +131,10 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
 const currentId = ref<number | null>(null)
+const token = localStorage.getItem('token') || ''
+const importUrl = '/api/v1/departments/import'
+const uploadRef = ref()
+const showImportDialog = ref(false)
 
 const form = reactive({
   name: '',
@@ -191,6 +241,64 @@ async function handlePageChange(page: number) {
   await departmentStore.fetchDepartments()
 }
 
+async function handleExport(command: string) {
+  try {
+    const response = await fetch('/api/v1/departments/export', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `departments_${dayjs().format('YYYYMMDD_HHmmss')}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
+}
+
+function beforeUpload(file: any) {
+  const isCSV = file.name.endsWith('.csv')
+  if (!isCSV) {
+    ElMessage.error('只能上传CSV文件')
+  }
+  return isCSV
+}
+
+function handleImportSuccess(response: any) {
+  if (response.imported !== undefined) {
+    ElMessage.success(`导入完成：成功${response.imported}条，跳过${response.skipped}条`)
+    showImportDialog.value = false
+    departmentStore.fetchDepartments()
+  }
+}
+
+function handleImportError(error: any) {
+  ElMessage.error('导入失败')
+}
+
+function submitImport() {
+  uploadRef.value?.submit()
+}
+
+function downloadTemplate() {
+  const template = '\ufeff部门名称,编码,上级部门ID,描述\n'
+  const example = '研发部,RD,,研发部门\n测试部,QA,,测试部门'
+  const blob = new Blob([template + example], { type: 'text/csv;charset=utf-8' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'department_template.csv'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
+
 onMounted(() => {
   departmentStore.fetchDepartments()
 })
@@ -201,6 +309,11 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .search-form {
