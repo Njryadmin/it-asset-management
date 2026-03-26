@@ -123,9 +123,11 @@ async def export_assets(
         ])
     
     output.seek(0)
+    # Add UTF-8 BOM for Excel compatibility
+    bom = '\ufeff'
     return StreamingResponse(
-        iter([output.getvalue()]),
-        media_type="text/csv",
+        iter([bom + output.getvalue()]),
+        media_type="text/csv; charset=utf-8-sig",
         headers={"Content-Disposition": f"attachment; filename=assets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
     )
 

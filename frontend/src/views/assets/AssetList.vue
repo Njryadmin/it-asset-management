@@ -249,9 +249,9 @@ function submitImport() {
 }
 
 function downloadTemplate() {
-  const template = '资产编号,名称,序列号,分类ID,供应商ID,部门ID,使用人ID,状态,购入日期,购入价格,保修期至,描述,规格参数\n'
+  const template = '\ufeff资产编号,名称,序列号,分类ID,供应商ID,部门ID,使用人ID,状态,购入日期,购入价格,保修期至,描述,规格参数\n'
   const code = 'CODE001,示例资产,SN123456,1,,1,,idle,2024-01-01,5000.00,2026-01-01,示例描述,示例规格'
-  const blob = new Blob(['\ufeff' + template + code], { type: 'text/csv;charset=utf-8' })
+  const blob = new Blob([template + code], { type: 'text/csv;charset=utf-8' })
   const url = window.URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
