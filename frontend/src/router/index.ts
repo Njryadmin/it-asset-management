@@ -48,6 +48,16 @@ const routes: RouteRecordRaw[] = [
         path: 'purchases',
         name: 'Purchases',
         component: () => import('@/views/purchases/PurchaseList.vue')
+      },
+      {
+        path: 'users',
+        name: 'Users',
+        component: () => import('@/views/users/UserList.vue')
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('@/views/settings/Settings.vue')
       }
     ]
   }

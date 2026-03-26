@@ -19,6 +19,27 @@ export interface User {
   createdAt: string
 }
 
+export interface UserCreate {
+  username: string
+  email: string
+  password: string
+  full_name?: string
+  is_superuser?: boolean
+}
+
+export interface UserUpdate {
+  email?: string
+  full_name?: string
+  password?: string
+  is_superuser?: boolean
+  is_active?: boolean
+}
+
+export interface UserListResponse {
+  total: number
+  items: User[]
+}
+
 export interface LoginRequest {
   username: string
   password: string

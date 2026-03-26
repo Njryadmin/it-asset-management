@@ -12,6 +12,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    is_superuser: bool = False
 
 
 class UserUpdate(BaseModel):
@@ -19,6 +20,7 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
 
 
 class UserResponse(UserBase):
@@ -28,6 +30,11 @@ class UserResponse(UserBase):
     is_active: bool
     is_superuser: bool
     created_at: datetime
+
+
+class UserListResponse(BaseModel):
+    total: int
+    items: List[UserResponse]
 
 
 # ============ Auth Schemas ============
