@@ -284,8 +284,8 @@ async function confirmAction() {
 }
 
 function handlePurchase(row: PurchaseRequest) {
-  purchaseRequestId.value = row.id
-  actualPrice.value = row.estimated_price
+  purchaseRequestId.value = row.id ?? null
+  actualPrice.value = row.estimated_price ?? undefined
   purchaseDialogVisible.value = true
 }
 

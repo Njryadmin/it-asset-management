@@ -102,13 +102,13 @@ function showDialog(mode: 'create' | 'edit', data?: Category) {
     currentId.value = null
     form.name = ''
     form.code = ''
-    form.parent_id = data?.id
+    form.parent_id = data?.id ?? undefined
     form.description = ''
   } else {
     currentId.value = data!.id
     form.name = data!.name
     form.code = data!.code || ''
-    form.parent_id = data!.parent_id
+    form.parent_id = data!.parent_id ?? undefined
     form.description = data!.description || ''
   }
   dialogVisible.value = true
