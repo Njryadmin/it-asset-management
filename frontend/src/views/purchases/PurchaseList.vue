@@ -50,19 +50,35 @@
             <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="approverComment" label="审批意见" width="150" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.approverComment || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column prop="createdAt" label="申请时间" width="160">
           <template #default="{ row }">
             {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="row.status === 'draft'" type="primary" link @click="handleSubmitRequest(row.id)">提交</el-button>
-            <el-button v-if="row.status === 'pending'" type="success" link @click="handleApprove(row)">通过</el-button>
-            <el-button v-if="row.status === 'pending'" type="danger" link @click="handleReject(row)">拒绝</el-button>
-            <el-button v-if="row.status === 'approved'" type="warning" link @click="handlePurchase(row)">标记已采购</el-button>
-            <el-button type="primary" link @click="showDialog('edit', row)">编辑</el-button>
-            <el-button v-if="row.status === 'draft'" type="danger" link @click="handleDelete(row.id)">删除</el-button>
+            <!-- 草稿状态：申请人可提交、编辑、删除 -->
+            <template v-if="row.status === 'draft'">
+              <el-button type="primary" link @click="handleSubmitRequest(row.id)">提交</el-button>
+              <el-button type="primary" link @click="showDialog('edit', row)">编辑</el-button>
+              <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
+            </template>
+            <!-- 待审批状态：管理员可审批通过/拒绝 -->
+            <template v-else-if="row.status === 'pending' && isAdmin">
+              <el-button type="success" link @click="handleApprove(row)">通过</el-button>
+              <el-button type="danger" link @click="handleReject(row)">拒绝</el-button>
+            </template>
+            <!-- 已通过状态：管理员可标记已采购 -->
+            <template v-else-if="row.status === 'approved' && isAdmin">
+              <el-button type="warning" link @click="handlePurchase(row)">标记已采购</el-button>
+            </template>
+            <!-- 其他状态：只可查看 -->
+            <span v-else class="no-action">-</span>
           </template>
         </el-table-column>
       </el-table>
@@ -131,12 +147,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { usePurchaseStore } from '@/stores/purchases'
+import { useAuthStore } from '@/stores/auth'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { PurchaseRequest, PurchaseRequestForm } from '@/types'
 import dayjs from 'dayjs'
 
 const purchaseStore = usePurchaseStore()
+const authStore = useAuthStore()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -152,6 +170,8 @@ const actionRequestId = ref<number | null>(null)
 const purchaseDialogVisible = ref(false)
 const actualPrice = ref<number | undefined>()
 const purchaseRequestId = ref<number | null>(null)
+
+const isAdmin = computed(() => authStore.user?.isSuperuser)
 
 const form = reactive<PurchaseRequestForm>({
   title: '',
@@ -352,5 +372,10 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.no-action {
+  color: #999;
+  font-size: 12px;
 }
 </style>

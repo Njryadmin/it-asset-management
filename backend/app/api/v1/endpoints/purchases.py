@@ -146,7 +146,10 @@ async def approve_purchase_request(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """审批通过采购申请"""
+    """审批通过采购申请（仅管理员）"""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="只有管理员可以审批")
+    
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
     purchase_request = result.scalar_one_or_none()
     if not purchase_request:
@@ -170,7 +173,10 @@ async def reject_purchase_request(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """拒绝采购申请"""
+    """拒绝采购申请（仅管理员）"""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="只有管理员可以审批")
+    
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
     purchase_request = result.scalar_one_or_none()
     if not purchase_request:
@@ -193,7 +199,10 @@ async def mark_as_purchased(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """标记为已采购"""
+    """标记为已采购（仅管理员）"""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="只有管理员可以操作")
+    
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
     purchase_request = result.scalar_one_or_none()
     if not purchase_request:
