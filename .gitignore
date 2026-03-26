@@ -46,3 +46,6 @@ htmlcov/
 
 # Frontend specific
 *.tsbuildinfo
+node_modules/
+dist/
+package-lock.json
