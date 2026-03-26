@@ -160,10 +160,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.category-list,
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .category-tree {
@@ -181,5 +189,9 @@ onMounted(() => {
 .node-actions {
   display: flex;
   gap: 8px;
+}
+
+.el-card {
+  border-radius: var(--radius-lg) !important;
 }
 </style>

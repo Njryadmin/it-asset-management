@@ -472,15 +472,23 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.asset-list {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .search-form {
@@ -505,5 +513,9 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.el-card {
+  border-radius: var(--radius-lg) !important;
 }
 </style>

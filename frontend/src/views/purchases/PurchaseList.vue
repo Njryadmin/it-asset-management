@@ -358,14 +358,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.purchase-list {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .search-form {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .pagination {
@@ -375,7 +382,11 @@ onMounted(() => {
 }
 
 .no-action {
-  color: #999;
+  color: var(--theme-text-placeholder);
   font-size: 12px;
+}
+
+.el-card {
+  border-radius: var(--radius-lg) !important;
 }
 </style>

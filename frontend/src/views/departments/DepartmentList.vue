@@ -305,10 +305,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.department-list,
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .header-actions {
@@ -317,12 +325,16 @@ onMounted(() => {
 }
 
 .search-form {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .pagination {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.el-card {
+  border-radius: var(--radius-lg) !important;
 }
 </style>

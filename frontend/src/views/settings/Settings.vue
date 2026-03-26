@@ -60,10 +60,10 @@
             <div class="theme-list">
               <div 
                 v-for="(theme, key) in themes" 
-                :key="key"
+                :key="String(key)"
                 class="theme-card"
-                :class="{ active: currentTheme === key }"
-                @click="selectTheme(key)"
+                :class="{ active: currentTheme === String(key) }"
+                @click="selectTheme(String(key))"
               >
                 <div class="theme-preview" :style="getThemePreviewStyle(theme)">
                   <div class="preview-sidebar" :style="{ background: theme.sidebar_color }"></div>
@@ -73,7 +73,7 @@
                   </div>
                 </div>
                 <div class="theme-name">{{ theme.name }}</div>
-                <el-icon v-if="currentTheme === key" class="theme-check"><Check /></el-icon>
+                <el-icon v-if="currentTheme === String(key)" class="theme-check"><Check /></el-icon>
               </div>
             </div>
           </div>
@@ -142,8 +142,93 @@ const profileLoading = ref(false)
 const passwordLoading = ref(false)
 const basicFormRef = ref<FormInstance>()
 const profileFormRef = ref<FormInstance>()
-const themes = ref<Record<string, any>>({})
-const currentTheme = ref('default')
+
+// Local theme definitions (must match App.vue)
+const localThemes = {
+  default: {
+    name: '默认主题',
+    primary: '#409eff',
+    success: '#67c23a',
+    warning: '#e6a23c',
+    danger: '#f56c6c',
+    info: '#909399',
+    bg_color: '#f0f2f5',
+    sidebar_color: '#304156',
+    sidebar_text: '#bfcbd9',
+    sidebar_active: '#263445',
+    header_color: '#ffffff',
+    card_bg: '#ffffff',
+    text_primary: '#303133',
+    text_secondary: '#606266',
+    border_color: '#e4e7ed',
+    border_light: '#f0f2f5',
+    shadow: '0 2px 12px rgba(0,0,0,0.08)',
+    shadow_hover: '0 4px 20px rgba(0,0,0,0.12)'
+  },
+  dark: {
+    name: '深色主题',
+    primary: '#409eff',
+    success: '#67c23a',
+    warning: '#e6a23c',
+    danger: '#f56c6c',
+    info: '#909399',
+    bg_color: '#0d1117',
+    sidebar_color: '#161b22',
+    sidebar_text: '#8b949e',
+    sidebar_active: 'rgba(31,111,235,0.2)',
+    header_color: '#161b22',
+    card_bg: '#161b22',
+    text_primary: '#c9d1d9',
+    text_secondary: '#8b949e',
+    border_color: '#30363d',
+    border_light: '#21262d',
+    shadow: '0 2px 12px rgba(0,0,0,0.4)',
+    shadow_hover: '0 4px 20px rgba(0,0,0,0.5)'
+  },
+  green: {
+    name: '绿色主题',
+    primary: '#2eb872',
+    success: '#67c23a',
+    warning: '#e6a23c',
+    danger: '#f56c6c',
+    info: '#909399',
+    bg_color: '#f0f9eb',
+    sidebar_color: '#1a5c1a',
+    sidebar_text: '#a6e7b0',
+    sidebar_active: 'rgba(46,184,114,0.13)',
+    header_color: '#ffffff',
+    card_bg: '#ffffff',
+    text_primary: '#303133',
+    text_secondary: '#606266',
+    border_color: '#e1f3d8',
+    border_light: '#f0f9eb',
+    shadow: '0 2px 12px rgba(46,184,114,0.12)',
+    shadow_hover: '0 4px 20px rgba(46,184,114,0.2)'
+  },
+  purple: {
+    name: '紫色主题',
+    primary: '#a371f7',
+    success: '#67c23a',
+    warning: '#e6a23c',
+    danger: '#f56c6c',
+    info: '#909399',
+    bg_color: '#f5f3ff',
+    sidebar_color: '#2d1b4e',
+    sidebar_text: '#d2b4fa',
+    sidebar_active: 'rgba(163,113,247,0.13)',
+    header_color: '#ffffff',
+    card_bg: '#ffffff',
+    text_primary: '#303133',
+    text_secondary: '#606266',
+    border_color: '#ede9fe',
+    border_light: '#f5f3ff',
+    shadow: '0 2px 12px rgba(163,113,247,0.12)',
+    shadow_hover: '0 4px 20px rgba(163,113,247,0.2)'
+  }
+}
+
+const themes: any = ref(localThemes)
+const currentTheme = ref(localStorage.getItem('app-theme') || 'default')
 
 const basicForm = reactive({
   system_name: '',
@@ -175,10 +260,9 @@ const assetCodeExample = computed(() => {
 
 function getThemePreviewStyle(theme: any) {
   return {
-    '--primary': theme.primary,
-    '--bg': theme.bg_color,
-    '--sidebar': theme.sidebar_color,
-    '--header': theme.header_color
+    '--theme-bg': theme.bg_color,
+    '--theme-sidebar': theme.sidebar_color,
+    '--theme-header': theme.header_color
   }
 }
 
@@ -223,11 +307,31 @@ async function saveBasicSettings() {
 
 function selectTheme(key: string) {
   currentTheme.value = key
-  // Apply theme CSS variables
   const theme = themes.value[key]
   if (theme) {
-    document.documentElement.style.setProperty('--el-color-primary', theme.primary)
-    document.body.style.backgroundColor = theme.bg_color
+    const root = document.documentElement
+    // Apply all CSS variables matching App.vue
+    root.style.setProperty('--el-color-primary', theme.primary)
+    root.style.setProperty('--theme-bg', theme.bg_color)
+    root.style.setProperty('--theme-sidebar', theme.sidebar_color)
+    root.style.setProperty('--theme-sidebar-text', theme.sidebar_text)
+    root.style.setProperty('--theme-sidebar-active', theme.sidebar_active)
+    root.style.setProperty('--theme-header', theme.header_color)
+    root.style.setProperty('--theme-card', theme.card_bg)
+    root.style.setProperty('--theme-text-primary', theme.text_primary)
+    root.style.setProperty('--theme-text-secondary', theme.text_secondary)
+    root.style.setProperty('--theme-border', theme.border_color)
+    root.style.setProperty('--theme-border-light', theme.border_light)
+    root.style.setProperty('--theme-shadow', theme.shadow)
+    root.style.setProperty('--theme-shadow-hover', theme.shadow_hover)
+    // Aliases for global.css compatibility
+    root.style.setProperty('--theme-primary', theme.primary)
+    root.style.setProperty('--theme-success', theme.success)
+    root.style.setProperty('--theme-warning', theme.warning)
+    root.style.setProperty('--theme-danger', theme.danger)
+    root.style.setProperty('--theme-info', theme.info)
+    root.setAttribute('data-theme', key)
+    localStorage.setItem('app-theme', key)
   }
   ElMessage.success(`已切换到${theme.name}`)
 }
@@ -287,7 +391,7 @@ function resetPasswordForm() {
 
 onMounted(() => {
   fetchSettings()
-  fetchThemes()
+  // themes are loaded from local definitions
   fetchProfile()
 })
 </script>
