@@ -5,64 +5,147 @@
         <span>系统设置</span>
       </template>
       
-      <el-form ref="formRef" :model="form" label-width="140px" class="settings-form">
-        <el-divider content-position="left">基本信息</el-divider>
-        
-        <el-form-item label="系统名称">
-          <el-input v-model="form.system_name" placeholder="请输入系统名称" />
-        </el-form-item>
-        
-        <el-form-item label="公司名称">
-          <el-input v-model="form.company_name" placeholder="请输入公司名称" />
-        </el-form-item>
-        
-        <el-form-item label="联系电话">
-          <el-input v-model="form.contact_phone" placeholder="请输入联系电话" />
-        </el-form-item>
-        
-        <el-form-item label="联系邮箱">
-          <el-input v-model="form.contact_email" placeholder="请输入联系邮箱" />
-        </el-form-item>
-        
-        <el-divider content-position="left">资产编号配置</el-divider>
-        
-        <el-form-item label="资产编号前缀">
-          <el-input v-model="form.asset_code_prefix" placeholder="如 ASSET" style="width: 200px" />
-          <span class="form-tip">示例: {{ assetCodeExample }}</span>
-        </el-form-item>
-        
-        <el-divider content-position="left">数据备份</el-divider>
-        
-        <el-form-item label="自动备份">
-          <el-switch v-model="form.auto_backup" />
-        </el-form-item>
-        
-        <el-form-item label="备份保留天数" v-if="form.auto_backup">
-          <el-input-number v-model="form.backup_retention_days" :min="1" :max="365" />
-          <span class="form-tip">超过此天数的备份将自动清理</span>
-        </el-form-item>
-        
-        <el-form-item>
-          <el-button type="primary" :loading="loading" @click="handleSubmit">
-            保存设置
-          </el-button>
-          <el-button @click="fetchSettings">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <el-tabs v-model="activeTab">
+        <!-- 基础设置 -->
+        <el-tab-pane label="基础设置" name="basic">
+          <el-form ref="basicFormRef" :model="basicForm" label-width="140px" class="settings-form">
+            <el-divider content-position="left">基本信息</el-divider>
+            
+            <el-form-item label="系统名称">
+              <el-input v-model="basicForm.system_name" placeholder="请输入系统名称" />
+            </el-form-item>
+            
+            <el-form-item label="公司名称">
+              <el-input v-model="basicForm.company_name" placeholder="请输入公司名称" />
+            </el-form-item>
+            
+            <el-form-item label="联系电话">
+              <el-input v-model="basicForm.contact_phone" placeholder="请输入联系电话" />
+            </el-form-item>
+            
+            <el-form-item label="联系邮箱">
+              <el-input v-model="basicForm.contact_email" placeholder="请输入联系邮箱" />
+            </el-form-item>
+            
+            <el-divider content-position="left">资产编号配置</el-divider>
+            
+            <el-form-item label="资产编号前缀">
+              <el-input v-model="basicForm.asset_code_prefix" placeholder="如 ASSET" style="width: 200px" />
+              <span class="form-tip">示例: {{ assetCodeExample }}</span>
+            </el-form-item>
+            
+            <el-divider content-position="left">数据备份</el-divider>
+            
+            <el-form-item label="自动备份">
+              <el-switch v-model="basicForm.auto_backup" />
+            </el-form-item>
+            
+            <el-form-item label="备份保留天数" v-if="basicForm.auto_backup">
+              <el-input-number v-model="basicForm.backup_retention_days" :min="1" :max="365" />
+              <span class="form-tip">超过此天数的备份将自动清理</span>
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button type="primary" :loading="basicLoading" @click="saveBasicSettings">
+                保存设置
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+
+        <!-- 主题设置 -->
+        <el-tab-pane label="主题设置" name="theme">
+          <div class="theme-section">
+            <el-divider content-position="left">选择主题</el-divider>
+            <div class="theme-list">
+              <div 
+                v-for="(theme, key) in themes" 
+                :key="key"
+                class="theme-card"
+                :class="{ active: currentTheme === key }"
+                @click="selectTheme(key)"
+              >
+                <div class="theme-preview" :style="getThemePreviewStyle(theme)">
+                  <div class="preview-sidebar" :style="{ background: theme.sidebar_color }"></div>
+                  <div class="preview-content">
+                    <div class="preview-header" :style="{ background: theme.header_color }"></div>
+                    <div class="preview-body"></div>
+                  </div>
+                </div>
+                <div class="theme-name">{{ theme.name }}</div>
+                <el-icon v-if="currentTheme === key" class="theme-check"><Check /></el-icon>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+
+        <!-- 个人设置 -->
+        <el-tab-pane label="个人设置" name="profile">
+          <el-form ref="profileFormRef" :model="profileForm" label-width="140px" class="settings-form">
+            <el-divider content-position="left">个人信息</el-divider>
+            
+            <el-form-item label="用户名">
+              <el-input v-model="profileForm.username" disabled />
+            </el-form-item>
+            
+            <el-form-item label="邮箱">
+              <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
+            </el-form-item>
+            
+            <el-form-item label="姓名">
+              <el-input v-model="profileForm.full_name" placeholder="请输入姓名" />
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button type="primary" :loading="profileLoading" @click="saveProfile">
+                保存个人信息
+              </el-button>
+              <el-button @click="resetProfile">重置</el-button>
+            </el-form-item>
+            
+            <el-divider content-position="left">修改密码</el-divider>
+            
+            <el-form-item label="原密码">
+              <el-input v-model="passwordForm.old_password" type="password" placeholder="请输入原密码" show-password />
+            </el-form-item>
+            
+            <el-form-item label="新密码">
+              <el-input v-model="passwordForm.new_password" type="password" placeholder="请输入新密码" show-password />
+            </el-form-item>
+            
+            <el-form-item label="确认新密码">
+              <el-input v-model="passwordForm.confirm_password" type="password" placeholder="请再次输入新密码" show-password />
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button type="primary" :loading="passwordLoading" @click="changePassword">
+                修改密码
+              </el-button>
+              <el-button @click="resetPasswordForm">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { settingsApi } from '@/api/settings'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 
-const formRef = ref<FormInstance>()
-const loading = ref(false)
+const activeTab = ref('basic')
+const basicLoading = ref(false)
+const profileLoading = ref(false)
+const passwordLoading = ref(false)
+const basicFormRef = ref<FormInstance>()
+const profileFormRef = ref<FormInstance>()
+const themes = ref<Record<string, any>>({})
+const currentTheme = ref('default')
 
-const form = reactive({
+const basicForm = reactive({
   system_name: '',
   company_name: '',
   contact_email: '',
@@ -72,41 +155,146 @@ const form = reactive({
   backup_retention_days: 30
 })
 
+const profileForm = reactive({
+  username: '',
+  email: '',
+  full_name: ''
+})
+
+const passwordForm = reactive({
+  old_password: '',
+  new_password: '',
+  confirm_password: ''
+})
+
 const assetCodeExample = computed(() => {
-  const prefix = form.asset_code_prefix || 'ASSET'
+  const prefix = basicForm.asset_code_prefix || 'ASSET'
   const year = new Date().getFullYear()
   return `${prefix}-${year}-000001`
 })
 
+function getThemePreviewStyle(theme: any) {
+  return {
+    '--primary': theme.primary,
+    '--bg': theme.bg_color,
+    '--sidebar': theme.sidebar_color,
+    '--header': theme.header_color
+  }
+}
+
 async function fetchSettings() {
   try {
     const response = await settingsApi.get()
-    Object.assign(form, response.data)
+    Object.assign(basicForm, response.data)
   } catch (error) {
     ElMessage.error('获取设置失败')
   }
 }
 
-async function handleSubmit() {
-  loading.value = true
+async function fetchThemes() {
   try {
-    await settingsApi.update(form)
+    const response = await settingsApi.getThemes()
+    themes.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch themes:', error)
+  }
+}
+
+async function fetchProfile() {
+  try {
+    const response = await settingsApi.getProfile()
+    Object.assign(profileForm, response.data)
+  } catch (error) {
+    console.error('Failed to fetch profile:', error)
+  }
+}
+
+async function saveBasicSettings() {
+  basicLoading.value = true
+  try {
+    await settingsApi.update(basicForm)
     ElMessage.success('设置已保存')
   } catch (error) {
     // Error handled by interceptor
   } finally {
-    loading.value = false
+    basicLoading.value = false
   }
+}
+
+function selectTheme(key: string) {
+  currentTheme.value = key
+  // Apply theme CSS variables
+  const theme = themes.value[key]
+  if (theme) {
+    document.documentElement.style.setProperty('--el-color-primary', theme.primary)
+    document.body.style.backgroundColor = theme.bg_color
+  }
+  ElMessage.success(`已切换到${theme.name}`)
+}
+
+function saveProfile() {
+  profileLoading.value = true
+  settingsApi.updateProfile(profileForm).then(() => {
+    ElMessage.success('个人信息已保存')
+  }).catch(() => {
+    // Error handled by interceptor
+  }).finally(() => {
+    profileLoading.value = false
+  })
+}
+
+function resetProfile() {
+  fetchProfile()
+}
+
+function changePassword() {
+  if (!passwordForm.old_password) {
+    ElMessage.error('请输入原密码')
+    return
+  }
+  if (!passwordForm.new_password) {
+    ElMessage.error('请输入新密码')
+    return
+  }
+  if (passwordForm.new_password.length < 6) {
+    ElMessage.error('新密码长度至少6位')
+    return
+  }
+  if (passwordForm.new_password !== passwordForm.confirm_password) {
+    ElMessage.error('两次输入的新密码不一致')
+    return
+  }
+  
+  passwordLoading.value = true
+  settingsApi.changePassword(passwordForm.old_password, passwordForm.new_password)
+    .then(() => {
+      ElMessage.success('密码修改成功')
+      resetPasswordForm()
+    })
+    .catch(() => {
+      // Error handled by interceptor
+    })
+    .finally(() => {
+      passwordLoading.value = false
+    })
+}
+
+function resetPasswordForm() {
+  passwordForm.old_password = ''
+  passwordForm.new_password = ''
+  passwordForm.confirm_password = ''
 }
 
 onMounted(() => {
   fetchSettings()
+  fetchThemes()
+  fetchProfile()
 })
 </script>
 
 <style scoped>
 .settings {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -122,5 +310,77 @@ onMounted(() => {
 
 .el-divider {
   margin: 24px 0 16px;
+}
+
+.theme-section {
+  padding: 10px 0;
+}
+
+.theme-list {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.theme-card {
+  width: 180px;
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 8px;
+  transition: all 0.3s;
+}
+
+.theme-card:hover {
+  border-color: #409eff;
+}
+
+.theme-card.active {
+  border-color: #409eff;
+}
+
+.theme-preview {
+  width: 100%;
+  height: 100px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  background: var(--bg);
+}
+
+.preview-sidebar {
+  width: 30px;
+  background: var(--sidebar);
+}
+
+.preview-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-header {
+  height: 20px;
+  background: var(--header);
+}
+
+.preview-body {
+  flex: 1;
+  background: var(--bg);
+}
+
+.theme-name {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.theme-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #409eff;
+  font-size: 20px;
 }
 </style>

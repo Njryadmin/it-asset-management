@@ -10,6 +10,14 @@ export interface SystemSettings {
   backup_retention_days: number
 }
 
+export interface UserProfile {
+  id: number
+  username: string
+  email: string
+  full_name: string | null
+  is_superuser: boolean
+}
+
 export const settingsApi = {
   get() {
     return request.get<SystemSettings>('/settings')
@@ -21,5 +29,23 @@ export const settingsApi = {
   
   getAssetCodeConfig() {
     return request.get<{ prefix: string; example: string }>('/settings/asset-codes')
+  },
+  
+  getThemes() {
+    return request.get<Record<string, any>>('/settings/themes')
+  },
+  
+  getProfile() {
+    return request.get<UserProfile>('/settings/profile')
+  },
+  
+  updateProfile(data: { email?: string; full_name?: string }) {
+    return request.put('/settings/profile', data)
+  },
+  
+  changePassword(oldPassword: string, newPassword: string) {
+    return request.put('/settings/password', null, {
+      params: { old_password: oldPassword, new_password: newPassword }
+    })
   }
 }
