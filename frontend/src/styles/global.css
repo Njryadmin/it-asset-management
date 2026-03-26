@@ -228,13 +228,50 @@ body {
   font-weight: 500 !important;
   transition: all var(--transition-fast) !important;
 }
-.el-button--primary {
-  background: var(--theme-primary) !important;
+
+/* Primary button - override Element Plus */
+.el-button--primary,
+.el-button.el-button--primary {
+  background-color: var(--theme-primary) !important;
   border-color: var(--theme-primary) !important;
+  color: #fff !important;
 }
-.el-button--primary:hover {
-  opacity: 0.88;
+.el-button--primary:hover,
+.el-button.el-button--primary:hover {
+  background-color: var(--theme-primary) !important;
+  border-color: var(--theme-primary) !important;
+  opacity: 0.85;
   transform: translateY(-1px);
+}
+
+/* Success button */
+.el-button--success,
+.el-button.el-button--success {
+  background-color: var(--theme-success) !important;
+  border-color: var(--theme-success) !important;
+  color: #fff !important;
+}
+
+/* Warning button */
+.el-button--warning,
+.el-button.el-button--warning {
+  background-color: var(--theme-warning) !important;
+  border-color: var(--theme-warning) !important;
+  color: #fff !important;
+}
+
+/* Danger button */
+.el-button--danger,
+.el-button.el-button--danger {
+  background-color: var(--theme-danger) !important;
+  border-color: var(--theme-danger) !important;
+  color: #fff !important;
+}
+
+/* Text/Danger link button */
+.el-button--text.el-button--danger,
+.el-button.el-button--text.el-button--danger {
+  color: var(--theme-danger) !important;
 }
 
 /* ── Tables ── */
