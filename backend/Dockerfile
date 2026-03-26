@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
 WORKDIR /app
+RUN mkdir -p /app/static /app/static/icons
 
 # Install dependencies
 COPY requirements.txt .

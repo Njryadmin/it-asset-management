@@ -14,10 +14,8 @@ from app.core.security import get_password_hash, verify_password
 
 router = APIRouter(prefix="/settings", tags=["系统设置"])
 
-# Ensure static directory exists
+# Static directory for uploads
 STATIC_DIR = "/app/static"
-os.makedirs(STATIC_DIR, exist_ok=True)
-os.makedirs(f"{STATIC_DIR}/icons", exist_ok=True)
 
 # In-memory settings (in production, use database)
 SETTINGS: Dict[str, Any] = {
@@ -253,6 +251,9 @@ async def upload_logo(
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="仅支持 PNG/JPEG/GIF/SVG/WebP 格式")
     
+    # Ensure static directory exists
+    os.makedirs(STATIC_DIR, exist_ok=True)
+    
     # Generate unique filename
     ext = file.filename.split(".")[-1] if "." in file.filename else "png"
     filename = f"logo_{uuid.uuid4().hex}.{ext}"
@@ -281,6 +282,9 @@ async def upload_favicon(
     allowed_types = ["image/png", "image/x-icon", "image/vnd.microsoft.icon", "image/svg+xml"]
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="仅支持 PNG/ICO/SVG 格式")
+    
+    # Ensure static directory exists
+    os.makedirs(STATIC_DIR, exist_ok=True)
     
     # Generate unique filename
     ext = file.filename.split(".")[-1] if "." in file.filename else "ico"

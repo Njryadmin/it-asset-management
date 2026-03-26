@@ -16,11 +16,6 @@ def create_app() -> FastAPI:
         docs_url=f"{settings.API_V1_STR}/docs",
         redoc_url=f"{settings.API_V1_STR}/redoc",
     )
-    
-    # Mount static files for uploads
-    from fastapi.staticfiles import StaticFiles
-    os.makedirs("/app/static", exist_ok=True)
-    app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 
     # CORS
     app.add_middleware(
