@@ -39,9 +39,11 @@
             {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="showDialog('edit', row)">编辑</el-button>
+            <el-button v-if="row.isActive" type="warning" link @click="handleToggleStatus(row)">禁用</el-button>
+            <el-button v-else type="success" link @click="handleToggleStatus(row)">启用</el-button>
             <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -94,6 +96,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useSupplierStore } from '@/stores/suppliers'
+import { suppliersApi } from '@/api/suppliers'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Supplier } from '@/types'
@@ -186,6 +189,25 @@ async function handleDelete(id: number) {
   } catch (error: any) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败')
+    }
+  }
+}
+
+async function handleToggleStatus(row: Supplier) {
+  const newStatus = !row.isActive
+  const action = newStatus ? '启用' : '禁用'
+  try {
+    await ElMessageBox.confirm(`确定要${action}该供应商吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await suppliersApi.toggleStatus(row.id, newStatus)
+    ElMessage.success(`${action}成功`)
+    await supplierStore.fetchSuppliers()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      ElMessage.error(`${action}失败`)
     }
   }
 }
