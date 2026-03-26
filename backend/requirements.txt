@@ -14,3 +14,4 @@ redis==5.0.1
 celery==5.3.6
 gunicorn==21.2.0
 httpx==0.26.0
+aiofiles==23.2.1

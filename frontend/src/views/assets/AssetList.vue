@@ -4,10 +4,20 @@
       <template #header>
         <div class="card-header">
           <span>资产管理</span>
-          <el-button type="primary" @click="$router.push('/assets/create')">
-            <el-icon><Plus /></el-icon>
-            新增资产
-          </el-button>
+          <div class="header-actions">
+            <el-button @click="handleExport">
+              <el-icon><Download /></el-icon>
+              导出
+            </el-button>
+            <el-button @click="showImportDialog = true">
+              <el-icon><Upload /></el-icon>
+              导入
+            </el-button>
+            <el-button type="primary" @click="$router.push('/assets/create')">
+              <el-icon><Plus /></el-icon>
+              新增资产
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -80,18 +90,50 @@
         />
       </div>
     </el-card>
+
+    <!-- Import Dialog -->
+    <el-dialog v-model="showImportDialog" title="导入资产" width="500px">
+      <el-upload
+        ref="uploadRef"
+        class="upload-demo"
+        drag
+        :action="importUrl"
+        :headers="{ Authorization: `Bearer ${token}` }"
+        :before-upload="beforeUpload"
+        :on-success="handleImportSuccess"
+        :on-error="handleImportError"
+        accept=".csv"
+        :auto-upload="false"
+      >
+        <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+        <div class="el-upload__text">拖拽CSV文件到此处 或 <em>点击上传</em></div>
+        <template #tip>
+          <div class="el-upload__tip">只能上传CSV文件，请先下载模板</div>
+          <el-button size="small" type="primary" @click="downloadTemplate">下载模板</el-button>
+        </template>
+      </el-upload>
+      <template #footer>
+        <el-button @click="showImportDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitImport">确定导入</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetStore } from '@/stores/assets'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+import request from '@/api/request'
 
 const router = useRouter()
 const assetStore = useAssetStore()
+const token = localStorage.getItem('token') || ''
+const importUrl = '/api/v1/assets/import'
+const uploadRef = ref()
+const showImportDialog = ref(false)
 
 const flatCategories = computed(() => {
   const result: any[] = []
@@ -162,6 +204,64 @@ async function handleDelete(id: number) {
   }
 }
 
+async function handleExport() {
+  try {
+    const response = await fetch('/api/v1/assets/export', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `assets_${dayjs().format('YYYYMMDD_HHmmss')}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
+}
+
+function beforeUpload(file: any) {
+  const isCSV = file.name.endsWith('.csv')
+  if (!isCSV) {
+    ElMessage.error('只能上传CSV文件')
+  }
+  return isCSV
+}
+
+function handleImportSuccess(response: any) {
+  if (response.imported !== undefined) {
+    ElMessage.success(`导入完成：成功${response.imported}条，跳过${response.skipped}条`)
+    showImportDialog.value = false
+    assetStore.fetchAssets()
+  }
+}
+
+function handleImportError(error: any) {
+  ElMessage.error('导入失败')
+}
+
+function submitImport() {
+  uploadRef.value?.submit()
+}
+
+function downloadTemplate() {
+  const template = '资产编号,名称,序列号,分类ID,供应商ID,部门ID,使用人ID,状态,购入日期,购入价格,保修期至,描述,规格参数\n'
+  const code = 'CODE001,示例资产,SN123456,1,,1,,idle,2024-01-01,5000.00,2026-01-01,示例描述,示例规格'
+  const blob = new Blob(['\ufeff' + template + code], { type: 'text/csv;charset=utf-8' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'asset_template.csv'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
+
 onMounted(async () => {
   await assetStore.fetchOptions()
   await assetStore.fetchAssets()
@@ -173,6 +273,11 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .search-form {
