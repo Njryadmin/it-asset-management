@@ -28,8 +28,14 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authApi.getMe()
       user.value = response.data
-    } catch (error) {
-      logout()
+    } catch (error: any) {
+      // Only logout on 401 (invalid token), don't logout on network errors
+      if (error.response?.status === 401) {
+        logout()
+      } else {
+        // Network error or server error - just clear user, keep token
+        user.value = null
+      }
       throw error
     }
   }
@@ -42,11 +48,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   function isLoggedIn() {
     return !!token.value
-  }
-
-  // Auto fetch user on init if token exists
-  if (token.value) {
-    fetchUser().catch(() => {})
   }
 
   return {

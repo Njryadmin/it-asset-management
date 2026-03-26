@@ -8,7 +8,7 @@ import io
 from datetime import datetime
 
 from app.core.database import get_db
-from app.models import Department
+from app.models import Department, User, Asset
 from app.schemas.schemas import DepartmentCreate, DepartmentUpdate, DepartmentResponse
 from app.api.v1.endpoints.auth import get_current_active_user
 
@@ -134,6 +134,27 @@ async def delete_department(
     if not department:
         raise HTTPException(status_code=404, detail="部门不存在")
     
+    # Check if has children
+    children_result = await db.execute(
+        select(Department).where(Department.parent_id == department_id)
+    )
+    if children_result.scalars().first():
+        raise HTTPException(status_code=400, detail="该部门包含子部门，无法删除")
+    
+    # Check if has users
+    users_result = await db.execute(
+        select(User).where(User.department_id == department_id)
+    )
+    if users_result.scalars().first():
+        raise HTTPException(status_code=400, detail="该部门下有用户，无法删除")
+    
+    # Check if has assets
+    assets_result = await db.execute(
+        select(Asset).where(Asset.department_id == department_id)
+    )
+    if assets_result.scalars().first():
+        raise HTTPException(status_code=400, detail="该部门下有资产，无法删除")
+    
     await db.delete(department)
     await db.commit()
     return {"message": "删除成功"}
@@ -152,14 +173,18 @@ async def export_departments(
     writer = csv.writer(output)
     
     # Header
-    writer.writerow(['部门名称', '编码', '上级部门ID', '描述', '创建时间'])
+    writer.writerow(['部门名称', '编码', '上级部门名称', '描述', '创建时间'])
+    
+    # Build parent name lookup
+    dept_map = {dept.id: dept.name for dept in departments}
     
     # Data
     for dept in departments:
+        parent_name = dept_map.get(dept.parent_id, '') if dept.parent_id else ''
         writer.writerow([
             dept.name,
             dept.code or '',
-            dept.parent_id or '',
+            parent_name,
             dept.description or '',
             dept.created_at.strftime('%Y-%m-%d %H:%M:%S') if dept.created_at else ''
         ])
@@ -170,6 +195,24 @@ async def export_departments(
         iter([bom + output.getvalue()]),
         media_type="text/csv; charset=utf-8-sig",
         headers={"Content-Disposition": f"attachment; filename=departments_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
+
+
+@router.get("/template")
+async def download_department_template(
+    current_user=Depends(get_current_active_user)
+):
+    """下载部门导入模板"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['部门名称', '编码', '上级部门名称', '描述'])
+    writer.writerow(['示例部门', 'DEPT01', '', '示例描述（上级部门名称留空表示顶级部门）'])
+    output.seek(0)
+    bom = '\ufeff'
+    return StreamingResponse(
+        iter([bom + output.getvalue()]),
+        media_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": "attachment; filename=department_template.csv"}
     )
 
 
@@ -188,6 +231,13 @@ async def import_departments(
     
     reader = csv.DictReader(io.StringIO(decoded_content))
     
+    # 预先查询所有现有部门
+    existing_result = await db.execute(select(Department))
+    existing_departments = existing_result.scalars().all()
+    existing_ids = {dept.id for dept in existing_departments}
+    existing_codes = {dept.code for dept in existing_departments if dept.code}
+    name_to_id = {dept.name: dept.id for dept in existing_departments}
+    
     imported = 0
     errors = []
     skipped = 0
@@ -201,15 +251,19 @@ async def import_departments(
             
             # Check if code exists
             if row.get('编码'):
-                result = await db.execute(select(Department).where(Department.code == row['编码']))
-                if result.scalar_one_or_none():
+                if row['编码'] in existing_codes:
                     errors.append(f"第{row_num}行: 编码 {row['编码']} 已存在，跳过")
                     skipped += 1
                     continue
             
             parent_id = None
-            if row.get('上级部门ID'):
-                parent_id = int(row['上级部门ID'])
+            parent_name = row.get('上级部门名称', '').strip()
+            if parent_name:
+                parent_id = name_to_id.get(parent_name)
+                if parent_id is None:
+                    errors.append(f"第{row_num}行: 未找到上级部门'{parent_name}'，跳过")
+                    skipped += 1
+                    continue
             
             dept = Department(
                 name=row['部门名称'],
@@ -218,6 +272,8 @@ async def import_departments(
                 description=row.get('描述') or None
             )
             db.add(dept)
+            # Update name lookup for chain references within this import
+            name_to_id[dept.name] = dept.id
             imported += 1
             
         except Exception as e:

@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import User, Category, Supplier, Department, Asset, AssetStatus
+from app.models import SystemSettings  # noqa: F401 - ensures table is created on startup
 from app.core.security import get_password_hash
 from app.core.database import AsyncSessionLocal, init_db
 import asyncio
@@ -19,7 +20,7 @@ async def create_default_admin(db: AsyncSession):
             is_active=True
         )
         db.add(admin)
-        print("Created default admin user: admin / admin123")
+        print("Created default admin user.")
 
 
 async def create_sample_data(db: AsyncSession):

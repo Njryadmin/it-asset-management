@@ -12,19 +12,39 @@
               <el-icon><Filter /></el-icon>
               筛选
             </el-button>
-            <el-dropdown trigger="click" @command="handleColumnToggle">
-              <el-button>
-                <el-icon><Setting /></el-icon>
-                字段
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item v-for="col in columnOptions" :key="col.key">
-                    <el-checkbox v-model="col.visible" :label="col.label" />
-                  </el-dropdown-item>
-                </el-dropdown-menu>
+            <el-popover placement="bottom" :width="220" trigger="click">
+              <template #reference>
+                <el-button>
+                  <el-icon><Setting /></el-icon>
+                  字段
+                </el-button>
               </template>
-            </el-dropdown>
+              <div class="column-settings">
+                <div class="column-settings-header">
+                  <span>列设置</span>
+                  <el-button link type="primary" @click="resetToDefaults">重置</el-button>
+                </div>
+                <div class="column-settings-list">
+                  <div
+                    v-for="(col, index) in columns"
+                    :key="col.key"
+                    class="column-settings-item"
+                    :class="{ 'is-dragging': draggingIndex === index }"
+                    draggable="true"
+                    @dragstart="onDragStart(index)"
+                    @dragover="(e) => onDragOver(e, index)"
+                    @dragend="onDragEnd"
+                  >
+                    <el-icon class="drag-handle"><Rank /></el-icon>
+                    <el-checkbox
+                      :model-value="col.visible"
+                      :disabled="!canHide(index)"
+                      @change="toggleColumn(index)"
+                    >{{ col.label }}</el-checkbox>
+                  </div>
+                </div>
+              </div>
+            </el-popover>
             <el-dropdown trigger="click" @command="handleExport">
               <el-button type="primary">
                 <el-icon><Download /></el-icon>
@@ -85,59 +105,81 @@
         <el-tag v-if="assetStore.params.status" closable @close="clearStatus">
           状态: {{ statusMap[assetStore.params.status] }}
         </el-tag>
+        <el-tag v-if="assetStore.params.region" closable @close="clearRegion">
+          地区: {{ assetStore.params.region }}
+        </el-tag>
         <el-button text type="primary" @click="resetFilters">清除全部</el-button>
       </div>
 
       <!-- Table -->
       <el-table :data="assetStore.assets" v-loading="assetStore.loading" style="width: 100%" class="data-table">
-        <el-table-column v-if="columnOptions.find(c => c.key === 'name')?.visible" prop="name" label="资产名称" min-width="150" />
-        <el-table-column v-if="columnOptions.find(c => c.key === 'assetCode')?.visible" prop="assetCode" label="资产编号" width="140" />
-        <el-table-column v-if="columnOptions.find(c => c.key === 'serialNumber')?.visible" prop="serialNumber" label="序列号" width="140" />
-        <el-table-column v-if="columnOptions.find(c => c.key === 'category')?.visible" prop="categoryId" label="分类" width="120">
+        <template v-for="col in columns" :key="col.key">
+          <el-table-column v-if="col.visible && col.key === 'name'" prop="name" label="资产名称" min-width="150" />
+          <el-table-column v-if="col.visible && col.key === 'assetCode'" prop="assetCode" label="资产编号" width="140" />
+          <el-table-column v-if="col.visible && col.key === 'serialNumber'" prop="serialNumber" label="序列号" width="140" />
+          <el-table-column v-if="col.visible && col.key === 'category'" prop="categoryId" label="分类" width="120">
+            <template #default="{ row }">
+              {{ getCategoryName(row.categoryId) }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'supplier'" prop="supplierId" label="供应商" width="120">
+            <template #default="{ row }">
+              {{ getSupplierName(row.supplierId) }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'department'" prop="departmentId" label="部门" width="120">
+            <template #default="{ row }">
+              {{ getDepartmentName(row.departmentId) }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'assignedTo'" prop="assignedTo" label="使用人" width="100">
+            <template #default="{ row }">
+              {{ row.assignedTo || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'status'" prop="status" label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'purchasePrice'" prop="purchasePrice" label="购买价格" width="100">
+            <template #default="{ row }">
+              {{ row.purchasePrice ? `¥${row.purchasePrice}` : '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'purchaseDate'" prop="purchaseDate" label="购买日期" width="120">
+            <template #default="{ row }">
+              {{ row.purchaseDate ? dayjs(row.purchaseDate).format('YYYY-MM-DD') : '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'warrantyExpireDate'" prop="warrantyExpireDate" label="保修到期" width="120">
+            <template #default="{ row }">
+              {{ row.warrantyExpireDate ? dayjs(row.warrantyExpireDate).format('YYYY-MM-DD') : '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'description'" prop="description" label="备注" min-width="150" show-overflow-tooltip />
+          <el-table-column v-if="col.visible && col.key === 'region'" prop="region" label="地区" width="120" />
+          <el-table-column v-if="col.visible && col.key === 'createdAt'" prop="createdAt" label="添加时间" width="160">
+            <template #default="{ row }">
+              {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
+            </template>
+          </el-table-column>
+        </template>
+        <el-table-column label="操作" width="110" fixed="right">
           <template #default="{ row }">
-            {{ getCategoryName(row.categoryId) }}
-          </template>
-        </el-table-column>
-        <el-table-column v-if="columnOptions.find(c => c.key === 'supplier')?.visible" prop="supplierId" label="供应商" width="120">
-          <template #default="{ row }">
-            {{ getSupplierName(row.supplierId) }}
-          </template>
-        </el-table-column>
-        <el-table-column v-if="columnOptions.find(c => c.key === 'department')?.visible" prop="departmentId" label="部门" width="120">
-          <template #default="{ row }">
-            {{ getDepartmentName(row.departmentId) }}
-          </template>
-        </el-table-column>
-        <el-table-column v-if="columnOptions.find(c => c.key === 'status')?.visible" prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="columnOptions.find(c => c.key === 'purchasePrice')?.visible" prop="purchasePrice" label="购买价格" width="100">
-          <template #default="{ row }">
-            {{ row.purchasePrice ? `¥${row.purchasePrice}` : '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column v-if="columnOptions.find(c => c.key === 'purchaseDate')?.visible" prop="purchaseDate" label="购买日期" width="120">
-          <template #default="{ row }">
-            {{ row.purchaseDate ? dayjs(row.purchaseDate).format('YYYY-MM-DD') : '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column v-if="columnOptions.find(c => c.key === 'warrantyExpireDate')?.visible" prop="warrantyExpireDate" label="保修到期" width="120">
-          <template #default="{ row }">
-            {{ row.warrantyExpireDate ? dayjs(row.warrantyExpireDate).format('YYYY-MM-DD') : '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column v-if="columnOptions.find(c => c.key === 'description')?.visible" prop="description" label="备注" min-width="150" show-overflow-tooltip />
-        <el-table-column v-if="columnOptions.find(c => c.key === 'createdAt')?.visible" prop="createdAt" label="添加时间" width="160">
-          <template #default="{ row }">
-            {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="$router.push(`/assets/${row.id}/edit`)">编辑</el-button>
-            <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
+            <el-button type="primary" link @click="$router.push(`/assets/${row.id}/edit`)">
+              <el-icon><Edit /></el-icon>
+            </el-button>
+            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
+              <el-button type="primary" link>
+                <el-icon><More /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -177,6 +219,9 @@
           <el-select v-model="tempParams.department_id" placeholder="选择部门" clearable style="width: 100%">
             <el-option v-for="dept in flatDepartments" :key="dept.id" :label="dept.name" :value="dept.id" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="地区">
+          <el-input v-model="tempParams.region" placeholder="输入地区" clearable style="width: 100%" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -220,8 +265,39 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetStore } from '@/stores/assets'
+import { assetsApi } from '@/api/assets'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useColumnSettings } from '@/composables/useColumnSettings'
+import type { ColumnOption } from '@/composables/useColumnSettings'
 import dayjs from 'dayjs'
+
+const defaultColumns: ColumnOption[] = [
+  { key: 'name', label: '资产名称', visible: true },
+  { key: 'assetCode', label: '资产编号', visible: true },
+  { key: 'serialNumber', label: '序列号', visible: true },
+  { key: 'category', label: '分类', visible: true },
+  { key: 'supplier', label: '供应商', visible: true },
+  { key: 'department', label: '部门', visible: true },
+  { key: 'assignedTo', label: '使用人', visible: true },
+  { key: 'status', label: '状态', visible: true },
+  { key: 'purchasePrice', label: '购买价格', visible: true },
+  { key: 'purchaseDate', label: '购买日期', visible: true },
+  { key: 'warrantyExpireDate', label: '保修到期', visible: false },
+  { key: 'description', label: '备注', visible: false },
+  { key: 'region', label: '地区', visible: true },
+  { key: 'createdAt', label: '添加时间', visible: true }
+]
+
+const {
+  columns,
+  draggingIndex,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  toggleColumn,
+  canHide,
+  resetToDefaults
+} = useColumnSettings('asset-columns', defaultColumns)
 
 const router = useRouter()
 const assetStore = useAssetStore()
@@ -231,26 +307,15 @@ const uploadRef = ref()
 const showImportDialog = ref(false)
 const showFilterDrawer = ref(false)
 
-const columnOptions = ref([
-  { key: 'name', label: '资产名称', visible: true },
-  { key: 'assetCode', label: '资产编号', visible: true },
-  { key: 'serialNumber', label: '序列号', visible: true },
-  { key: 'category', label: '分类', visible: true },
-  { key: 'supplier', label: '供应商', visible: true },
-  { key: 'department', label: '部门', visible: true },
-  { key: 'status', label: '状态', visible: true },
-  { key: 'purchasePrice', label: '购买价格', visible: true },
-  { key: 'purchaseDate', label: '购买日期', visible: true },
-  { key: 'warrantyExpireDate', label: '保修到期', visible: false },
-  { key: 'description', label: '备注', visible: false },
-  { key: 'createdAt', label: '添加时间', visible: true }
-])
+// Legacy reference - table now uses 'columns' from composable
+const columnOptions = ref(defaultColumns)
 
 const tempParams = reactive({
   keyword: '',
   category_id: undefined as number | undefined,
   status: '',
-  department_id: undefined as number | undefined
+  department_id: undefined as number | undefined,
+  region: ''
 })
 
 const flatCategories = computed(() => {
@@ -282,7 +347,7 @@ const flatDepartments = computed(() => {
 })
 
 const hasActiveFilters = computed(() => {
-  return assetStore.params.keyword || assetStore.params.category_id || assetStore.params.status || assetStore.params.department_id
+  return assetStore.params.keyword || assetStore.params.category_id || assetStore.params.status || assetStore.params.department_id || assetStore.params.region
 })
 
 const statusMap: Record<string, string> = {
@@ -306,6 +371,10 @@ function statusTagType(status: string) {
     scrapped: 'info'
   }
   return map[status] || 'info'
+}
+
+function handleActionCommand(cmd: string, row: any) {
+  if (cmd === 'delete') handleDelete(row.id)
 }
 
 function getCategoryName(id: number | null) {
@@ -358,8 +427,6 @@ async function handleDelete(id: number) {
   }
 }
 
-function handleColumnToggle() {}
-
 function clearKeyword() {
   assetStore.params.keyword = ''
   search()
@@ -375,6 +442,11 @@ function clearStatus() {
   search()
 }
 
+function clearRegion() {
+  assetStore.params.region = ''
+  search()
+}
+
 function resetFilters() {
   reset()
 }
@@ -384,6 +456,7 @@ function resetTempParams() {
   tempParams.category_id = undefined
   tempParams.status = ''
   tempParams.department_id = undefined
+  tempParams.region = ''
 }
 
 function applyFilters() {
@@ -391,39 +464,26 @@ function applyFilters() {
   assetStore.params.category_id = tempParams.category_id
   assetStore.params.status = tempParams.status
   assetStore.params.department_id = tempParams.department_id
+  assetStore.params.region = tempParams.region
   showFilterDrawer.value = false
   search()
 }
 
 async function handleExport(command: string) {
   try {
-    let url = '/api/v1/assets/export'
-    let filename = 'assets'
+    const params: Record<string, any> = {}
+    let filename = `assets_all_${dayjs().format('YYYYMMDD_HHmmss')}`
     
     if (command === 'filtered') {
-      const params = new URLSearchParams()
-      if (assetStore.params.keyword) params.append('keyword', assetStore.params.keyword)
-      if (assetStore.params.category_id) params.append('category_id', String(assetStore.params.category_id))
-      if (assetStore.params.status) params.append('status', assetStore.params.status)
-      if (assetStore.params.department_id) params.append('department_id', String(assetStore.params.department_id))
-      url += '?' + params.toString()
+      if (assetStore.params.keyword) params.keyword = assetStore.params.keyword
+      if (assetStore.params.category_id) params.category_id = assetStore.params.category_id
+      if (assetStore.params.status) params.status = assetStore.params.status
+      if (assetStore.params.department_id) params.department_id = assetStore.params.department_id
+      if (assetStore.params.region) params.region = assetStore.params.region
       filename = `assets_filtered_${dayjs().format('YYYYMMDD_HHmmss')}`
-    } else {
-      filename = `assets_all_${dayjs().format('YYYYMMDD_HHmmss')}`
     }
     
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    const blob = await response.blob()
-    const downloadUrl = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = downloadUrl
-    a.download = `${filename}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(downloadUrl)
+    await assetsApi.exportFile(Object.keys(params).length > 0 ? params : undefined, `${filename}.csv`)
     ElMessage.success('导出成功')
   } catch (error) {
     ElMessage.error('导出失败')
@@ -455,8 +515,8 @@ function submitImport() {
 }
 
 function downloadTemplate() {
-  const template = '\ufeff资产编号,名称,序列号,分类ID,供应商ID,部门ID,使用人ID,状态,购入日期,购入价格,保修期至,描述,规格参数\n'
-  const code = 'CODE001,示例资产,SN123456,1,,1,,idle,2024-01-01,5000.00,2026-01-01,示例描述,示例规格'
+  const template = '\ufeff资产编号,名称,序列号,分类名称,供应商名称,部门名称,使用人,状态,购入日期,购入价格,保修期至,描述,规格参数,地区\n'
+  const code = 'CODE001,示例资产,SN123456,1,,1,,idle,2024-01-01,5000.00,2026-01-01,示例描述,示例规格,上海'
   const blob = new Blob([template + code], { type: 'text/csv;charset=utf-8' })
   const url = window.URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -483,6 +543,7 @@ onMounted(async () => {
 
 .main-card {
   border-radius: var(--radius-lg) !important;
+  overflow: hidden;
 }
 
 .card-header {
@@ -490,7 +551,8 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
+  padding: 14px 20px;
 }
 
 .header-left {
@@ -501,19 +563,20 @@ onMounted(async () => {
 
 .page-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--theme-text-primary);
+  color: var(--wechat-text);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--theme-text-secondary);
+  color: var(--wechat-text-secondary);
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .search-bar {
@@ -521,10 +584,13 @@ onMounted(async () => {
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-input {
-  width: 320px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
 }
 
 .filter-tags {
@@ -536,14 +602,20 @@ onMounted(async () => {
 }
 
 .data-table {
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: 0;
+  overflow-x: auto;
+}
+
+.data-table :deep(.el-table__body-wrapper) {
+  overflow-x: auto !important;
 }
 
 .pagination-wrapper {
-  margin-top: 20px;
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .drawer-footer {
@@ -554,10 +626,80 @@ onMounted(async () => {
 
 .custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
-  background: var(--theme-card);
 }
 
 .upload-demo {
   text-align: center;
+}
+
+.column-settings {
+  user-select: none;
+}
+
+.column-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.column-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.column-settings-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: grab;
+  transition: background-color 0.2s;
+}
+
+.column-settings-item:hover {
+  background-color: var(--el-fill-color-light);
+}
+
+.column-settings-item.is-dragging {
+  opacity: 0.5;
+  background-color: var(--el-fill-color);
+}
+
+.drag-handle {
+  color: var(--el-text-color-placeholder);
+  cursor: grab;
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    padding: 10px 12px;
+  }
+  .search-bar {
+    margin-bottom: 12px;
+  }
+  .search-input {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .el-table :deep(.el-table__header th),
+  .el-table :deep(.el-table__body td) {
+    padding: 8px 4px;
+  }
+  .el-table :deep(.el-table__cell) {
+    min-width: 80px;
+  }
+  .el-table :deep(.el-button) {
+    padding: 4px 6px;
+  }
 }
 </style>

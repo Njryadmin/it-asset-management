@@ -27,7 +27,7 @@
         </el-form-item>
         <el-form-item label="供应商" prop="supplier_id">
           <el-select v-model="form.supplier_id" placeholder="请选择供应商" clearable>
-            <el-option v-for="sup in assetStore.suppliers" :key="sup.id" :label="sup.name" :value="sup.id" />
+            <el-option v-for="sup in assetStore.suppliers.filter(s => s.isActive)" :key="sup.id" :label="sup.name" :value="sup.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="使用部门" prop="department_id">
@@ -68,6 +68,9 @@
         <el-form-item label="备注" prop="description">
           <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入备注" />
         </el-form-item>
+        <el-form-item label="地区" prop="region">
+          <el-input v-model="form.region" placeholder="请输入地区" maxlength="100" />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleSubmit">
             {{ isEdit ? '保存' : '创建' }}
@@ -107,7 +110,8 @@ const form = reactive({
   purchase_date: undefined as string | undefined,
   purchase_price: undefined as number | undefined,
   warranty_expire_date: undefined as string | undefined,
-  description: ''
+  description: '',
+  region: ''
 })
 
 const rules: FormRules = {
@@ -187,7 +191,8 @@ onMounted(async () => {
         purchase_date: data.purchaseDate,
         purchase_price: data.purchasePrice,
         warranty_expire_date: data.warrantyExpireDate,
-        description: data.description
+        description: data.description,
+        region: data.region || ''
       })
     } catch (error) {
       ElMessage.error('加载资产数据失败')

@@ -1,7 +1,258 @@
 /* ============================================================
    Global Styles — IT Asset Management System
-   Modern design with CSS variables for theming
+   WeChat Theme (微信主题风格)
    ============================================================ */
+
+/* ── WeChat Dark Theme (WeChat 深色模式) ── */
+[data-theme="dark"] {
+  --wechat-primary: #07C160;
+  --wechat-primary-dark: #05984A;
+  --wechat-primary-light: #2DB86E;
+
+  --wechat-bg: #1F1F1F;
+  --wechat-bg-secondary: #2D2D2D;
+  --wechat-card: #252525;
+
+  --wechat-text: #FFFFFF;
+  --wechat-text-secondary: #A0A0A0;
+  --wechat-text-placeholder: #6B6B6B;
+  --wechat-text-disabled: #4A4A4A;
+
+  --wechat-border: #3A3A3C;
+  --wechat-border-light: #2D2D2D;
+
+  --wechat-danger: #FA5151;
+  --wechat-danger-light: #3D1A1A;
+  --wechat-success: #07C160;
+  --wechat-warning: #FF991A;
+  --wechat-warning-bg: #3D2A0A;
+
+  --wechat-sidebar: #191919;
+  --wechat-sidebar-text: #E0E0E0;
+  --wechat-sidebar-active-bg: rgba(7, 193, 96, 0.15);
+  --wechat-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+  --wechat-sidebar-icon: #A0A0A0;
+  --wechat-sidebar-active-icon: #07C160;
+
+  --wechat-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --wechat-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --wechat-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+  /* Element Plus dark overrides */
+  --el-color-primary: #07C160;
+  --el-color-primary-light-3: #2DB86E;
+  --el-color-primary-light-5: #4DBF3A;
+  --el-color-primary-light-7: #66C954;
+  --el-color-primary-light-9: #1A3D24;
+  --el-color-primary-dark-2: #05984A;
+
+  --el-color-success: #07C160;
+  --el-color-success-light-3: #2DB86E;
+  --el-color-success-light-5: #4DBF3A;
+  --el-color-success-light-7: #66C954;
+  --el-color-success-light-9: #1A3D24;
+  --el-color-success-dark-2: #05984A;
+
+  --el-color-warning: #FF991A;
+  --el-color-warning-light-3: #FFAD4D;
+  --el-color-warning-light-5: #FFBF7A;
+  --el-color-warning-light-7: #FFD1A7;
+  --el-color-warning-light-9: #3D2A0A;
+  --el-color-warning-dark-2: #CC7A00;
+
+  --el-color-danger: #FA5151;
+  --el-color-danger-light-3: #FC7676;
+  --el-color-danger-light-5: #FD9999;
+  --el-color-danger-light-7: #FEBBBB;
+  --el-color-danger-light-9: #3D1A1A;
+  --el-color-danger-dark-2: #C84040;
+
+  --el-bg-color: #1F1F1F;
+  --el-bg-color-page: #121212;
+  --el-bg-color-soft: #1F1F1F;
+  --el-fill-color-blank: #252525;
+  --el-fill-color-light: #2D2D2D;
+  --el-fill-color-lighter: #2D2D2D;
+  --el-fill-color-extra-light: #2D2D2D;
+  --el-border-color: #3A3A3C;
+  --el-border-color-light: #2D2D2D;
+  --el-border-color-lighter: #252525;
+  --el-border-color-extra-light: #252525;
+  --el-text-color-primary: #FFFFFF;
+  --el-text-color-regular: #A0A0A0;
+  --el-text-color-secondary: #8B8B8B;
+  --el-text-color-placeholder: #6B6B6B;
+  --el-text-color-disabled: #4A4A4A;
+
+  /* Input backgrounds */
+  --el-input-bg-color: var(--wechat-card);
+
+  /* Backward compat aliases */
+  --theme-primary: #07C160;
+  --theme-primary-light: #2DB86E;
+
+  /* Dark mode input fix — override hardcoded #fff from base rule */
+  --el-input-wrapper-bg-color: var(--wechat-card);
+
+  /* Backward compat aliases */
+  --theme-success: #07C160;
+  --theme-warning: #FF991A;
+  --theme-warning-bg: #3D2A0A;
+  --theme-danger: #FA5151;
+  --theme-info: #909399;
+
+  --theme-bg: #1F1F1F;
+  --theme-sidebar: #191919;
+  --theme-sidebar-text: #E0E0E0;
+  --theme-sidebar-active: rgba(7, 193, 96, 0.15);
+  --theme-header: #1F1F1F;
+  --theme-card: #252525;
+  --theme-text-primary: #FFFFFF;
+  --theme-text-secondary: #A0A0A0;
+  --theme-text-placeholder: #6B6B6B;
+  --theme-border: #3A3A3C;
+  --theme-border-light: #2D2D2D;
+  --theme-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --theme-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Input wrapper in dark mode — override hardcoded #fff from base rule */
+[data-theme="dark"] .el-input__wrapper {
+  background-color: var(--wechat-card) !important;
+}
+[data-theme="dark"] .el-input__wrapper:hover {
+  background-color: var(--wechat-card) !important;
+}
+
+/* ── WeChat Theme Variables ── */
+:root {
+  /* Primary Colors */
+  --wechat-primary: #1AAD19;
+  --wechat-primary-dark: #148D14;
+  --wechat-primary-light: #33B520;
+
+  /* Background Colors */
+  --wechat-bg: #F5F5F5;
+  --wechat-card: #FFFFFF;
+  --wechat-bg-dark: #EDEDED;
+
+  /* Text Colors */
+  --wechat-text: #333333;
+  --wechat-text-secondary: #666666;
+  --wechat-text-placeholder: #C0C4CC;
+  --wechat-text-disabled: #BBBBBB;
+
+  /* Border Colors */
+  --wechat-border: #E5E5E5;
+  --wechat-border-light: #F0F0F0;
+
+  /* Status Colors */
+  --wechat-danger: #FA5151;
+  --wechat-danger-light: #FFDAD9;
+  --wechat-success: #07C160;
+  --wechat-warning: #FF991A;
+  --wechat-warning-bg: #FFF4E6;
+
+  /* Sidebar - White Frosted Glass */
+  --wechat-sidebar: rgba(255, 255, 255, 0.9);
+  --wechat-sidebar-text: #333333;
+  --wechat-sidebar-active-bg: rgba(26, 173, 25, 0.12);
+  --wechat-sidebar-hover-bg: rgba(0, 0, 0, 0.04);
+  --wechat-sidebar-icon: #666666;
+  --wechat-sidebar-active-icon: #1AAD19;
+
+  /* Shadows */
+  --wechat-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --wechat-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --wechat-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* Map WeChat vars → Element Plus */
+  --el-color-primary: #1AAD19;
+  --el-color-primary-light-3: #33B520;
+  --el-color-primary-light-5: #4DBF3A;
+  --el-color-primary-light-7: #66C954;
+  --el-color-primary-light-9: #E8F7E4;
+  --el-color-primary-dark-2: #148D14;
+
+  --el-color-success: #07C160;
+  --el-color-success-light-3: #2DB86E;
+  --el-color-success-light-5: #4DBF3A;
+  --el-color-success-light-7: #66C954;
+  --el-color-success-light-9: #E8F7E4;
+  --el-color-success-dark-2: #05984A;
+
+  --el-color-warning: #FF991A;
+  --el-color-warning-light-3: #FFAD4D;
+  --el-color-warning-light-5: #FFBF7A;
+  --el-color-warning-light-7: #FFD1A7;
+  --el-color-warning-light-9: #FFF4E6;
+  --el-color-warning-dark-2: #CC7A00;
+
+  --el-color-danger: #FA5151;
+  --el-color-danger-light-3: #FC7676;
+  --el-color-danger-light-5: #FD9999;
+  --el-color-danger-light-7: #FEBBBB;
+  --el-color-danger-light-9: #FFDAD9;
+  --el-color-danger-dark-2: #C84040;
+
+  --el-color-info: #909399;
+  --el-color-info-light-3: #ACB0B8;
+  --el-color-info-light-5: #C4C7CC;
+  --el-color-info-light-7: #DCDDE0;
+  --el-color-info-light-9: #F4F4F5;
+  --el-color-info-dark-2: #73767A;
+
+  --el-bg-color: #F5F5F5;
+  --el-bg-color-page: #F5F5F5;
+  --el-bg-color-soft: #FAFAFA;
+  --el-fill-color-blank: #FFFFFF;
+  --el-fill-color-light: #F5F5F5;
+  --el-fill-color-lighter: #FAFAFA;
+  --el-fill-color-extra-light: #FAFAFA;
+  --el-border-color: #E5E5E5;
+  --el-border-color-light: #F0F0F0;
+  --el-border-color-lighter: #F5F5F5;
+  --el-border-color-extra-light: #FAFAFA;
+  --el-text-color-primary: #333333;
+  --el-text-color-regular: #666666;
+  --el-text-color-secondary: #999999;
+  --el-text-color-placeholder: #C0C4CC;
+  --el-text-color-disabled: #BBBBBB;
+
+  /* Map legacy theme vars (backward compat) */
+  --theme-primary: var(--wechat-primary);
+  --theme-primary-light: var(--wechat-primary-light);
+  --theme-success: var(--wechat-success);
+  --theme-warning: var(--wechat-warning);
+  --theme-warning-bg: var(--wechat-warning-bg);
+  --theme-danger: var(--wechat-danger);
+  --theme-info: var(--wechat-info);
+
+  --theme-bg: var(--wechat-bg);
+  --theme-sidebar: var(--wechat-sidebar);
+  --theme-sidebar-text: var(--wechat-sidebar-text);
+  --theme-sidebar-active: var(--wechat-sidebar-active-bg);
+  --theme-header: var(--wechat-card);
+  --theme-card: var(--wechat-card);
+  --theme-text-primary: var(--wechat-text);
+  --theme-text-secondary: var(--wechat-text-secondary);
+  --theme-text-placeholder: var(--wechat-text-placeholder);
+  --theme-border: var(--wechat-border);
+  --theme-border-light: var(--wechat-border-light);
+  --theme-shadow: var(--wechat-shadow);
+  --theme-shadow-hover: var(--wechat-shadow-hover);
+}
 
 /* ── Reset ── */
 *, *::before, *::after {
@@ -12,165 +263,19 @@
 
 html, body {
   height: 100%;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  color: var(--wechat-text);
+  background-color: var(--wechat-bg);
 }
 
 #app {
   height: 100%;
 }
 
-/* ── CSS Theme Variables (defaults → default theme) ── */
-:root {
-  --theme-primary:        #409eff;
-  --theme-primary-light:  #66b3ff;
-  --theme-success:        #67c23a;
-  --theme-success-light:  #85ce61;
-  --theme-warning:        #e6a23c;
-  --theme-warning-light:  #ebb563;
-  --theme-warning-bg:     #fff7e6;
-  --theme-danger:         #f56c6c;
-  --theme-danger-light:  #f78989;
-  --theme-info:           #909399;
-
-  --theme-bg:             #f0f2f5;
-  --theme-sidebar:        #304156;
-  --theme-sidebar-text:   #bfcbd9;
-  --theme-sidebar-active: #263445;
-  --theme-header:         #ffffff;
-  --theme-header-text:    #303133;
-  --theme-card:           #ffffff;
-  --theme-text-primary:   #303133;
-  --theme-text-secondary: #606266;
-  --theme-text-placeholder: #c0c4cc;
-  --theme-border:         #e4e7ed;
-  --theme-border-light:   #f0f2f5;
-  --theme-shadow:         0 2px 12px rgba(0,0,0,0.08);
-  --theme-shadow-hover:   0 4px 20px rgba(0,0,0,0.12);
-
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   16px;
-  --radius-xl:   20px;
-
-  --transition-fast:   150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow:   400ms ease;
-}
-
-/* ── Dark Theme ── */
-[data-theme="dark"] {
-  --theme-primary:        #409eff;
-  --theme-primary-light:  #5291d4;
-  --theme-success:        #67c23a;
-  --theme-success-light:  #52914d;
-  --theme-warning:        #e6a23c;
-  --theme-warning-light:  #b38a3a;
-  --theme-warning-bg:     #2d2517;
-  --theme-danger:         #f56c6c;
-  --theme-danger-light:  #c05555;
-  --theme-info:           #909399;
-
-  --theme-bg:             #0d1117;
-  --theme-sidebar:        #161b22;
-  --theme-sidebar-text:   #8b949e;
-  --theme-sidebar-active: rgba(31,111,235,0.2);
-  --theme-header:         #161b22;
-  --theme-header-text:    #c9d1d9;
-  --theme-card:           #161b22;
-  --theme-text-primary:   #c9d1d9;
-  --theme-text-secondary: #8b949e;
-  --theme-text-placeholder: #484f58;
-  --theme-border:         #30363d;
-  --theme-border-light:   #21262d;
-  --theme-shadow:         0 2px 12px rgba(0,0,0,0.4);
-  --theme-shadow-hover:   0 4px 20px rgba(0,0,0,0.5);
-}
-
-/* ── Green Theme ── */
-[data-theme="green"] {
-  --theme-primary:        #2eb872;
-  --theme-primary-light:  #52b77a;
-  --theme-success:        #52b77a;
-  --theme-success-light:  #6dc48e;
-  --theme-warning:        #f5a623;
-  --theme-warning-light:  #d4913d;
-  --theme-warning-bg:     #fef9f0;
-  --theme-danger:         #e5534b;
-  --theme-danger-light:  #b8423e;
-  --theme-info:           #8bc34a;
-
-  --theme-bg:             #f0f9eb;
-  --theme-sidebar:        #1a5c1a;
-  --theme-sidebar-text:   #a6e7b0;
-  --theme-sidebar-active: rgba(46,184,114,0.13);
-  --theme-header:         #ffffff;
-  --theme-header-text:    #303133;
-  --theme-card:           #ffffff;
-  --theme-text-primary:   #303133;
-  --theme-text-secondary: #606266;
-  --theme-text-placeholder: #c0c4cc;
-  --theme-border:         #e1f3d8;
-  --theme-border-light:   #f0f9eb;
-  --theme-shadow:         0 2px 12px rgba(46,184,114,0.12);
-  --theme-shadow-hover:   0 4px 20px rgba(46,184,114,0.2);
-}
-
-/* ── Purple Theme ── */
-[data-theme="purple"] {
-  --theme-primary:        #a371f7;
-  --theme-primary-light:  #b994f9;
-  --theme-success:        #67c23a;
-  --theme-success-light:  #85ce61;
-  --theme-warning:        #e6a23c;
-  --theme-warning-light:  #ebb563;
-  --theme-warning-bg:     #fff7e6;
-  --theme-danger:         #f56c6c;
-  --theme-danger-light:  #f78989;
-  --theme-info:           #909399;
-
-  --theme-bg:             #f5f3ff;
-  --theme-sidebar:        #2d1b4e;
-  --theme-sidebar-text:   #d2b4fa;
-  --theme-sidebar-active: rgba(163,113,247,0.13);
-  --theme-header:         #ffffff;
-  --theme-header-text:    #303133;
-  --theme-card:           #ffffff;
-  --theme-text-primary:   #303133;
-  --theme-text-secondary: #606266;
-  --theme-text-placeholder: #c0c4cc;
-  --theme-border:         #ede9fe;
-  --theme-border-light:   #f5f3ff;
-  --theme-shadow:         0 2px 12px rgba(163,113,247,0.12);
-  --theme-shadow-hover:   0 4px 20px rgba(163,113,247,0.2);
-}
-
-/* ── Map theme vars to Element Plus CSS vars ── */
-[data-theme="default"],
-:root {
-  --el-color-primary: var(--theme-primary);
-  --el-color-success: var(--theme-success);
-  --el-color-warning: var(--theme-warning);
-  --el-color-danger: var(--theme-danger);
-  --el-color-info: var(--theme-info);
-  --el-bg-color: var(--theme-bg);
-  --el-fill-color-light: var(--theme-border-light);
-  --el-border-color: var(--theme-border);
-  --el-border-color-light: var(--theme-border-light);
-  --el-text-color-primary: var(--theme-text-primary);
-  --el-text-color-regular: var(--theme-text-secondary);
-  --el-text-color-placeholder: var(--theme-text-placeholder);
-}
-
-/* ── Body background ── */
-body {
-  background-color: var(--theme-bg);
-  color: var(--theme-text-primary);
-  transition: background-color var(--transition-normal), color var(--transition-normal);
-}
-
-/* ── Custom scrollbar ── */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -179,14 +284,14 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--theme-border);
+  background: var(--wechat-border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--theme-text-placeholder);
+  background: var(--wechat-text-placeholder);
 }
 
-/* ── Page transitions ── */
+/* ── Page Transitions ── */
 .fade-enter-active, .fade-leave-active {
   transition: opacity var(--transition-normal);
 }
@@ -194,158 +299,159 @@ body {
   opacity: 0;
 }
 
-/* ── Page container ── */
+/* ── Page Container ── */
 .page-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 4px;
 }
 
-/* ── Unified card style ── */
+/* ── Modern Card ── */
 .modern-card {
-  background: var(--theme-card);
-  border: 1px solid var(--theme-border-light);
+  background: var(--wechat-card);
+  border: 1px solid var(--wechat-border-light);
   border-radius: var(--radius-lg);
-  box-shadow: var(--theme-shadow);
-  transition: box-shadow var(--transition-normal), border-color var(--transition-normal), transform var(--transition-normal);
+  box-shadow: var(--wechat-shadow);
+  transition: box-shadow var(--transition-normal);
 }
 .modern-card:hover {
-  box-shadow: var(--theme-shadow-hover);
-}
-.modern-card .el-card__header {
-  border-bottom: 1px solid var(--theme-border-light);
-  padding: 16px 20px;
-  background: transparent;
-}
-.modern-card .el-card__body {
-  padding: 20px;
+  box-shadow: var(--wechat-shadow-hover);
 }
 
-/* Override el-card to be modern-card equivalent */
+/* ── Element Plus el-card Override ── */
 .el-card {
   border-radius: var(--radius-lg) !important;
-  border: 1px solid var(--theme-border-light) !important;
-  box-shadow: var(--theme-shadow) !important;
-  background-color: var(--theme-card) !important;
-  background: var(--theme-card) !important;
-  color: var(--theme-text-primary) !important;
-  transition: box-shadow var(--transition-normal), border-color var(--transition-normal) !important;
+  border: 1px solid var(--wechat-border-light) !important;
+  box-shadow: var(--wechat-shadow-card) !important;
+  background-color: var(--wechat-card) !important;
+  color: var(--wechat-text) !important;
 }
 .el-card:hover {
-  box-shadow: var(--theme-shadow-hover) !important;
+  box-shadow: var(--wechat-shadow-hover) !important;
 }
-.el-card .el-card__header {
-  background-color: var(--theme-card) !important;
-  background: var(--theme-card) !important;
-  border-bottom: 1px solid var(--theme-border-light) !important;
-  padding: 16px 20px;
+.el-card__header {
+  background-color: var(--wechat-card) !important;
+  border-bottom: 1px solid var(--wechat-border-light) !important;
+  padding: 14px 20px;
   font-weight: 600;
-  color: var(--theme-text-primary) !important;
+  color: var(--wechat-text) !important;
 }
-.el-card .el-card__body {
-  background-color: var(--theme-card) !important;
-  background: var(--theme-card) !important;
+.el-card__body {
   padding: 20px;
-  color: var(--theme-text-primary) !important;
+  background-color: var(--wechat-card) !important;
 }
 
 /* ── Buttons ── */
 .el-button {
   border-radius: var(--radius-sm) !important;
   font-weight: 500 !important;
+  font-size: 14px !important;
+  border: none !important;
   transition: all var(--transition-fast) !important;
+  cursor: pointer;
 }
 
-/* Primary button - override Element Plus */
-.el-button--primary,
-.el-button.el-button--primary {
-  background-color: var(--theme-primary) !important;
-  border-color: var(--theme-primary) !important;
+.el-button--primary {
+  background-color: var(--wechat-primary) !important;
+  border-color: var(--wechat-primary) !important;
   color: #fff !important;
 }
 .el-button--primary:hover,
-.el-button.el-button--primary:hover {
-  background-color: var(--theme-primary) !important;
-  border-color: var(--theme-primary) !important;
-  opacity: 0.85;
-  transform: translateY(-1px);
+.el-button--primary:focus {
+  background-color: var(--wechat-primary-dark) !important;
+  border-color: var(--wechat-primary-dark) !important;
+  color: #fff !important;
+}
+.el-button--primary:active {
+  background-color: #117A12 !important;
 }
 
-/* Success button */
-.el-button--success,
-.el-button.el-button--success {
-  background-color: var(--theme-success) !important;
-  border-color: var(--theme-success) !important;
+.el-button--success {
+  background-color: var(--wechat-success) !important;
+  border-color: var(--wechat-success) !important;
   color: #fff !important;
 }
 
-/* Warning button */
-.el-button--warning,
-.el-button.el-button--warning {
-  background-color: var(--theme-warning) !important;
-  border-color: var(--theme-warning) !important;
+.el-button--warning {
+  background-color: var(--wechat-warning) !important;
+  border-color: var(--wechat-warning) !important;
   color: #fff !important;
 }
 
-/* Danger button */
-.el-button--danger,
-.el-button.el-button--danger {
-  background-color: var(--theme-danger) !important;
-  border-color: var(--theme-danger) !important;
+.el-button--danger {
+  background-color: var(--wechat-danger) !important;
+  border-color: var(--wechat-danger) !important;
   color: #fff !important;
 }
 
-/* Text/Danger link button */
+.el-button--default {
+  background-color: var(--wechat-card) !important;
+  border: 1px solid var(--wechat-border) !important;
+  color: var(--wechat-text) !important;
+}
+.el-button--default:hover,
+.el-button--default:focus {
+  border-color: var(--wechat-primary) !important;
+  color: var(--wechat-primary) !important;
+}
+
 .el-button--text.el-button--danger,
 .el-button.el-button--text.el-button--danger {
-  color: var(--theme-danger) !important;
+  color: var(--wechat-danger) !important;
 }
 
 /* ── Tables ── */
 .el-table {
-  --el-table-border-color: var(--theme-border-light);
-  --el-table-header-bg-color: var(--theme-border-light);
-  --el-table-row-hover-bg-color: var(--theme-border-light);
-  --el-table-bg-color: var(--theme-card);
-  --el-table-tr-bg-color: var(--theme-card);
+  --el-table-border-color: var(--wechat-border-light);
+  --el-table-header-bg-color: var(--wechat-bg);
+  --el-table-row-hover-bg-color: var(--wechat-bg);
+  --el-table-bg-color: var(--wechat-card);
+  --el-table-tr-bg-color: var(--wechat-card);
+  font-size: 14px;
+  color: var(--wechat-text);
   border-radius: var(--radius-md);
   overflow: hidden;
-  font-size: 14px;
-  background-color: var(--theme-card) !important;
-}
-.el-table .el-table__inner-wrapper::before {
-  background-color: var(--theme-border-light) !important;
 }
 .el-table th.el-table__cell {
   font-weight: 600;
-  color: var(--theme-text-secondary) !important;
-  background: var(--theme-border-light) !important;
-  background-color: var(--theme-border-light) !important;
+  color: var(--wechat-text-secondary) !important;
+  background: var(--wechat-bg) !important;
+  border-bottom: 1px solid var(--wechat-border) !important;
 }
 .el-table td.el-table__cell {
-  border-bottom: 1px solid var(--theme-border-light) !important;
-  background-color: var(--theme-card) !important;
+  border-bottom: 1px solid var(--wechat-border-light) !important;
+  background-color: var(--wechat-card) !important;
 }
 .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
-  background: var(--theme-border-light) !important;
-  background-color: var(--theme-border-light) !important;
+  background: var(--wechat-bg) !important;
+}
+.el-table .el-table__inner-wrapper::before {
+  display: none;
 }
 
-/* ── Form items ── */
+/* ── Forms ── */
 .el-form-item__label {
-  color: var(--theme-text-secondary) !important;
+  color: var(--wechat-text-secondary) !important;
   font-weight: 500 !important;
+  font-size: 14px;
 }
 .el-input__wrapper {
   border-radius: var(--radius-sm) !important;
-  box-shadow: 0 0 0 1px var(--theme-border) inset !important;
+  box-shadow: 0 0 0 1px var(--wechat-border) inset !important;
+  background-color: var(--wechat-card) !important;
   transition: box-shadow var(--transition-fast) !important;
 }
 .el-input__wrapper:hover {
-  box-shadow: 0 0 0 1px var(--theme-primary) inset !important;
+  box-shadow: 0 0 0 1px var(--wechat-primary) inset !important;
 }
 .el-input__wrapper.is-focus {
-  box-shadow: 0 0 0 1px var(--theme-primary) inset !important;
+  box-shadow: 0 0 0 1px var(--wechat-primary) inset !important;
+}
+.el-input__inner {
+  color: var(--wechat-text) !important;
+}
+.el-input__inner::placeholder {
+  color: var(--wechat-text-placeholder) !important;
 }
 .el-select .el-input__wrapper {
   border-radius: var(--radius-sm) !important;
@@ -356,280 +462,292 @@ body {
   border-radius: var(--radius-sm) !important;
   border: none !important;
   font-weight: 500 !important;
+  font-size: 12px;
 }
 
 /* ── Pagination ── */
 .el-pagination {
-  --el-pagination-hover-color: var(--theme-primary);
+  --el-pagination-hover-color: var(--wechat-primary);
   font-weight: 500;
 }
 
-/* ── Drawer / Dialog ── */
-.el-drawer {
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
-  background-color: var(--theme-card) !important;
-}
-.el-drawer .el-drawer__header {
-  color: var(--theme-text-primary) !important;
-  border-bottom: 1px solid var(--theme-border-light) !important;
-}
-.el-drawer .el-drawer__body {
-  background-color: var(--theme-card) !important;
-}
+/* ── Dialog / Drawer ── */
 .el-dialog {
   border-radius: var(--radius-lg) !important;
   overflow: hidden;
-  background-color: var(--theme-card) !important;
 }
-.el-dialog .el-dialog__header {
-  background-color: var(--theme-card) !important;
-  border-bottom: 1px solid var(--theme-border-light) !important;
-  padding: 18px 24px !important;
-}
-.el-dialog .el-dialog__body {
-  background-color: var(--theme-card) !important;
-  padding: 24px !important;
-  color: var(--theme-text-primary) !important;
-}
-.el-dialog .el-dialog__footer {
-  background-color: var(--theme-card) !important;
-  border-top: 1px solid var(--theme-border-light) !important;
-}
-}
-.el-dialog .el-dialog__footer {
-  border-top: 1px solid var(--theme-border-light);
+.el-dialog__header {
   padding: 16px 24px !important;
+  border-bottom: 1px solid var(--wechat-border-light) !important;
+}
+.el-dialog__title {
+  font-weight: 600;
+  color: var(--wechat-text);
+}
+.el-dialog__body {
+  padding: 24px !important;
+  color: var(--wechat-text);
+}
+.el-dialog__footer {
+  padding: 14px 24px !important;
+  border-top: 1px solid var(--wechat-border-light) !important;
 }
 
-/* ── Dropdowns ── */
+.el-drawer {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
+}
+.el-drawer__header {
+  color: var(--wechat-text) !important;
+  border-bottom: 1px solid var(--wechat-border-light) !important;
+  padding: 16px 20px !important;
+}
+.el-drawer__body {
+  padding: 20px !important;
+}
+
+/* ── Dropdown ── */
 .el-dropdown-menu {
   border-radius: var(--radius-md) !important;
-  border: 1px solid var(--theme-border-light) !important;
-  box-shadow: var(--theme-shadow-hover) !important;
-  overflow: hidden;
+  border: 1px solid var(--wechat-border-light) !important;
+  box-shadow: var(--wechat-shadow-hover) !important;
+  padding: 4px 0 !important;
 }
 .el-dropdown-menu__item {
   border-radius: 0 !important;
+  color: var(--wechat-text) !important;
+  padding: 8px 16px !important;
+  font-size: 14px;
+}
+.el-dropdown-menu__item:hover {
+  background-color: var(--wechat-bg) !important;
+  color: var(--wechat-primary) !important;
 }
 
-/* ── Utility classes ── */
-.text-primary   { color: var(--theme-text-primary)   !important; }
-.text-secondary { color: var(--theme-text-secondary) !important; }
-.text-muted     { color: var(--theme-text-placeholder) !important; }
-.text-success   { color: var(--theme-success) !important; }
-.text-warning   { color: var(--theme-warning) !important; }
-.text-danger    { color: var(--theme-danger)  !important; }
-.text-info      { color: var(--theme-info)     !important; }
+/* ── Select ── */
+.el-select-dropdown {
+  background-color: var(--wechat-card) !important;
+  border: 1px solid var(--wechat-border-light) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--wechat-shadow-hover) !important;
+}
+.el-select-dropdown__item {
+  color: var(--wechat-text) !important;
+  font-size: 14px;
+  padding: 8px 12px !important;
+}
+.el-select-dropdown__item:hover {
+  background-color: var(--wechat-bg) !important;
+}
+.el-select-dropdown__item.selected {
+  color: var(--wechat-primary) !important;
+  font-weight: 600;
+}
+.el-popper.is-light {
+  background-color: var(--wechat-card) !important;
+  border: 1px solid var(--wechat-border-light) !important;
+}
 
-.font-bold   { font-weight: 700 !important; }
-.font-medium { font-weight: 500 !important; }
-.font-normal { font-weight: 400 !important; }
+/* ── Date Picker ── */
+.el-date-editor.el-input__wrapper {
+  background-color: var(--wechat-card) !important;
+}
+.el-picker-panel {
+  background-color: var(--wechat-card) !important;
+  border: 1px solid var(--wechat-border-light) !important;
+  color: var(--wechat-text) !important;
+}
+.el-date-table td.in-range .el-date-table-cell {
+  background-color: var(--wechat-bg) !important;
+}
 
-.mt-4  { margin-top:  4px  !important; }
-.mt-8  { margin-top:  8px  !important; }
-.mt-12 { margin-top:  12px !important; }
-.mt-16 { margin-top:  16px !important; }
-.mt-20 { margin-top:  20px !important; }
-.mt-24 { margin-top:  24px !important; }
-.mb-4  { margin-bottom: 4px  !important; }
-.mb-8  { margin-bottom: 8px  !important; }
-.mb-12 { margin-bottom: 12px !important; }
-.mb-16 { margin-bottom: 16px !important; }
-.mb-20 { margin-bottom: 20px !important; }
-.mb-24 { margin-bottom: 24px !important; }
-.gap-8  { gap:  8px !important; }
-.gap-12 { gap: 12px !important; }
-.gap-16 { gap: 16px !important; }
-.gap-20 { gap: 20px !important; }
+/* ── Upload ── */
+.el-upload-dragger {
+  background-color: var(--wechat-bg) !important;
+  border-color: var(--wechat-border) !important;
+  border-radius: var(--radius-md) !important;
+}
+.el-upload-dragger:hover {
+  border-color: var(--wechat-primary) !important;
+}
 
-.flex         { display: flex !important; }
-.flex-col     { flex-direction: column !important; }
-.items-center { align-items: center !important; }
-.justify-between { justify-content: space-between !important; }
-.flex-wrap    { flex-wrap: wrap !important; }
-.flex-1       { flex: 1 !important; }
+/* ── Tabs ── */
+.el-tabs__item {
+  color: var(--wechat-text-secondary) !important;
+  font-size: 14px;
+}
+.el-tabs__item.is-active {
+  color: var(--wechat-primary) !important;
+  font-weight: 600;
+}
+.el-tabs__active-bar {
+  background-color: var(--wechat-primary) !important;
+}
 
-/* ── Stat card gradient variants ── */
-.stat-gradient-blue   { background: linear-gradient(135deg, #409eff 0%, #66b3ff 100%) !important; }
-.stat-gradient-green  { background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%) !important; }
-.stat-gradient-orange { background: linear-gradient(135deg, #e6a23c 0%, #ebb563 100%) !important; }
-.stat-gradient-red    { background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%) !important; }
-.stat-gradient-purple { background: linear-gradient(135deg, #a371f7 0%, #b994f9 100%) !important; }
-.stat-gradient-dark   { background: linear-gradient(135deg, #304156 0%, #40627d 100%) !important; }
+/* ── Tree ── */
+.el-tree {
+  background-color: transparent !important;
+  color: var(--wechat-text) !important;
+}
+.el-tree-node__content {
+  background-color: transparent !important;
+}
+.el-tree-node__content:hover {
+  background-color: var(--wechat-bg) !important;
+}
+.el-tree-node__content.is-current {
+  background-color: var(--wechat-sidebar-active-bg) !important;
+}
+.el-tree-node__expand-icon {
+  color: var(--wechat-text-secondary) !important;
+}
+
+/* ── Message / Notification ── */
+.el-message {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--wechat-shadow-hover) !important;
+}
+
+/* ── Badge ── */
+.el-badge__content {
+  background-color: var(--wechat-danger) !important;
+}
+
+/* ── Switch ── */
+.el-switch.is-checked .el-switch__core {
+  background-color: var(--wechat-primary) !important;
+  border-color: var(--wechat-primary) !important;
+}
+
+/* ── Checkbox ── */
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: var(--wechat-primary) !important;
+  border-color: var(--wechat-primary) !important;
+}
+.el-checkbox__input.is-checked + .el-checkbox__label {
+  color: var(--wechat-primary) !important;
+}
+
+/* ── Radio ── */
+.el-radio__input.is-checked .el-radio__inner {
+  background-color: var(--wechat-primary) !important;
+  border-color: var(--wechat-primary) !important;
+}
+.el-radio__input.is-checked + .el-radio__label {
+  color: var(--wechat-primary) !important;
+}
+
+/* ── Progress ── */
+.el-progress-bar__outer {
+  background-color: var(--wechat-border) !important;
+}
+.el-progress-bar__inner {
+  background-color: var(--wechat-primary) !important;
+}
+.el-progress__text {
+  color: var(--wechat-text) !important;
+}
+
+/* ── Divider ── */
+.el-divider {
+  border-color: var(--wechat-border-light) !important;
+}
 
 /* ── Animations ── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.03); }
-}
 
 .anim-fade-in-up {
-  animation: fadeInUp 0.4s ease both;
+  animation: fadeInUp 0.35s ease both;
 }
 .anim-fade-in {
   animation: fadeIn 0.3s ease both;
 }
 
-/* Staggered animation delays for lists */
 .anim-stagger > *:nth-child(1) { animation-delay: 0ms; }
-.anim-stagger > *:nth-child(2) { animation-delay: 80ms; }
-.anim-stagger > *:nth-child(3) { animation-delay: 160ms; }
-.anim-stagger > *:nth-child(4) { animation-delay: 240ms; }
-.anim-stagger > *:nth-child(5) { animation-delay: 320ms; }
-.anim-stagger > *:nth-child(6) { animation-delay: 400ms; }
+.anim-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.anim-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.anim-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.anim-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.anim-stagger > *:nth-child(6) { animation-delay: 300ms; }
 
-/* ── Progress bar custom ── */
-.progress-bar-track {
-  background: var(--theme-border-light);
-  border-radius: 99px;
-  overflow: hidden;
-  height: 8px;
-}
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* ── Utility Classes ── */
+.text-primary   { color: var(--wechat-text) !important; }
+.text-secondary { color: var(--wechat-text-secondary) !important; }
+.text-muted     { color: var(--wechat-text-placeholder) !important; }
+.text-success   { color: var(--wechat-success) !important; }
+.text-warning   { color: var(--wechat-warning) !important; }
+.text-danger    { color: var(--wechat-danger) !important; }
 
-/* ── Donut/Pie chart (CSS only) ── */
-.donut-chart {
-  position: relative;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: conic-gradient(
-    var(--donut-1) 0deg,
-    var(--donut-2) var(--donut-1-angle),
-    var(--donut-3) calc(var(--donut-1-angle) + var(--donut-2-angle)),
-    var(--donut-4) calc(var(--donut-1-angle) + var(--donut-2-angle) + var(--donut-3-angle)),
-    var(--donut-5) calc(var(--donut-1-angle) + var(--donut-2-angle) + var(--donut-3-angle) + var(--donut-4-angle)),
-    var(--theme-border-light) calc(var(--donut-1-angle) + var(--donut-2-angle) + var(--donut-3-angle) + var(--donut-4-angle) + var(--donut-5-angle))
-  );
-}
-.donut-chart::before {
-  content: '';
-  position: absolute;
-  width: 60%;
-  height: 60%;
-  border-radius: 50%;
-  background: var(--theme-card);
-}
-.donut-center-text {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  line-height: 1.3;
-}
+.font-bold   { font-weight: 700 !important; }
+.font-medium { font-weight: 500 !important; }
 
-/* ── Dropdown / Select ── */
-.el-select-dropdown {
-  background-color: var(--theme-card) !important;
-  border: 1px solid var(--theme-border-light) !important;
-}
-.el-select-dropdown__item {
-  color: var(--theme-text-primary) !important;
-}
-.el-select-dropdown__item.hover,
-.el-select-dropdown__item:hover {
-  background-color: var(--theme-border-light) !important;
-}
-.el-select-dropdown__item.selected {
-  color: var(--theme-primary) !important;
-}
-.el-popper.is-light {
-  background-color: var(--theme-card) !important;
-  border: 1px solid var(--theme-border-light) !important;
-}
-.el-popper.is-light .el-popper__arrow::before {
-  background-color: var(--theme-card) !important;
-  border-color: var(--theme-border-light) !important;
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  html, body {
+    font-size: 13px;
+  }
+
+  .page-container {
+    padding: 0 12px;
+  }
+
+  /* Smaller buttons on mobile */
+  .el-button {
+    font-size: 13px !important;
+    padding: 9px 14px !important;
+  }
+
+  /* Scrollable table wrapper */
+  .el-table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .el-table > .el-table__body-wrapper {
+    overflow-x: auto !important;
+  }
+
+  /* Stack header actions on mobile */
+  .card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .header-actions {
+    flex-wrap: wrap !important;
+  }
+
+  /* Responsive dialogs */
+  .el-dialog {
+    width: 92% !important;
+    margin: 0 auto !important;
+  }
+
+  /* Responsive drawer */
+  .el-drawer {
+    width: 85% !important;
+  }
+
+  /* Pagination compact on mobile */
+  .el-pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 
-/* ── Form inputs ── */
-.el-input__wrapper {
-  background-color: var(--theme-card) !important;
-  box-shadow: 0 0 0 1px var(--theme-border-light) inset !important;
-}
-.el-input__wrapper:hover {
-  box-shadow: 0 0 0 1px var(--theme-primary) inset !important;
-}
-.el-input__wrapper.is-focus {
-  box-shadow: 0 0 0 1px var(--theme-primary) inset !important;
-}
-.el-input__inner {
-  color: var(--theme-text-primary) !important;
-}
-.el-input__inner::placeholder {
-  color: var(--theme-text-placeholder) !important;
-}
-
-/* ── Date picker ── */
-.el-date-editor.el-input__wrapper {
-  background-color: var(--theme-card) !important;
-}
-.el-picker-panel {
-  background-color: var(--theme-card) !important;
-  border: 1px solid var(--theme-border-light) !important;
-  color: var(--theme-text-primary) !important;
-}
-.el-date-table td.in-range .el-date-table-cell {
-  background-color: var(--theme-border-light) !important;
-}
-
-/* ── Message / Notification ── */
-.el-message {
-  background-color: var(--theme-card) !important;
-  border-color: var(--theme-border-light) !important;
-}
-
-/* ── Upload ── */
-.el-upload-dragger {
-  background-color: var(--theme-card) !important;
-  border-color: var(--theme-border-light) !important;
-}
-.el-upload-dragger:hover {
-  border-color: var(--theme-primary) !important;
-}
-
-/* ── Tabs ── */
-.el-tabs__item {
-  color: var(--theme-text-secondary) !important;
-}
-.el-tabs__item.is-active {
-  color: var(--theme-primary) !important;
-}
-.el-tabs__active-bar {
-  background-color: var(--theme-primary) !important;
-}
-
-/* ── Tree ── */
-.el-tree {
-  background-color: transparent !important;
-  color: var(--theme-text-primary) !important;
-}
-.el-tree-node__content {
-  background-color: transparent !important;
-}
-.el-tree-node__content:hover {
-  background-color: var(--theme-border-light) !important;
-}
-.el-tree-node__content.is-current {
-  background-color: var(--theme-border-light) !important;
-}
-.el-tree-node__expand-icon {
-  color: var(--theme-text-secondary) !important;
-}
-.el-tree-node__label {
-  color: var(--theme-text-primary) !important;
+@media (max-width: 480px) {
+  .el-button {
+    padding: 8px 12px !important;
+  }
+  .search-bar {
+    flex-wrap: wrap !important;
+  }
+  .search-input {
+    width: 100% !important;
+  }
 }

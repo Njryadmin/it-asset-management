@@ -1,12 +1,20 @@
 import request from './request'
 import type { User } from '@/types'
 
-export interface UserForm {
+export interface UserCreateForm {
   username: string
   email: string
   full_name?: string
   password: string
   is_superuser?: boolean
+}
+
+export interface UserUpdateForm {
+  email?: string
+  full_name?: string
+  password?: string
+  is_superuser?: boolean
+  is_active?: boolean
 }
 
 export const usersApi = {
@@ -18,11 +26,11 @@ export const usersApi = {
     return request.get<User>(`/users/${id}`)
   },
   
-  create(data: UserForm) {
+  create(data: UserCreateForm) {
     return request.post<User>('/users', data)
   },
   
-  update(id: number, data: Partial<UserForm>) {
+  update(id: number, data: Partial<UserUpdateForm>) {
     return request.put<User>(`/users/${id}`, data)
   },
   
@@ -30,9 +38,10 @@ export const usersApi = {
     return request.delete(`/users/${id}`)
   },
   
-  changePassword(userId: number, oldPassword: string, newPassword: string) {
-    return request.put(`/users/${userId}/password`, null, {
-      params: { old_password: oldPassword, new_password: newPassword }
+  changePassword(userId: number, oldPassword: string | undefined, newPassword: string) {
+    return request.put(`/users/${userId}/password`, {
+      old_password: oldPassword,
+      new_password: newPassword
     })
   }
 }

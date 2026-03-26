@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
+import secrets
+import os
 
 
 class Settings(BaseSettings):
@@ -27,7 +29,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
 
     # CORS
-    BACKEND_CORS_ORIGINS: list[str] = ["*"]
+    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 
     class Config:
         env_file = ".env"
@@ -35,6 +37,12 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# SECURITY: If SECRET_KEY is default and not set via env, use a stable default for development
+# In production, always set SECRET_KEY environment variable
+if settings.SECRET_KEY == "your-secret-key-change-in-production":
+    # Use a stable default for development - NOT recommended for production
+    settings.SECRET_KEY = "it-asset-mgmt-dev-secret-key-do-not-use-in-production"
 
 # Build DATABASE_URL
 if not settings.DATABASE_URL:

@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { PurchaseRequest, PurchaseRequestForm } from '@/types'
+import type { PurchaseRequest, PurchaseRequestForm, Supplier } from '@/types'
 import { purchasesApi } from '@/api/purchases'
+import { suppliersApi } from '@/api/suppliers'
 
 export const usePurchaseStore = defineStore('purchases', () => {
   const requests = ref<PurchaseRequest[]>([])
   const pendingRequests = ref<PurchaseRequest[]>([])
+  const suppliers = ref<Supplier[]>([])
   const total = ref(0)
   const loading = ref(false)
   const params = ref({
@@ -29,6 +31,11 @@ export const usePurchaseStore = defineStore('purchases', () => {
   async function fetchPending() {
     const response = await purchasesApi.getPending()
     pendingRequests.value = response.data
+  }
+
+  async function fetchSuppliers() {
+    const response = await suppliersApi.list({ page_size: 100 })
+    suppliers.value = response.data.items
   }
 
   async function create(data: PurchaseRequestForm) {
@@ -78,11 +85,13 @@ export const usePurchaseStore = defineStore('purchases', () => {
   return {
     requests,
     pendingRequests,
+    suppliers,
     total,
     loading,
     params,
     fetchRequests,
     fetchPending,
+    fetchSuppliers,
     create,
     update,
     submit,

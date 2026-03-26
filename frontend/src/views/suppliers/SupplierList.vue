@@ -8,6 +8,39 @@
             <span class="item-count">共 {{ supplierStore.total }} 条</span>
           </div>
           <div class="header-actions">
+            <el-popover placement="bottom" :width="220" trigger="click">
+              <template #reference>
+                <el-button>
+                  <el-icon><Setting /></el-icon>
+                  字段
+                </el-button>
+              </template>
+              <div class="column-settings">
+                <div class="column-settings-header">
+                  <span>列设置</span>
+                  <el-button link type="primary" @click="resetToDefaults">重置</el-button>
+                </div>
+                <div class="column-settings-list">
+                  <div
+                    v-for="(col, index) in columns"
+                    :key="col.key"
+                    class="column-settings-item"
+                    :class="{ 'is-dragging': draggingIndex === index }"
+                    draggable="true"
+                    @dragstart="onDragStart(index)"
+                    @dragover="(e) => onDragOver(e, index)"
+                    @dragend="onDragEnd"
+                  >
+                    <el-icon class="drag-handle"><Rank /></el-icon>
+                    <el-checkbox
+                      :model-value="col.visible"
+                      :disabled="!canHide(index)"
+                      @change="toggleColumn(index)"
+                    >{{ col.label }}</el-checkbox>
+                  </div>
+                </div>
+              </div>
+            </el-popover>
             <el-dropdown trigger="click" @command="handleExport">
               <el-button>
                 <el-icon><Download /></el-icon>
@@ -51,27 +84,42 @@
 
       <!-- Table -->
       <el-table :data="supplierStore.suppliers" v-loading="supplierStore.loading" style="width: 100%" class="data-table">
-        <el-table-column prop="name" label="供应商名称" min-width="150" />
-        <el-table-column prop="code" label="编码" width="120" />
-        <el-table-column prop="contactPerson" label="联系人" width="100" />
-        <el-table-column prop="phone" label="电话" width="130" />
-        <el-table-column prop="email" label="邮箱" width="180" />
-        <el-table-column prop="isActive" label="状态" width="80">
+        <template v-for="col in columns" :key="col.key">
+          <el-table-column v-if="col.visible && col.key === 'name'" prop="name" label="供应商名称" min-width="150" />
+          <el-table-column v-if="col.visible && col.key === 'code'" prop="code" label="编码" width="120" />
+          <el-table-column v-if="col.visible && col.key === 'contactPerson'" prop="contactPerson" label="联系人" width="100" />
+          <el-table-column v-if="col.visible && col.key === 'phone'" prop="phone" label="电话" width="130" />
+          <el-table-column v-if="col.visible && col.key === 'email'" prop="email" label="邮箱" width="180" />
+          <el-table-column v-if="col.visible && col.key === 'address'" prop="address" label="地址" min-width="150" show-overflow-tooltip />
+          <el-table-column v-if="col.visible && col.key === 'isActive'" prop="isActive" label="状态" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.isActive ? 'success' : 'info'">{{ row.isActive ? '启用' : '禁用' }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'createdAt'" prop="createdAt" label="创建时间" width="160">
+            <template #default="{ row }">
+              {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
+            </template>
+          </el-table-column>
+        </template>
+        <el-table-column label="操作" width="110" fixed="right">
           <template #default="{ row }">
-            <el-tag :type="row.isActive ? 'success' : 'info'">{{ row.isActive ? '启用' : '禁用' }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="160">
-          <template #default="{ row }">
-            {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="showDialog('edit', row)">编辑</el-button>
-            <el-button v-if="row.isActive" type="warning" link size="small" @click="handleToggleStatus(row)">禁用</el-button>
-            <el-button v-else type="success" link size="small" @click="handleToggleStatus(row)">启用</el-button>
-            <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
+            <el-button type="primary" link @click="showDialog('edit', row)">
+              <el-icon><Edit /></el-icon>
+            </el-button>
+            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
+              <el-button type="primary" link>
+                <el-icon><More /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item :command="row.isActive ? 'disable' : 'enable'">
+                    {{ row.isActive ? '禁用' : '启用' }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -154,7 +202,31 @@ import { suppliersApi } from '@/api/suppliers'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Supplier } from '@/types'
+import { useColumnSettings } from '@/composables/useColumnSettings'
+import type { ColumnOption } from '@/composables/useColumnSettings'
 import dayjs from 'dayjs'
+
+const defaultColumns: ColumnOption[] = [
+  { key: 'name', label: '供应商名称', visible: true },
+  { key: 'code', label: '编码', visible: true },
+  { key: 'contactPerson', label: '联系人', visible: true },
+  { key: 'phone', label: '电话', visible: true },
+  { key: 'email', label: '邮箱', visible: true },
+  { key: 'address', label: '地址', visible: false },
+  { key: 'isActive', label: '状态', visible: true },
+  { key: 'createdAt', label: '创建时间', visible: true }
+]
+
+const {
+  columns,
+  draggingIndex,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  toggleColumn,
+  canHide,
+  resetToDefaults
+} = useColumnSettings('supplier-columns', defaultColumns)
 
 const supplierStore = useSupplierStore()
 const formRef = ref<FormInstance>()
@@ -182,6 +254,11 @@ const rules: FormRules = {
 }
 
 const dialogTitle = computed(() => dialogMode.value === 'create' ? '新增供应商' : '编辑供应商')
+
+function handleActionCommand(cmd: string, row: Supplier) {
+  if (cmd === 'delete') handleDelete(row.id)
+  else if (cmd === 'disable' || cmd === 'enable') handleToggleStatus(row)
+}
 
 function showDialog(mode: 'create' | 'edit', data?: Supplier) {
   dialogMode.value = mode
@@ -358,6 +435,7 @@ onMounted(() => {
 
 .main-card {
   border-radius: var(--radius-lg) !important;
+  overflow: hidden;
 }
 
 .card-header {
@@ -365,7 +443,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
+  padding: 14px 20px;
 }
 
 .header-left {
@@ -376,49 +455,129 @@ onMounted(() => {
 
 .page-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--theme-text-primary);
+  color: var(--wechat-text);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--theme-text-secondary);
+  color: var(--wechat-text-secondary);
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .search-bar {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-input {
-  width: 320px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
 }
 
 .data-table {
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: 0;
+  overflow-x: auto;
+}
+
+.data-table :deep(.el-table__body-wrapper) {
+  overflow-x: auto !important;
 }
 
 .pagination-wrapper {
-  margin-top: 20px;
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
-  background: var(--theme-card);
 }
 
 .upload-demo {
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    padding: 10px 12px;
+  }
+  .search-bar {
+    margin-bottom: 12px;
+  }
+  .search-input {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .el-table :deep(.el-table__header th),
+  .el-table :deep(.el-table__body td) {
+    padding: 8px 4px;
+  }
+  .el-table :deep(.el-table__cell) {
+    min-width: 80px;
+  }
+  .el-table :deep(.el-button) {
+    padding: 4px 6px;
+  }
+}
+
+.column-settings {
+  user-select: none;
+}
+
+.column-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.column-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.column-settings-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: grab;
+  transition: background-color 0.2s;
+}
+
+.column-settings-item:hover {
+  background-color: var(--el-fill-color-light);
+}
+
+.column-settings-item.is-dragging {
+  opacity: 0.5;
+  background-color: var(--el-fill-color);
+}
+
+.drag-handle {
+  color: var(--el-text-color-placeholder);
+  cursor: grab;
 }
 </style>

@@ -104,6 +104,7 @@ export interface Asset {
   warrantyExpireDate: string | null
   description: string | null
   specs: string | null
+  region: string | null
   createdAt: string
   updatedAt: string | null
 }
@@ -126,6 +127,7 @@ export interface PurchaseRequest {
   approvedAt: string | null
   purchasedAt: string | null
   createdAt: string
+  region: string | null
 }
 
 // Dashboard types
@@ -181,6 +183,7 @@ export interface AssetForm {
   warranty_expire_date?: string
   description?: string
   specs?: string
+  region?: string
 }
 
 export interface PurchaseRequestForm {
@@ -190,6 +193,7 @@ export interface PurchaseRequestForm {
   supplier_id?: number
   quantity: number
   estimated_price?: number
+  region?: string
 }
 
 // Pagination (params for API - snake_case since sent to API)

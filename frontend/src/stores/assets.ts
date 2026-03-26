@@ -20,7 +20,8 @@ export const useAssetStore = defineStore('assets', () => {
     keyword: '',
     category_id: undefined as number | undefined,
     status: '',
-    department_id: undefined as number | undefined
+    department_id: undefined as number | undefined,
+    region: ''
   })
 
   async function fetchAssets() {
@@ -71,7 +72,8 @@ export const useAssetStore = defineStore('assets', () => {
       keyword: '',
       category_id: undefined,
       status: '',
-      department_id: undefined
+      department_id: undefined,
+      region: ''
     }
   }
 

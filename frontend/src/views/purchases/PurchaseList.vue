@@ -8,6 +8,39 @@
             <span class="item-count">共 {{ purchaseStore.total }} 条</span>
           </div>
           <div class="header-actions">
+            <el-popover placement="bottom" :width="220" trigger="click">
+              <template #reference>
+                <el-button>
+                  <el-icon><Setting /></el-icon>
+                  字段
+                </el-button>
+              </template>
+              <div class="column-settings">
+                <div class="column-settings-header">
+                  <span>列设置</span>
+                  <el-button link type="primary" @click="resetToDefaults">重置</el-button>
+                </div>
+                <div class="column-settings-list">
+                  <div
+                    v-for="(col, index) in columns"
+                    :key="col.key"
+                    class="column-settings-item"
+                    :class="{ 'is-dragging': draggingIndex === index }"
+                    draggable="true"
+                    @dragstart="onDragStart(index)"
+                    @dragover="(e) => onDragOver(e, index)"
+                    @dragend="onDragEnd"
+                  >
+                    <el-icon class="drag-handle"><Rank /></el-icon>
+                    <el-checkbox
+                      :model-value="col.visible"
+                      :disabled="!canHide(index)"
+                      @change="toggleColumn(index)"
+                    >{{ col.label }}</el-checkbox>
+                  </div>
+                </div>
+              </div>
+            </el-popover>
             <el-button type="primary" @click="showDialog('create')">
               <el-icon><Plus /></el-icon>
               新增采购申请
@@ -43,48 +76,66 @@
 
       <!-- Table -->
       <el-table :data="purchaseStore.requests" v-loading="purchaseStore.loading" style="width: 100%" class="data-table">
-        <el-table-column prop="title" label="标题" min-width="150" />
-        <el-table-column prop="quantity" label="数量" width="80" />
-        <el-table-column prop="estimatedPrice" label="预估价格" width="110">
-          <template #default="{ row }">
-            {{ row.estimatedPrice ? `¥${row.estimatedPrice}` : '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="actualPrice" label="实际价格" width="110">
-          <template #default="{ row }">
-            {{ row.actualPrice ? `¥${row.actualPrice}` : '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="approverComment" label="审批意见" width="150" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.approverComment || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="申请时间" width="160">
-          <template #default="{ row }">
-            {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="300" fixed="right">
-          <template #default="{ row }">
-            <template v-if="row.status === 'draft'">
-              <el-button type="primary" link size="small" @click="handleSubmitRequest(row.id)">提交</el-button>
-              <el-button type="primary" link size="small" @click="showDialog('edit', row)">编辑</el-button>
-              <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
+        <template v-for="col in columns" :key="col.key">
+          <el-table-column v-if="col.visible && col.key === 'title'" prop="title" label="标题" min-width="150" />
+          <el-table-column v-if="col.visible && col.key === 'quantity'" prop="quantity" label="数量" width="80" />
+          <el-table-column v-if="col.visible && col.key === 'estimatedPrice'" prop="estimatedPrice" label="预估价格" width="110">
+            <template #default="{ row }">
+              {{ row.estimatedPrice ? `¥${row.estimatedPrice}` : '-' }}
             </template>
-            <template v-else-if="row.status === 'pending' && isAdmin">
-              <el-button type="success" link size="small" @click="handleApprove(row)">通过</el-button>
-              <el-button type="danger" link size="small" @click="handleReject(row)">拒绝</el-button>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'actualPrice'" prop="actualPrice" label="实际价格" width="110">
+            <template #default="{ row }">
+              {{ row.actualPrice ? `¥${row.actualPrice}` : '-' }}
             </template>
-            <template v-else-if="row.status === 'approved' && isAdmin">
-              <el-button type="warning" link size="small" @click="handlePurchase(row)">标记已采购</el-button>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'status'" prop="status" label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
             </template>
-            <span v-else class="no-action">-</span>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'approverComment'" prop="approverComment" label="审批意见" width="150" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row.approverComment || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'region'" prop="region" label="地区" width="120">
+            <template #default="{ row }">
+              {{ row.region || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column v-if="col.visible && col.key === 'createdAt'" prop="createdAt" label="申请时间" width="160">
+            <template #default="{ row }">
+              {{ dayjs(row.createdAt).format('YYYY-MM-DD HH:mm') }}
+            </template>
+          </el-table-column>
+        </template>
+        <el-table-column label="操作" width="110" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link @click="showDialog('edit', row)">
+              <el-icon><Edit /></el-icon>
+            </el-button>
+            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
+              <el-button type="primary" link>
+                <el-icon><More /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <template v-if="row.status === 'draft'">
+                    <el-dropdown-item command="submit">提交</el-dropdown-item>
+                    <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
+                  </template>
+                  <template v-else-if="row.status === 'pending' && isAdmin">
+                    <el-dropdown-item command="approve">通过</el-dropdown-item>
+                    <el-dropdown-item command="reject">拒绝</el-dropdown-item>
+                  </template>
+                  <template v-else-if="row.status === 'approved' && isAdmin">
+                    <el-dropdown-item command="purchase">标记已采购</el-dropdown-item>
+                  </template>
+                  <el-dropdown-item v-if="row.status !== 'draft' && row.status !== 'pending' && row.status !== 'approved'" disabled>无操作</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -114,6 +165,14 @@
         </el-form-item>
         <el-form-item label="预估价格">
           <el-input-number v-model="form.estimated_price" :min="0" :precision="2" placeholder="请输入预估价格" />
+        </el-form-item>
+        <el-form-item label="供应商">
+          <el-select v-model="form.supplier_id" placeholder="请选择供应商" clearable style="width: 100%">
+            <el-option v-for="sup in purchaseStore.suppliers.filter(s => s.isActive)" :key="sup.id" :label="sup.name" :value="sup.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="地区">
+          <el-input v-model="form.region" placeholder="请输入地区" maxlength="100" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -157,7 +216,31 @@ import { useAuthStore } from '@/stores/auth'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { PurchaseRequest } from '@/types'
+import { useColumnSettings } from '@/composables/useColumnSettings'
+import type { ColumnOption } from '@/composables/useColumnSettings'
 import dayjs from 'dayjs'
+
+const defaultColumns: ColumnOption[] = [
+  { key: 'title', label: '标题', visible: true },
+  { key: 'quantity', label: '数量', visible: true },
+  { key: 'estimatedPrice', label: '预估价格', visible: true },
+  { key: 'actualPrice', label: '实际价格', visible: false },
+  { key: 'status', label: '状态', visible: true },
+  { key: 'approverComment', label: '审批意见', visible: false },
+  { key: 'region', label: '地区', visible: true },
+  { key: 'createdAt', label: '申请时间', visible: true }
+]
+
+const {
+  columns,
+  draggingIndex,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  toggleColumn,
+  canHide,
+  resetToDefaults
+} = useColumnSettings('purchase-columns', defaultColumns)
 
 const purchaseStore = usePurchaseStore()
 const authStore = useAuthStore()
@@ -183,7 +266,9 @@ const form = reactive({
   title: '',
   description: '',
   quantity: 1,
-  estimated_price: undefined as number | undefined
+  estimated_price: undefined as number | undefined,
+  supplier_id: undefined as number | undefined,
+  region: ''
 })
 
 const rules: FormRules = {
@@ -216,6 +301,14 @@ function statusTagType(status: string) {
   return map[status] || 'info'
 }
 
+function handleActionCommand(cmd: string, row: PurchaseRequest) {
+  if (cmd === 'submit') handleSubmitRequest(row.id)
+  else if (cmd === 'delete') handleDelete(row.id)
+  else if (cmd === 'approve') handleApprove(row)
+  else if (cmd === 'reject') handleReject(row)
+  else if (cmd === 'purchase') handlePurchase(row)
+}
+
 function showDialog(mode: 'create' | 'edit', data?: PurchaseRequest) {
   dialogMode.value = mode
   if (mode === 'create') {
@@ -224,7 +317,9 @@ function showDialog(mode: 'create' | 'edit', data?: PurchaseRequest) {
       title: '',
       description: '',
       quantity: 1,
-      estimated_price: undefined
+      estimated_price: undefined,
+      supplier_id: undefined,
+      region: ''
     })
   } else {
     currentId.value = data!.id
@@ -232,7 +327,9 @@ function showDialog(mode: 'create' | 'edit', data?: PurchaseRequest) {
       title: data!.title,
       description: data!.description || '',
       quantity: data!.quantity,
-      estimated_price: data!.estimatedPrice
+      estimated_price: data!.estimatedPrice,
+      supplier_id: data!.supplierId ?? undefined,
+      region: data!.region || ''
     })
   }
   dialogVisible.value = true
@@ -360,6 +457,7 @@ async function handlePageChange(page: number) {
 
 onMounted(() => {
   purchaseStore.fetchRequests()
+  purchaseStore.fetchSuppliers()
 })
 </script>
 
@@ -372,6 +470,7 @@ onMounted(() => {
 
 .main-card {
   border-radius: var(--radius-lg) !important;
+  overflow: hidden;
 }
 
 .card-header {
@@ -379,7 +478,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
+  padding: 14px 20px;
 }
 
 .header-left {
@@ -390,50 +490,130 @@ onMounted(() => {
 
 .page-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--theme-text-primary);
+  color: var(--wechat-text);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--theme-text-secondary);
+  color: var(--wechat-text-secondary);
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .search-bar {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-input {
-  width: 320px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
 }
 
 .data-table {
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: 0;
+  overflow-x: auto;
+}
+
+.data-table :deep(.el-table__body-wrapper) {
+  overflow-x: auto !important;
 }
 
 .pagination-wrapper {
-  margin-top: 20px;
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .no-action {
-  color: #999;
+  color: var(--wechat-text-placeholder);
   font-size: 12px;
 }
 
 .custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
-  background: var(--theme-card);
+}
+
+.column-settings {
+  user-select: none;
+}
+
+.column-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.column-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.column-settings-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: grab;
+  transition: background-color 0.2s;
+}
+
+.column-settings-item:hover {
+  background-color: var(--el-fill-color-light);
+}
+
+.column-settings-item.is-dragging {
+  opacity: 0.5;
+  background-color: var(--el-fill-color);
+}
+
+.drag-handle {
+  color: var(--el-text-color-placeholder);
+  cursor: grab;
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    padding: 10px 12px;
+  }
+  .search-bar {
+    margin-bottom: 12px;
+  }
+  .search-input {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .el-table :deep(.el-table__header th),
+  .el-table :deep(.el-table__body td) {
+    padding: 8px 4px;
+  }
+  .el-table :deep(.el-table__cell) {
+    min-width: 80px;
+  }
+  .el-table :deep(.el-button) {
+    padding: 4px 6px;
+  }
 }
 </style>

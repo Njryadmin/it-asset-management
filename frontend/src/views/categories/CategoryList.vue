@@ -353,6 +353,7 @@ onMounted(() => {
 
 .main-card {
   border-radius: var(--radius-lg) !important;
+  overflow: hidden;
 }
 
 .card-header {
@@ -360,7 +361,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
+  padding: 14px 20px;
 }
 
 .header-left {
@@ -371,27 +373,29 @@ onMounted(() => {
 
 .page-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--theme-text-primary);
+  color: var(--wechat-text);
 }
 
 .category-count {
   font-size: 13px;
-  color: var(--theme-text-secondary);
+  color: var(--wechat-text-secondary);
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .search-bar {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .search-input {
   max-width: 320px;
+  width: 100%;
 }
 
 .category-container {
@@ -432,7 +436,7 @@ onMounted(() => {
 }
 
 .tree-node-wrapper:hover {
-  background: var(--theme-border-light) !important;
+  background: var(--wechat-bg) !important;
 }
 
 .node-content {
@@ -460,29 +464,22 @@ onMounted(() => {
 
 .node-name {
   font-weight: 500;
-  color: var(--theme-text-primary);
+  color: var(--wechat-text);
   font-size: 14px;
 }
 
 .node-code {
   font-size: 12px;
-  color: var(--theme-text-secondary);
+  color: var(--wechat-text-secondary);
 }
 
 .node-actions {
   display: flex;
   gap: 4px;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.tree-node-wrapper:hover .node-actions {
-  opacity: 1;
 }
 
 .custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
-  background: var(--theme-card);
 }
 
 .upload-demo {

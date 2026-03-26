@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import Optional
@@ -88,8 +89,9 @@ async def create_user(
         username=user_in.username,
         email=user_in.email,
         full_name=user_in.full_name,
-        password_hash=get_password_hash(user_in.password),
-        is_superuser=user_in.is_superuser if hasattr(user_in, 'is_superuser') else False
+        hashed_password=get_password_hash(user_in.password),
+        is_superuser=getattr(user_in, 'is_superuser', False),
+        is_active=getattr(user_in, 'is_active', True)
     )
     db.add(user)
     await db.commit()
@@ -123,7 +125,7 @@ async def update_user(
     
     # Handle password separately
     if 'password' in update_data:
-        user.password_hash = get_password_hash(update_data.pop('password'))
+        user.hashed_password = get_password_hash(update_data.pop('password'))
     
     for key, value in update_data.items():
         setattr(user, key, value)
@@ -156,11 +158,15 @@ async def delete_user(
     return {"message": "删除成功"}
 
 
+class PasswordChangeRequest(BaseModel):
+    old_password: Optional[str] = None
+    new_password: str
+
+
 @router.put("/{user_id}/password")
 async def change_password(
     user_id: int,
-    old_password: str,
-    new_password: str,
+    password_data: PasswordChangeRequest,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -176,9 +182,13 @@ async def change_password(
     
     # Non-admin users must provide correct old password
     if not current_user.is_superuser:
-        if not verify_password(old_password, user.password_hash):
+        if not verify_password(password_data.old_password, user.hashed_password):
             raise HTTPException(status_code=400, detail="原密码错误")
     
-    user.password_hash = get_password_hash(new_password)
+    # Password strength validation
+    if len(password_data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="新密码长度至少6位")
+    
+    user.hashed_password = get_password_hash(password_data.new_password)
     await db.commit()
     return {"message": "密码修改成功"}

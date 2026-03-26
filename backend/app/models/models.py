@@ -101,6 +101,7 @@ class Asset(Base):
     
     description = Column(Text)
     specs = Column(Text)  # JSON string for specifications
+    region = Column(String(100), nullable=True)  # 地区
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -138,6 +139,8 @@ class PurchaseRequest(Base):
     approver_comment = Column(Text)
     approved_at = Column(DateTime(timezone=True), nullable=True)
     purchased_at = Column(DateTime(timezone=True), nullable=True)
+    
+    region = Column(String(100), nullable=True)  # 采购地区
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

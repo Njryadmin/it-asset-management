@@ -9,7 +9,7 @@ import io
 from datetime import datetime
 
 from app.core.database import get_db
-from app.models import Asset, AssetStatus
+from app.models import Asset, AssetStatus, Category, Supplier, Department, User
 from app.schemas.schemas import AssetCreate, AssetUpdate, AssetResponse, AssetListResponse
 from app.api.v1.endpoints.auth import get_current_active_user
 
@@ -22,6 +22,7 @@ async def list_assets(
     category_id: Optional[int] = Query(None, description="分类ID"),
     status: Optional[str] = Query(None, description="资产状态"),
     department_id: Optional[int] = Query(None, description="部门ID"),
+    region: Optional[str] = Query(None, description="地区"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -41,6 +42,8 @@ async def list_assets(
         query = query.where(Asset.status == status)
     if department_id is not None:
         query = query.where(Asset.department_id == department_id)
+    if region:
+        query = query.where(Asset.region.ilike(f"%{region}%"))
     
     # Count total
     count_query = select(func.count()).select_from(query.subquery())
@@ -95,6 +98,7 @@ async def export_assets(
     category_id: Optional[int] = Query(None, description="分类ID"),
     status: Optional[str] = Query(None, description="资产状态"),
     department_id: Optional[int] = Query(None, description="部门ID"),
+    region: Optional[str] = Query(None, description="地区"),
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
@@ -113,6 +117,8 @@ async def export_assets(
         query = query.where(Asset.status == status)
     if department_id is not None:
         query = query.where(Asset.department_id == department_id)
+    if region:
+        query = query.where(Asset.region.ilike(f"%{region}%"))
     
     result = await db.execute(query)
     assets = result.scalars().all()
@@ -120,25 +126,34 @@ async def export_assets(
     output = io.StringIO()
     writer = csv.writer(output)
     
-    # Header
+    # Header - 使用名称而非ID
     writer.writerow([
-        '资产编号', '名称', '序列号', '分类ID', '供应商ID', '部门ID',
-        '使用人ID', '状态', '购入日期', '购入价格', '保修期至',
-        '描述', '规格参数', '创建时间', '更新时间'
+        '资产编号', '名称', '序列号', '分类名称', '供应商名称', '部门名称',
+        '使用人', '状态', '购入日期', '购入价格', '保修期至',
+        '描述', '规格参数', '地区'
     ])
+    
+    # 预先加载关联数据
+    category_map = {c.id: c.name for c in (await db.execute(select(Category))).scalars().all()}
+    supplier_map = {s.id: s.name for s in (await db.execute(select(Supplier))).scalars().all()}
+    department_map = {d.id: d.name for d in (await db.execute(select(Department))).scalars().all()}
+    # 加载用户名称
+    user_result = await db.execute(select(User.id, User.username, User.full_name))
+    user_map = {u.id: (u.full_name or u.username) for u in user_result.scalars().all()}
     
     # Data
     for asset in assets:
+        assigned_user = user_map.get(asset.assigned_to, '') if asset.assigned_to else ''
         writer.writerow([
             asset.asset_code, asset.name, asset.serial_number,
-            asset.category_id, asset.supplier_id, asset.department_id,
-            asset.assigned_to, asset.status,
+            category_map.get(asset.category_id, ''),
+            supplier_map.get(asset.supplier_id, ''),
+            department_map.get(asset.department_id, ''),
+            assigned_user, asset.status,
             asset.purchase_date.strftime('%Y-%m-%d') if asset.purchase_date else '',
             asset.purchase_price, 
             asset.warranty_expire_date.strftime('%Y-%m-%d') if asset.warranty_expire_date else '',
-            asset.description, asset.specs,
-            asset.created_at.strftime('%Y-%m-%d %H:%M:%S') if asset.created_at else '',
-            asset.updated_at.strftime('%Y-%m-%d %H:%M:%S') if asset.updated_at else ''
+            asset.description, asset.specs, asset.region or ''
         ])
     
     output.seek(0)
@@ -148,6 +163,33 @@ async def export_assets(
         iter([bom + output.getvalue()]),
         media_type="text/csv; charset=utf-8-sig",
         headers={"Content-Disposition": f"attachment; filename=assets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
+
+
+@router.get("/template")
+async def download_asset_template(
+    current_user=Depends(get_current_active_user)
+):
+    """下载资产导入模板"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    # 模板使用名称，导入时自动查找对应ID
+    writer.writerow([
+        '资产编号', '名称', '序列号', '分类名称', '供应商名称', '部门名称',
+        '使用人', '状态', '购入日期', '购入价格', '保修期至',
+        '描述', '规格参数', '地区'
+    ])
+    writer.writerow([
+        'ASSET-2026-000001', '示例资产', 'SN123456', '计算机设备', '联想官方旗舰店', '技术部',
+        '', 'idle', '2026-01-01', '5000.00', '2027-01-01',
+        '示例描述', '', '上海'
+    ])
+    output.seek(0)
+    bom = '\ufeff'
+    return StreamingResponse(
+        iter([bom + output.getvalue()]),
+        media_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": "attachment; filename=asset_template.csv"}
     )
 
 
@@ -170,11 +212,22 @@ async def import_assets(
     errors = []
     skipped = 0
     
+    # 预先加载所有名称映射
+    category_map = {c.name: c.id for c in (await db.execute(select(Category))).scalars().all()}
+    supplier_map = {s.name: s.id for s in (await db.execute(select(Supplier))).scalars().all()}
+    department_map = {d.name: d.id for d in (await db.execute(select(Department))).scalars().all()}
+    # 用户名称映射
+    user_name_map = {}
+    for u in (await db.execute(select(User.username, User.full_name))).scalars().all():
+        user_name_map[u.username] = u.id
+        if u.full_name:
+            user_name_map[u.full_name] = u.id
+    
     for row_num, row in enumerate(reader, start=2):
         try:
             # Check required fields
-            if not row.get('资产编号') or not row.get('名称') or not row.get('分类ID'):
-                errors.append(f"第{row_num}行: 缺少必填字段(资产编号/名称/分类ID)")
+            if not row.get('资产编号') or not row.get('名称'):
+                errors.append(f"第{row_num}行: 缺少必填字段(资产编号/名称)")
                 skipped += 1
                 continue
             
@@ -184,6 +237,27 @@ async def import_assets(
                 errors.append(f"第{row_num}行: 资产编号 {row['资产编号']} 已存在，跳过")
                 skipped += 1
                 continue
+            
+            # Parse category name -> id
+            category_id = None
+            if row.get('分类名称'):
+                category_id = category_map.get(row['分类名称'])
+                if not category_id:
+                    errors.append(f"第{row_num}行: 分类 '{row['分类名称']}' 不存在")
+                    skipped += 1
+                    continue
+            
+            # Parse supplier name -> id
+            supplier_id = None
+            if row.get('供应商名称'):
+                supplier_id = supplier_map.get(row['供应商名称'])
+                # supplier_id can be None if not found, so just warning
+                
+            # Parse department name -> id  
+            department_id = None
+            if row.get('部门名称'):
+                department_id = department_map.get(row['部门名称'])
+                # department_id can be None if not found
             
             # Parse date fields
             purchase_date = None
@@ -200,20 +274,27 @@ async def import_assets(
                 except ValueError:
                     pass
             
+            status_str = row.get('状态', 'idle')
+            try:
+                status = AssetStatus(status_str)
+            except ValueError:
+                status = AssetStatus.idle
+            
             asset = Asset(
                 name=row['名称'],
                 asset_code=row['资产编号'],
                 serial_number=row.get('序列号') or None,
-                category_id=int(row['分类ID']),
-                supplier_id=int(row['供应商ID']) if row.get('供应商ID') else None,
-                department_id=int(row['部门ID']) if row.get('部门ID') else None,
-                assigned_to=int(row['使用人ID']) if row.get('使用人ID') else None,
-                status=row.get('状态', 'idle'),
+                category_id=category_id,
+                supplier_id=supplier_id,
+                department_id=department_id,
+                assigned_to=user_name_map.get(row.get('使用人')) if row.get('使用人') else None,
+                status=status,
                 purchase_date=purchase_date,
                 purchase_price=float(row['购入价格']) if row.get('购入价格') else None,
                 warranty_expire_date=warranty_expire_date,
                 description=row.get('描述') or None,
                 specs=row.get('规格参数') or None,
+                region=row.get('地区') or None,
             )
             db.add(asset)
             imported += 1

@@ -107,7 +107,16 @@ async def update_purchase_request(
     if purchase_request.requester_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="无权限修改此申请")
     
-    for key, value in request_in.model_dump(exclude_unset=True).items():
+    update_data = request_in.model_dump(exclude_unset=True)
+    
+    # Validate status enum if provided
+    if 'status' in update_data:
+        try:
+            update_data['status'] = PurchaseRequestStatus(update_data['status'])
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"无效的采购状态: {update_data['status']}")
+    
+    for key, value in update_data.items():
         setattr(purchase_request, key, value)
     
     await db.commit()

@@ -1,4 +1,4 @@
-import request from './request'
+import request, { downloadFile } from './request'
 import type { ApiResponse, Asset, AssetForm } from '@/types'
 
 export const assetsApi = {
@@ -7,6 +7,7 @@ export const assetsApi = {
     category_id?: number; 
     status?: string; 
     department_id?: number;
+    region?: string;
     page?: number; 
     page_size?: number 
   }) {
@@ -31,5 +32,15 @@ export const assetsApi = {
   
   delete(id: number) {
     return request.delete(`/assets/${id}`)
+  },
+  
+  exportFile(params?: {
+    keyword?: string;
+    category_id?: number;
+    status?: string;
+    department_id?: number;
+    region?: string;
+  }, filename?: string) {
+    return downloadFile('/assets/export', params, filename)
   }
 }

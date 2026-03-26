@@ -156,6 +156,7 @@ class AssetBase(BaseModel):
     warranty_expire_date: Optional[datetime] = None
     description: Optional[str] = None
     specs: Optional[str] = None
+    region: Optional[str] = None
 
 
 class AssetCreate(AssetBase):
@@ -176,6 +177,7 @@ class AssetUpdate(BaseModel):
     warranty_expire_date: Optional[datetime] = None
     description: Optional[str] = None
     specs: Optional[str] = None
+    region: Optional[str] = None
 
 
 class AssetResponse(AssetBase):
@@ -199,6 +201,7 @@ class PurchaseRequestBase(BaseModel):
     supplier_id: Optional[int] = None
     quantity: int = 1
     estimated_price: Optional[float] = None
+    region: Optional[str] = None
 
 
 class PurchaseRequestCreate(PurchaseRequestBase):
@@ -215,6 +218,7 @@ class PurchaseRequestUpdate(BaseModel):
     actual_price: Optional[float] = None
     status: Optional[str] = None
     approver_comment: Optional[str] = None
+    region: Optional[str] = None
 
 
 class PurchaseRequestResponse(PurchaseRequestBase):
@@ -228,6 +232,7 @@ class PurchaseRequestResponse(PurchaseRequestBase):
     approved_at: Optional[datetime] = None
     purchased_at: Optional[datetime] = None
     created_at: datetime
+    region: Optional[str] = None
 
 
 class PurchaseRequestListResponse(BaseModel):

@@ -7,11 +7,17 @@ const request = axios.create({
   timeout: 30000
 })
 
+// Check if value is a plain object (not null, not array, not class instance)
+function isPlainObject(obj: any): boolean {
+  if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) return false
+  return Object.getPrototypeOf(obj) === Object.prototype || Object.getPrototypeOf(obj) === null
+}
+
 // snake_case to camelCase
 function snakeToCamel(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(item => snakeToCamel(item))
-  } else if (obj !== null && typeof obj === 'object') {
+  } else if (isPlainObject(obj)) {
     return Object.keys(obj).reduce((acc, key) => {
       const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
       acc[camelKey] = snakeToCamel(obj[key])
@@ -25,7 +31,7 @@ function snakeToCamel(obj: any): any {
 function camelToSnake(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(item => camelToSnake(item))
-  } else if (obj !== null && typeof obj === 'object') {
+  } else if (isPlainObject(obj)) {
     return Object.keys(obj).reduce((acc, key) => {
       const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
       acc[snakeKey] = camelToSnake(obj[key])
@@ -67,7 +73,8 @@ request.interceptors.request.use(
     
     // Convert camelCase to snake_case for request body (skip FormData/URLSearchParams)
     if (config.data && typeof config.data === 'object' && 
-        !(config.data instanceof FormData) && !(config.data instanceof URLSearchParams)) {
+        !String(config.headers['Content-Type'] || '').includes('multipart/form-data') && 
+        !(config.data instanceof URLSearchParams)) {
       config.data = camelToSnake(config.data)
     }
     
@@ -84,3 +91,30 @@ request.interceptors.request.use(
 )
 
 export default request
+
+// Helper for file downloads
+export function downloadFile(url: string, params?: Record<string, any>, filename?: string) {
+  const token = localStorage.getItem('token')
+  const queryParams = params ? '?' + new URLSearchParams(
+    Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== '').reduce((acc, [k, v]) => {
+      acc[k] = String(v)
+      return acc
+    }, {} as Record<string, string>)
+  ).toString() : ''
+  
+  return fetch(`${request.defaults.baseURL}${url}${queryParams}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then(response => {
+    if (!response.ok) throw new Error('Download failed')
+    return response.blob()
+  }).then(blob => {
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = downloadUrl
+    a.download = filename || `${url.split('/').pop()}_${Date.now()}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(downloadUrl)
+  })
+}

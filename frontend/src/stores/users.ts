@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { User } from '@/types'
-import { usersApi, type UserForm } from '@/api/users'
+import { usersApi, type UserCreateForm, type UserUpdateForm } from '@/api/users'
 
 export const useUserStore = defineStore('users', () => {
   const users = ref<User[]>([])
@@ -24,13 +24,13 @@ export const useUserStore = defineStore('users', () => {
     }
   }
 
-  async function createUser(data: UserForm) {
+  async function createUser(data: UserCreateForm) {
     const response = await usersApi.create(data)
     await fetchUsers()
     return response.data
   }
 
-  async function updateUser(id: number, data: Partial<UserForm>) {
+  async function updateUser(id: number, data: UserUpdateForm) {
     const response = await usersApi.update(id, data)
     await fetchUsers()
     return response.data

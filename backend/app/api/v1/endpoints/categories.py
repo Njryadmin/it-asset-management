@@ -72,6 +72,132 @@ async def get_category_tree(
     return tree
 
 
+# IMPORTANT: /export and /import must be defined BEFORE /{category_id}
+# otherwise FastAPI will match them as {category_id}
+
+@router.get("/export")
+async def export_categories(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    """导出所有分类为CSV"""
+    result = await db.execute(select(Category))
+    categories = result.scalars().all()
+    
+    # Build parent name lookup
+    category_map = {cat.id: cat.name for cat in categories}
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header with Chinese descriptions
+    writer.writerow(['分类名称', '编码', '上级分类名称', '描述', '创建时间'])
+    
+    for cat in categories:
+        parent_name = category_map.get(cat.parent_id, '') if cat.parent_id else ''
+        writer.writerow([
+            cat.name,
+            cat.code or '',
+            parent_name,
+            cat.description or '',
+            cat.created_at.strftime('%Y-%m-%d %H:%M:%S') if cat.created_at else ''
+        ])
+    
+    output.seek(0)
+    bom = '\ufeff'
+    return StreamingResponse(
+        iter([bom + output.getvalue()]),
+        media_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": f"attachment; filename=categories_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
+
+
+@router.get("/template")
+async def download_category_template(
+    current_user=Depends(get_current_active_user)
+):
+    """下载分类导入模板"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['分类名称', '编码', '上级分类名称', '描述'])
+    writer.writerow(['电脑设备', 'PC', '', '示例描述（上级分类名称留空表示顶级分类）'])
+    writer.writerow(['笔记本电脑', 'PC-LAPTOP', '电脑设备', '示例子分类'])
+    output.seek(0)
+    bom = '\ufeff'
+    return StreamingResponse(
+        iter([bom + output.getvalue()]),
+        media_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": "attachment; filename=category_template.csv"}
+    )
+
+
+@router.post("/import")
+async def import_categories(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    """批量导入分类(CSV格式)"""
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="仅支持CSV文件")
+    
+    content = await file.read()
+    decoded_content = content.decode('utf-8-sig')
+    
+    reader = csv.DictReader(io.StringIO(decoded_content))
+    
+    imported = 0
+    errors = []
+    skipped = 0
+    
+    # Build name -> id lookup for parent resolution
+    name_to_id = {}
+    result = await db.execute(select(Category))
+    for cat in result.scalars().all():
+        name_to_id[cat.name] = cat.id
+    
+    for row_num, row in enumerate(reader, start=2):
+        try:
+            if not row.get('分类名称'):
+                errors.append(f"第{row_num}行: 缺少必填字段(分类名称)")
+                skipped += 1
+                continue
+            
+            # Resolve parent by name
+            parent_id = None
+            parent_name = row.get('上级分类名称', '').strip()
+            if parent_name:
+                parent_id = name_to_id.get(parent_name)
+                if parent_id is None:
+                    errors.append(f"第{row_num}行: 未找到上级分类'{parent_name}'，跳过")
+                    skipped += 1
+                    continue
+            
+            cat = Category(
+                name=row['分类名称'],
+                code=row.get('编码', '').strip() or None,
+                parent_id=parent_id,
+                description=row.get('描述', '').strip() or None
+            )
+            db.add(cat)
+            # Add to lookup for nested categories
+            name_to_id[cat.name] = cat.id
+            imported += 1
+            
+        except Exception as e:
+            errors.append(f"第{row_num}行: {str(e)}")
+            skipped += 1
+    
+    await db.commit()
+    
+    return {
+        "message": f"导入完成",
+        "imported": imported,
+        "skipped": skipped,
+        "errors": errors[:20]
+    }
+
+
 @router.get("/{category_id}")
 async def get_category(
     category_id: int,
@@ -152,105 +278,3 @@ async def delete_category(
     await db.delete(category)
     await db.commit()
     return {"message": "删除成功"}
-
-
-@router.get("/export")
-async def export_categories(
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
-):
-    """导出所有分类为CSV"""
-    result = await db.execute(select(Category))
-    categories = result.scalars().all()
-    
-    # Build parent name lookup
-    category_map = {cat.id: cat.name for cat in categories}
-    
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    # Header with Chinese descriptions
-    writer.writerow(['分类名称', '编码', '上级分类名称', '描述', '创建时间'])
-    
-    for cat in categories:
-        parent_name = category_map.get(cat.parent_id, '') if cat.parent_id else ''
-        writer.writerow([
-            cat.name,
-            cat.code or '',
-            parent_name,
-            cat.description or '',
-            cat.created_at.strftime('%Y-%m-%d %H:%M:%S') if cat.created_at else ''
-        ])
-    
-    output.seek(0)
-    bom = '\ufeff'
-    return StreamingResponse(
-        iter([bom + output.getvalue()]),
-        media_type="text/csv; charset=utf-8-sig",
-        headers={"Content-Disposition": f"attachment; filename=categories_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
-    )
-
-
-@router.post("/import")
-async def import_categories(
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
-):
-    """批量导入分类(CSV格式)"""
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="仅支持CSV文件")
-    
-    content = await file.read()
-    decoded_content = content.decode('utf-8-sig')
-    
-    reader = csv.DictReader(io.StringIO(decoded_content))
-    
-    imported = 0
-    errors = []
-    skipped = 0
-    
-    # Build name -> id lookup for parent resolution
-    name_to_id = {}
-    result = await db.execute(select(Category))
-    for cat in result.scalars().all():
-        name_to_id[cat.name] = cat.id
-    
-    for row_num, row in enumerate(reader, start=2):
-        try:
-            if not row.get('分类名称'):
-                errors.append(f"第{row_num}行: 缺少必填字段(分类名称)")
-                skipped += 1
-                continue
-            
-            # Resolve parent by name
-            parent_id = None
-            parent_name = row.get('上级分类名称', '').strip()
-            if parent_name:
-                parent_id = name_to_id.get(parent_name)
-                if parent_id is None:
-                    errors.append(f"第{row_num}行: 未找到上级分类'{parent_name}'，已设为空")
-            
-            cat = Category(
-                name=row['分类名称'],
-                code=row.get('编码', '').strip() or None,
-                parent_id=parent_id,
-                description=row.get('描述', '').strip() or None
-            )
-            db.add(cat)
-            # Add to lookup for nested categories
-            name_to_id[cat.name] = cat.id
-            imported += 1
-            
-        except Exception as e:
-            errors.append(f"第{row_num}行: {str(e)}")
-            skipped += 1
-    
-    await db.commit()
-    
-    return {
-        "message": f"导入完成",
-        "imported": imported,
-        "skipped": skipped,
-        "errors": errors[:20]
-    }

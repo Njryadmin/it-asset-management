@@ -35,7 +35,7 @@ async def get_dashboard_stats(
         .join(Asset, Asset.category_id == Category.id)
         .group_by(Category.name)
     )
-    assets_by_category = {row[0]: row[1] for row in category_result.all()}
+    assets_by_category = {str(row[0]): int(row[1]) for row in category_result.all()}
     
     # Recent assets (last 10)
     recent_result = await db.execute(

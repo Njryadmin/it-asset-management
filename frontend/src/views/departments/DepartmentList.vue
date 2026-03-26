@@ -8,6 +8,39 @@
             <span class="item-count">共 {{ departmentStore.total }} 条</span>
           </div>
           <div class="header-actions">
+            <el-popover placement="bottom" :width="220" trigger="click">
+              <template #reference>
+                <el-button>
+                  <el-icon><Setting /></el-icon>
+                  字段
+                </el-button>
+              </template>
+              <div class="column-settings">
+                <div class="column-settings-header">
+                  <span>列设置</span>
+                  <el-button link type="primary" @click="resetToDefaults">重置</el-button>
+                </div>
+                <div class="column-settings-list">
+                  <div
+                    v-for="(col, index) in columns"
+                    :key="col.key"
+                    class="column-settings-item"
+                    :class="{ 'is-dragging': draggingIndex === index }"
+                    draggable="true"
+                    @dragstart="onDragStart(index)"
+                    @dragover="(e) => onDragOver(e, index)"
+                    @dragend="onDragEnd"
+                  >
+                    <el-icon class="drag-handle"><Rank /></el-icon>
+                    <el-checkbox
+                      :model-value="col.visible"
+                      :disabled="!canHide(index)"
+                      @change="toggleColumn(index)"
+                    >{{ col.label }}</el-checkbox>
+                  </div>
+                </div>
+              </div>
+            </el-popover>
             <el-dropdown trigger="click" @command="handleExport">
               <el-button>
                 <el-icon><Download /></el-icon>
@@ -51,13 +84,26 @@
 
       <!-- Tree Table -->
       <el-table :data="flatDepartments" v-loading="departmentStore.loading" row-key="id" style="width: 100%" class="data-table">
-        <el-table-column prop="name" label="部门名称" min-width="200" />
-        <el-table-column prop="code" label="编码" width="120" />
-        <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column label="操作" width="200" fixed="right">
+        <template v-for="col in columns" :key="col.key">
+          <el-table-column v-if="col.visible && col.key === 'name'" prop="name" label="部门名称" min-width="200" />
+          <el-table-column v-if="col.visible && col.key === 'code'" prop="code" label="编码" width="120" />
+          <el-table-column v-if="col.visible && col.key === 'description'" prop="description" label="描述" min-width="200" show-overflow-tooltip />
+        </template>
+        <el-table-column label="操作" width="110" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="showDialog('edit', row)">编辑</el-button>
-            <el-button type="danger" link size="small" @click="handleDelete(row.id)">删除</el-button>
+            <el-button type="primary" link @click="showDialog('edit', row)">
+              <el-icon><Edit /></el-icon>
+            </el-button>
+            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
+              <el-button type="primary" link>
+                <el-icon><More /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -84,7 +130,7 @@
         </el-form-item>
         <el-form-item label="上级部门">
           <el-select v-model="form.parent_id" placeholder="请选择上级部门" clearable style="width: 100%">
-            <el-option v-for="dept in flatDepartments" :key="dept.id" :label="dept.name" :value="dept.id" />
+            <el-option v-for="dept in selectableDepartments" :key="dept.id" :label="dept.name" :value="dept.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="描述">
@@ -133,7 +179,26 @@ import { departmentsApi } from '@/api/departments'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Department } from '@/types'
+import { useColumnSettings } from '@/composables/useColumnSettings'
+import type { ColumnOption } from '@/composables/useColumnSettings'
 import dayjs from 'dayjs'
+
+const defaultColumns: ColumnOption[] = [
+  { key: 'name', label: '部门名称', visible: true },
+  { key: 'code', label: '编码', visible: true },
+  { key: 'description', label: '描述', visible: true }
+]
+
+const {
+  columns,
+  draggingIndex,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  toggleColumn,
+  canHide,
+  resetToDefaults
+} = useColumnSettings('department-columns', defaultColumns)
 
 const departmentStore = useDepartmentStore()
 const formRef = ref<FormInstance>()
@@ -159,6 +224,10 @@ const rules: FormRules = {
 
 const dialogTitle = computed(() => dialogMode.value === 'create' ? '新增部门' : '编辑部门')
 
+function handleActionCommand(cmd: string, row: Department) {
+  if (cmd === 'delete') handleDelete(row.id)
+}
+
 const flatDepartments = computed(() => {
   const result: any[] = []
   function flatten(depts: Department[], level = 0) {
@@ -171,6 +240,22 @@ const flatDepartments = computed(() => {
   }
   flatten(departmentStore.departments)
   return result
+})
+
+// Get selectable parent departments (exclude self and descendants when editing)
+const selectableDepartments = computed(() => {
+  if (dialogMode.value === 'create' || !currentId.value) {
+    return flatDepartments.value
+  }
+  // Collect IDs of current department and all its descendants
+  const excludeIds = new Set<number>()
+  function collectIds(dept: Department) {
+    excludeIds.add(dept.id)
+    dept.children?.forEach(child => collectIds(child))
+  }
+  const currentDept = flatDepartments.value.find(d => d.id === currentId.value)
+  if (currentDept) collectIds(currentDept)
+  return flatDepartments.value.filter(d => !excludeIds.has(d.id))
 })
 
 function showDialog(mode: 'create' | 'edit', data?: Department) {
@@ -323,6 +408,7 @@ onMounted(() => {
 
 .main-card {
   border-radius: var(--radius-lg) !important;
+  overflow: hidden;
 }
 
 .card-header {
@@ -330,7 +416,8 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
+  padding: 14px 20px;
 }
 
 .header-left {
@@ -341,49 +428,129 @@ onMounted(() => {
 
 .page-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--theme-text-primary);
+  color: var(--wechat-text);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--theme-text-secondary);
+  color: var(--wechat-text-secondary);
 }
 
 .header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .search-bar {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-input {
-  width: 320px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
 }
 
 .data-table {
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: 0;
+  overflow-x: auto;
+}
+
+.data-table :deep(.el-table__body-wrapper) {
+  overflow-x: auto !important;
 }
 
 .pagination-wrapper {
-  margin-top: 20px;
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .custom-dialog :deep(.el-dialog) {
   border-radius: var(--radius-lg) !important;
-  background: var(--theme-card);
 }
 
 .upload-demo {
   text-align: center;
+}
+
+.column-settings {
+  user-select: none;
+}
+
+.column-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.column-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.column-settings-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: grab;
+  transition: background-color 0.2s;
+}
+
+.column-settings-item:hover {
+  background-color: var(--el-fill-color-light);
+}
+
+.column-settings-item.is-dragging {
+  opacity: 0.5;
+  background-color: var(--el-fill-color);
+}
+
+.drag-handle {
+  color: var(--el-text-color-placeholder);
+  cursor: grab;
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    padding: 10px 12px;
+  }
+  .search-bar {
+    margin-bottom: 12px;
+  }
+  .search-input {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .el-table :deep(.el-table__header th),
+  .el-table :deep(.el-table__body td) {
+    padding: 8px 4px;
+  }
+  .el-table :deep(.el-table__cell) {
+    min-width: 80px;
+  }
+  .el-table :deep(.el-button) {
+    padding: 4px 6px;
+  }
 }
 </style>
