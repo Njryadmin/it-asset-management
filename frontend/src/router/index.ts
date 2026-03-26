@@ -1,0 +1,73 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/auth/Login.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/',
+    component: () => import('@/components/layout/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'Dashboard',
+        component: () => import('@/views/dashboard/Dashboard.vue')
+      },
+      {
+        path: 'assets',
+        name: 'Assets',
+        component: () => import('@/views/assets/AssetList.vue')
+      },
+      {
+        path: 'assets/create',
+        name: 'AssetCreate',
+        component: () => import('@/views/assets/AssetForm.vue')
+      },
+      {
+        path: 'assets/:id/edit',
+        name: 'AssetEdit',
+        component: () => import('@/views/assets/AssetForm.vue')
+      },
+      {
+        path: 'categories',
+        name: 'Categories',
+        component: () => import('@/views/categories/CategoryList.vue')
+      },
+      {
+        path: 'suppliers',
+        name: 'Suppliers',
+        component: () => import('@/views/suppliers/SupplierList.vue')
+      },
+      {
+        path: 'purchases',
+        name: 'Purchases',
+        component: () => import('@/views/purchases/PurchaseList.vue')
+      }
+    ]
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  
+  if (to.meta.requiresAuth !== false && !authStore.isLoggedIn()) {
+    next('/login')
+  } else if (to.path === '/login' && authStore.isLoggedIn()) {
+    next('/')
+  } else {
+    next()
+  }
+})
+
+export default router
