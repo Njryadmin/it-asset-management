@@ -24,9 +24,14 @@ html, body {
 /* ── CSS Theme Variables (defaults → default theme) ── */
 :root {
   --theme-primary:        #409eff;
+  --theme-primary-light:  #66b3ff;
   --theme-success:        #67c23a;
+  --theme-success-light:  #85ce61;
   --theme-warning:        #e6a23c;
+  --theme-warning-light:  #ebb563;
+  --theme-warning-bg:     #fff7e6;
   --theme-danger:         #f56c6c;
+  --theme-danger-light:  #f78989;
   --theme-info:           #909399;
 
   --theme-bg:             #f0f2f5;
@@ -57,9 +62,14 @@ html, body {
 /* ── Dark Theme ── */
 [data-theme="dark"] {
   --theme-primary:        #409eff;
+  --theme-primary-light:  #5291d4;
   --theme-success:        #67c23a;
+  --theme-success-light:  #52914d;
   --theme-warning:        #e6a23c;
+  --theme-warning-light:  #b38a3a;
+  --theme-warning-bg:     #2d2517;
   --theme-danger:         #f56c6c;
+  --theme-danger-light:  #c05555;
   --theme-info:           #909399;
 
   --theme-bg:             #0d1117;
@@ -81,9 +91,14 @@ html, body {
 /* ── Green Theme ── */
 [data-theme="green"] {
   --theme-primary:        #2eb872;
+  --theme-primary-light:  #52b77a;
   --theme-success:        #52b77a;
+  --theme-success-light:  #6dc48e;
   --theme-warning:        #f5a623;
+  --theme-warning-light:  #d4913d;
+  --theme-warning-bg:     #fef9f0;
   --theme-danger:         #e5534b;
+  --theme-danger-light:  #b8423e;
   --theme-info:           #8bc34a;
 
   --theme-bg:             #f0f9eb;
@@ -105,9 +120,14 @@ html, body {
 /* ── Purple Theme ── */
 [data-theme="purple"] {
   --theme-primary:        #a371f7;
+  --theme-primary-light:  #b994f9;
   --theme-success:        #67c23a;
+  --theme-success-light:  #85ce61;
   --theme-warning:        #e6a23c;
+  --theme-warning-light:  #ebb563;
+  --theme-warning-bg:     #fff7e6;
   --theme-danger:         #f56c6c;
+  --theme-danger-light:  #f78989;
   --theme-info:           #909399;
 
   --theme-bg:             #f5f3ff;

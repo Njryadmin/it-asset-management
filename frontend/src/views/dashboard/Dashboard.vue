@@ -509,22 +509,22 @@ onMounted(async () => {
 }
 
 .stat-card--blue {
-  background: linear-gradient(135deg, #409eff 0%, #66b3ff 100%);
+  background: linear-gradient(135deg, var(--theme-primary, #409eff) 0%, var(--theme-primary-light, #66b3ff) 100%);
   box-shadow: 0 4px 16px rgba(64, 158, 255, 0.35);
   color: #fff;
 }
 .stat-card--green {
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  background: linear-gradient(135deg, var(--theme-success, #67c23a) 0%, var(--theme-success-light, #85ce61) 100%);
   box-shadow: 0 4px 16px rgba(103, 194, 58, 0.35);
   color: #fff;
 }
 .stat-card--orange {
-  background: linear-gradient(135deg, #e6a23c 0%, #ebb563 100%);
+  background: linear-gradient(135deg, var(--theme-warning, #e6a23c) 0%, var(--theme-warning-light, #ebb563) 100%);
   box-shadow: 0 4px 16px rgba(230, 162, 60, 0.35);
   color: #fff;
 }
 .stat-card--red {
-  background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
+  background: linear-gradient(135deg, var(--theme-danger, #f56c6c) 0%, var(--theme-danger-light, #f78989) 100%);
   box-shadow: 0 4px 16px rgba(245, 108, 108, 0.35);
   color: #fff;
 }
@@ -739,11 +739,11 @@ onMounted(async () => {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #fff7e6;
+  background: var(--theme-warning-bg, #fff7e6);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #e6a23c;
+  color: var(--theme-warning, #e6a23c);
   font-size: 18px;
   flex-shrink: 0;
 }
