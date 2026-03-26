@@ -22,6 +22,10 @@
           <el-icon><Grid /></el-icon>
           <span>分类管理</span>
         </el-menu-item>
+        <el-menu-item index="/departments">
+          <el-icon><Office /></el-icon>
+          <span>部门管理</span>
+        </el-menu-item>
         <el-menu-item index="/suppliers">
           <el-icon><Shop /></el-icon>
           <span>供应商</span>
