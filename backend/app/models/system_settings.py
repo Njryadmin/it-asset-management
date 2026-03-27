@@ -21,3 +21,4 @@ class SystemSettings(Base):
     favicon_url = Column(String(500), default="")
     announcement = Column(Text, default="")
     announcement_enabled = Column(Boolean, default=False)
+    version = Column(String(20), default="v2.0.0")

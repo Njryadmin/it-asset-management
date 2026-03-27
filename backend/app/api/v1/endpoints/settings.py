@@ -112,6 +112,7 @@ def settings_to_dict(settings: SystemSettings) -> Dict[str, Any]:
         "favicon_url": settings.favicon_url,
         "announcement": settings.announcement or "",
         "announcement_enabled": settings.announcement_enabled or False,
+        "version": settings.version or "v2.0.0",
     }
 
 

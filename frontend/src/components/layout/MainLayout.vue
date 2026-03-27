@@ -85,7 +85,7 @@
       </el-menu>
 
       <div class="sidebar__footer">
-        <div class="sidebar__version">v1.0.0</div>
+        <div class="sidebar__version">{{ appVersion }}</div>
       </div>
     </el-aside>
 
@@ -170,6 +170,7 @@ const authStore = useAuthStore()
 const sidebarVisible = ref(false)
 const siteLogo = ref('')
 const siteName = ref('')
+const appVersion = ref('v2.0.0')
 const currentTheme = ref((window as any).__getTheme?.() || 'default')
 
 function toggleTheme() {
@@ -243,6 +244,7 @@ onMounted(async () => {
     const res = await settingsApi.get()
     siteLogo.value = (res.data as any).logoUrl || ''
     siteName.value = (res.data as any).systemName || 'IT资产'
+    appVersion.value = (res.data as any).version || 'v2.0.0'
   } catch {
     // ignore
   }
