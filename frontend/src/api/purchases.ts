@@ -3,16 +3,25 @@ import type { ApiResponse, PurchaseRequest, PurchaseRequestForm } from '@/types'
 
 export interface ApprovalInstance {
   id: number
-  requestId: number
-  requestTitle: string
-  requesterId: number
-  requesterName: string
-  department: string
-  requestType: string
-  amount: number | null
+  instanceNo: string
+  bizType: string
+  bizId: number
+  applicantId: number | null
+  applicantName: string | null
+  currentStep: number
   status: 'pending' | 'approved' | 'rejected'
-  comment: string | null
+  approvalChain: ApprovalChainItem[]
+  totalSteps: number | null
   createdAt: string
+}
+
+export interface ApprovalChainItem {
+  step: number
+  approver: string | null
+  approverId: number | null
+  action: string
+  comment: string | null
+  time: string | null
 }
 
 export const approvalApi = {
@@ -20,7 +29,7 @@ export const approvalApi = {
     return request.get<ApiResponse<ApprovalInstance>>('/approval-instances', { params })
   },
   myPending() {
-    return request.get<ApprovalInstance[]>('/approval-instances/my-pending')
+    return request.get<ApiResponse<ApprovalInstance>>('/approval-instances/my-pending')
   },
   myApplications(params?: { page?: number; page_size?: number }) {
     return request.get<ApiResponse<ApprovalInstance>>('/approval-instances/my-applications', { params })

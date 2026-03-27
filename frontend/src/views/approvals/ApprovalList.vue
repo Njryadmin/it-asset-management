@@ -38,17 +38,13 @@
             shadow="hover"
           >
             <div class="approval-card__header">
-              <div class="approval-card__title">{{ item.requestTitle }}</div>
+              <div class="approval-card__title">{{ item.instanceNo || '申请 ' + item.id }}</div>
               <el-tag :type="statusTagType(item.status)" size="small">{{ statusLabel(item.status) }}</el-tag>
             </div>
             <div class="approval-card__body">
               <div class="approval-card__row">
                 <span class="label">申请人</span>
-                <span class="value">{{ item.requesterName || '-' }}</span>
-              </div>
-              <div class="approval-card__row">
-                <span class="label">部门</span>
-                <span class="value">{{ item.department || '-' }}</span>
+                <span class="value">{{ item.applicantName || '-' }}</span>
               </div>
               <div class="approval-card__row">
                 <span class="label">申请时间</span>
@@ -56,15 +52,7 @@
               </div>
               <div class="approval-card__row">
                 <span class="label">申请类型</span>
-                <span class="value">{{ item.requestType || '采购申请' }}</span>
-              </div>
-              <div v-if="item.amount" class="approval-card__row">
-                <span class="label">金额</span>
-                <span class="value amount">¥{{ item.amount.toLocaleString() }}</span>
-              </div>
-              <div v-if="item.comment" class="approval-card__row">
-                <span class="label">审批意见</span>
-                <span class="value comment">{{ item.comment }}</span>
+                <span class="value">{{ item.bizType === 'purchase_request' ? '采购申请' : item.bizType }}</span>
               </div>
             </div>
             <div v-if="activeTab === 'pending' && item.status === 'pending'" class="approval-card__footer">
@@ -160,7 +148,7 @@ async function fetchApprovals() {
       total.value = res.data.total
     } else if (activeTab.value === 'pending') {
       res = await approvalApi.myPending()
-      approvals.value = res.data || []
+      approvals.value = res.data.items || res.data || []
       total.value = approvals.value.length
     } else {
       res = await approvalApi.myHistory({ page: filterParams.page, page_size: filterParams.page_size })

@@ -189,6 +189,47 @@ async def list_my_pending_approvals(
     return {"total": len(items), "items": items}
 
 
+@router.get("/my-applications", response_model=ApprovalInstanceListResponse)
+async def list_my_applications(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """获取当前用户提交的申请列表"""
+    query = select(ApprovalInstance).where(
+        ApprovalInstance.applicant_id == current_user.id
+    ).order_by(ApprovalInstance.created_at.desc())
+    count_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    total = count_result.scalar() or 0
+    query = query.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(query)
+    items = result.scalars().all()
+    return {"total": total, "items": items}
+
+
+@router.get("/my-history", response_model=ApprovalInstanceListResponse)
+async def list_my_approval_history(
+    status: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """获取当前用户的审批历史"""
+    query = select(ApprovalInstance).where(
+        ApprovalInstance.applicant_id == current_user.id
+    ).order_by(ApprovalInstance.created_at.desc())
+    if status:
+        query = query.where(ApprovalInstance.status == status)
+    count_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    total = count_result.scalar() or 0
+    query = query.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(query)
+    items = result.scalars().all()
+    return {"total": total, "items": items}
+
+
 @router.get("/{instance_id}", response_model=ApprovalInstanceResponse)
 async def get_approval_instance(
     instance_id: int,
