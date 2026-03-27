@@ -154,7 +154,46 @@
           <el-tabs v-model="activeTab">
             <el-tab-pane label="基本信息" name="info" />
             <el-tab-pane label="维保记录" name="maintenance">
-              <el-empty description="暂无维保记录" />
+              <div class="tab-toolbar">
+                <el-button type="primary" size="small" @click="openMaintenanceDialog()">
+                  <el-icon><Plus /></el-icon>
+                  新增维保记录
+                </el-button>
+              </div>
+              <el-table :data="maintenanceLogs" v-loading="maintenanceLoading" style="width: 100%" size="small">
+                <el-table-column prop="maintenance_date" label="维保日期" width="120">
+                  <template #default="{ row }">
+                    {{ row.maintenance_date ? dayjs(row.maintenance_date).format('YYYY-MM-DD') : '-' }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="maintenance_type" label="类型" width="100">
+                  <template #default="{ row }">
+                    {{ maintenanceTypeLabel(row.maintenance_type) }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="vendor" label="供应商" show-overflow-tooltip />
+                <el-table-column prop="cost" label="费用" width="100">
+                  <template #default="{ row }">
+                    {{ row.cost != null ? `¥${Number(row.cost).toFixed(2)}` : '-' }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="description" label="备注" show-overflow-tooltip />
+                <el-table-column label="操作" width="120" fixed="right">
+                  <template #default="{ row }">
+                    <el-button link type="primary" size="small" @click="openMaintenanceDialog(row)">编辑</el-button>
+                    <el-button link type="danger" size="small" @click="deleteMaintenanceLog(row.id)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div v-if="maintenanceTotal > 0" class="pagination-wrapper">
+                <el-pagination
+                  v-model:current-page="maintenanceParams.page"
+                  :page-size="maintenanceParams.page_size"
+                  :total="maintenanceTotal"
+                  layout="prev, pager, next"
+                  @current-change="fetchMaintenanceLogs"
+                />
+              </div>
             </el-tab-pane>
             <el-tab-pane label="操作日志" name="log">
               <el-table :data="auditLogs" v-loading="auditLoading" style="width: 100%" size="small">
@@ -182,12 +221,78 @@
               </div>
             </el-tab-pane>
             <el-tab-pane label="附件管理" name="attachments">
-              <el-empty description="暂无附件" />
+              <div class="tab-toolbar">
+                <el-upload
+                  :action="uploadUrl"
+                  :data="{ asset_id: assetId }"
+                  :headers="{ Authorization: `Bearer ${token}` }"
+                  :on-success="onUploadSuccess"
+                  :show-file-list="false"
+                  accept="*"
+                >
+                  <el-button type="primary" size="small">
+                    <el-icon><Upload /></el-icon>
+                    上传附件
+                  </el-button>
+                </el-upload>
+              </div>
+              <el-table :data="attachments" v-loading="attachmentsLoading" style="width: 100%" size="small">
+                <el-table-column prop="file_name" label="文件名" show-overflow-tooltip />
+                <el-table-column prop="file_type" label="类型" width="100" />
+                <el-table-column prop="file_size" label="大小" width="100">
+                  <template #default="{ row }">
+                    {{ formatFileSize(row.file_size) }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="created_at" label="上传时间" width="160">
+                  <template #default="{ row }">
+                    {{ dayjs(row.created_at).format('YYYY-MM-DD HH:mm') }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100" fixed="right">
+                  <template #default="{ row }">
+                    <el-button link type="primary" size="small" @click="downloadAttachment(row)">下载</el-button>
+                    <el-button link type="danger" size="small" @click="deleteAttachment(row.id)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
             </el-tab-pane>
           </el-tabs>
         </el-card>
       </div>
     </div>
+
+    <!-- 维保记录 Dialog -->
+    <el-dialog v-model="maintenanceDialogVisible" :title="editingMaintenanceLog ? '编辑维保记录' : '新增维保记录'" width="500px">
+      <el-form ref="maintenanceFormRef" :model="maintenanceForm" label-width="100px">
+        <el-form-item label="维保日期" prop="maintenance_date">
+          <el-date-picker v-model="maintenanceForm.maintenance_date" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="维保类型" prop="maintenance_type">
+          <el-select v-model="maintenanceForm.maintenance_type" style="width: 100%">
+            <el-option label="维修" value="repair" />
+            <el-option label="保养" value="maintenance" />
+            <el-option label="巡检" value="inspection" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="供应商">
+          <el-input v-model="maintenanceForm.vendor" />
+        </el-form-item>
+        <el-form-item label="费用">
+          <el-input-number v-model="maintenanceForm.cost" :min="0" :precision="2" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="下次维保日期">
+          <el-date-picker v-model="maintenanceForm.next_maintenance_date" type="date" value-format="YYYY-MM-DD" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="maintenanceForm.description" type="textarea" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="maintenanceDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="maintenanceSaving" @click="saveMaintenanceLog">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -195,10 +300,10 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAssetStore } from '@/stores/assets'
-import { assetsApi } from '@/api/assets'
+import { assetsApi, maintenanceApi } from '@/api/assets'
 import { auditApi } from '@/api/auditApi'
 import type { Asset } from '@/types'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
 const route = useRoute()
@@ -210,11 +315,37 @@ const saving = ref(false)
 const isEditing = ref(false)
 const activeTab = ref('info')
 const asset = ref<Asset>({} as Asset)
+const assetId = computed(() => Number(route.params.id))
+const token = localStorage.getItem('token') || ''
+const uploadUrl = '/api/v1/asset-attachments/upload'
 
+// Audit logs
 const auditLogs = ref<any[]>([])
 const auditLoading = ref(false)
 const auditTotal = ref(0)
 const auditParams = reactive({ page: 1, page_size: 10 })
+
+// Maintenance logs
+const maintenanceLogs = ref<any[]>([])
+const maintenanceLoading = ref(false)
+const maintenanceTotal = ref(0)
+const maintenanceParams = reactive({ page: 1, page_size: 10 })
+const maintenanceDialogVisible = ref(false)
+const maintenanceSaving = ref(false)
+const editingMaintenanceLog = ref<any>(null)
+const maintenanceFormRef = ref()
+const maintenanceForm = reactive({
+  maintenance_date: '',
+  maintenance_type: '',
+  vendor: '',
+  cost: undefined as number | undefined,
+  next_maintenance_date: '',
+  description: ''
+})
+
+// Attachments
+const attachments = ref<any[]>([])
+const attachmentsLoading = ref(false)
 
 const form = reactive({
   asset_code: '',
@@ -291,6 +422,18 @@ function actionLabel(action: string) {
   return map[action] || action
 }
 
+function maintenanceTypeLabel(type: string) {
+  const map: Record<string, string> = { repair: '维修', maintenance: '保养', inspection: '巡检' }
+  return map[type] || type
+}
+
+function formatFileSize(size: number | null) {
+  if (!size) return '-'
+  if (size < 1024) return `${size}B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)}KB`
+  return `${(size / (1024 * 1024)).toFixed(1)}MB`
+}
+
 function populateForm(a: Asset) {
   form.asset_code = a.assetCode
   form.name = a.name
@@ -312,8 +455,7 @@ function populateForm(a: Asset) {
 async function fetchAsset() {
   loading.value = true
   try {
-    const id = Number(route.params.id)
-    const res = await assetsApi.get(id)
+    const res = await assetsApi.get(assetId.value)
     asset.value = res.data
     populateForm(res.data)
   } finally {
@@ -324,14 +466,12 @@ async function fetchAsset() {
 async function fetchAuditLogs() {
   auditLoading.value = true
   try {
-    const id = Number(route.params.id)
     const res = await auditApi.list({
       biz_type: 'assets',
       page: auditParams.page,
       page_size: auditParams.page_size
     })
-    // Filter to only this asset's logs
-    auditLogs.value = res.data.items.filter((l: any) => l.resourceId === id)
+    auditLogs.value = res.data.items.filter((l: any) => l.resourceId === assetId.value)
     auditTotal.value = res.data.total
   } catch {
     // ignore
@@ -340,11 +480,120 @@ async function fetchAuditLogs() {
   }
 }
 
+async function fetchMaintenanceLogs() {
+  maintenanceLoading.value = true
+  try {
+    const res = await maintenanceApi.list({
+      asset_id: assetId.value,
+      page: maintenanceParams.page,
+      page_size: maintenanceParams.page_size
+    })
+    maintenanceLogs.value = res.data.items
+    maintenanceTotal.value = res.data.total
+  } catch {
+    // ignore
+  } finally {
+    maintenanceLoading.value = false
+  }
+}
+
+async function fetchAttachments() {
+  attachmentsLoading.value = true
+  try {
+    const res = await fetch(`/api/v1/asset-attachments?asset_id=${assetId.value}`)
+    const data = await res.json()
+    attachments.value = data.items || []
+  } catch {
+    // ignore
+  } finally {
+    attachmentsLoading.value = false
+  }
+}
+
+function openMaintenanceDialog(row?: any) {
+  if (row) {
+    editingMaintenanceLog.value = row
+    maintenanceForm.maintenance_date = row.maintenance_date || ''
+    maintenanceForm.maintenance_type = row.maintenance_type || ''
+    maintenanceForm.vendor = row.vendor || ''
+    maintenanceForm.cost = row.cost != null ? Number(row.cost) : undefined
+    maintenanceForm.next_maintenance_date = row.next_maintenance_date || ''
+    maintenanceForm.description = row.description || ''
+  } else {
+    editingMaintenanceLog.value = null
+    maintenanceForm.maintenance_date = ''
+    maintenanceForm.maintenance_type = ''
+    maintenanceForm.vendor = ''
+    maintenanceForm.cost = undefined
+    maintenanceForm.next_maintenance_date = ''
+    maintenanceForm.description = ''
+  }
+  maintenanceDialogVisible.value = true
+}
+
+async function saveMaintenanceLog() {
+  maintenanceSaving.value = true
+  try {
+    const payload = {
+      asset_id: assetId.value,
+      maintenance_date: maintenanceForm.maintenance_date,
+      maintenance_type: maintenanceForm.maintenance_type,
+      vendor: maintenanceForm.vendor || null,
+      cost: maintenanceForm.cost != null ? maintenanceForm.cost : null,
+      description: maintenanceForm.description || null,
+      next_maintenance_date: maintenanceForm.next_maintenance_date || null,
+    }
+    if (editingMaintenanceLog.value) {
+      await maintenanceApi.update(editingMaintenanceLog.value.id, payload)
+      ElMessage.success('更新成功')
+    } else {
+      await maintenanceApi.create(payload)
+      ElMessage.success('创建成功')
+    }
+    maintenanceDialogVisible.value = false
+    await fetchMaintenanceLogs()
+  } catch {
+    ElMessage.error('保存失败')
+  } finally {
+    maintenanceSaving.value = false
+  }
+}
+
+async function deleteMaintenanceLog(id: number) {
+  try {
+    await ElMessageBox.confirm('确定删除该维保记录？', '提示', { type: 'warning' })
+    await maintenanceApi.delete(id)
+    ElMessage.success('删除成功')
+    await fetchMaintenanceLogs()
+  } catch {
+    // user cancelled or error
+  }
+}
+
+function onUploadSuccess() {
+  ElMessage.success('上传成功')
+  fetchAttachments()
+}
+
+async function downloadAttachment(row: any) {
+  window.open(`/api/v1/asset-attachments/${row.id}/download`, '_blank')
+}
+
+async function deleteAttachment(id: number) {
+  try {
+    await ElMessageBox.confirm('确定删除该附件？', '提示', { type: 'warning' })
+    await fetch(`/api/v1/asset-attachments/${id}`, { method: 'DELETE' })
+    ElMessage.success('删除成功')
+    await fetchAttachments()
+  } catch {
+    // user cancelled or error
+  }
+}
+
 async function saveAsset() {
   saving.value = true
   try {
-    const id = Number(route.params.id)
-    await assetsApi.update(id, form as any)
+    await assetsApi.update(assetId.value, form as any)
     ElMessage.success('保存成功')
     isEditing.value = false
     await fetchAsset()
@@ -360,6 +609,12 @@ onMounted(async () => {
   await fetchAsset()
   if (activeTab.value === 'log') {
     await fetchAuditLogs()
+  }
+  if (activeTab.value === 'maintenance') {
+    await fetchMaintenanceLogs()
+  }
+  if (activeTab.value === 'attachments') {
+    await fetchAttachments()
   }
 })
 </script>
@@ -458,6 +713,13 @@ onMounted(async () => {
   margin-top: 12px;
   display: flex;
   justify-content: flex-end;
+}
+
+.tab-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+  gap: 8px;
 }
 
 @media (max-width: 900px) {

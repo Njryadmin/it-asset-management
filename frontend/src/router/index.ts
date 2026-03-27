@@ -81,6 +81,12 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true }
       },
       {
+        path: 'approval-instances/:id',
+        name: 'ApprovalInstanceDetail',
+        component: () => import('@/views/approvals/ApprovalInstanceDetail.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: 'approval-flows',
         name: 'ApprovalFlowConfig',
         component: () => import('@/views/approvals/ApprovalFlowConfig.vue'),

@@ -36,6 +36,7 @@
             :key="item.id"
             class="approval-card"
             shadow="hover"
+            @click="goToDetail(item)"
           >
             <div class="approval-card__header">
               <div class="approval-card__title">{{ item.instanceNo || '申请 ' + item.id }}</div>
@@ -53,6 +54,14 @@
               <div class="approval-card__row">
                 <span class="label">申请类型</span>
                 <span class="value">{{ item.bizType === 'purchase_request' ? '采购申请' : item.bizType }}</span>
+              </div>
+              <div v-if="item.bizType === 'purchase_request'" class="approval-card__row">
+                <span class="label">采购标题</span>
+                <span class="value">{{ item.bizTitle || '-' }}</span>
+              </div>
+              <div v-if="item.bizType === 'purchase_request'" class="approval-card__row">
+                <span class="label">预估金额</span>
+                <span class="value amount">{{ item.bizPrice ? '¥' + item.bizPrice.toLocaleString() : '-' }}</span>
               </div>
             </div>
             <div v-if="activeTab === 'pending' && item.status === 'pending'" class="approval-card__footer">
@@ -105,10 +114,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { approvalApi, type ApprovalInstance } from '@/api/purchases'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
+
+const router = useRouter()
 
 const authStore = useAuthStore()
 const activeTab = ref('my')
@@ -163,6 +175,10 @@ async function fetchApprovals() {
 function resetFilters() {
   filterParams.keyword = ''
   fetchApprovals()
+}
+
+function goToDetail(item: ApprovalInstance) {
+  router.push(`/approval-instances/${item.id}`)
 }
 
 function openApproveDialog(item: ApprovalInstance) {

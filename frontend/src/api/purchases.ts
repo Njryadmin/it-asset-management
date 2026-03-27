@@ -13,6 +13,8 @@ export interface ApprovalInstance {
   approvalChain: ApprovalChainItem[]
   totalSteps: number | null
   createdAt: string
+  bizTitle?: string
+  bizPrice?: number
 }
 
 export interface ApprovalChainItem {
@@ -67,6 +69,9 @@ export const flowsApi = {
 }
 
 export const approvalApi = {
+  get(id: number) {
+    return request.get<ApprovalInstance>(`/approval-instances/${id}`)
+  },
   instances(params?: { status?: string; page?: number; page_size?: number }) {
     return request.get<ApiResponse<ApprovalInstance>>('/approval-instances', { params })
   },

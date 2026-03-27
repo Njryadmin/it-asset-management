@@ -9,6 +9,7 @@ from app.core.database import get_db
 from app.models import User
 from app.models.approval_flow import ApprovalFlow
 from app.models.approval_instance import ApprovalInstance
+from app.models.models import PurchaseRequest
 from app.api.v1.endpoints.auth import get_current_active_user
 from app.core.permissions import require_admin
 
@@ -56,7 +57,7 @@ class ApprovalChainItem(BaseModel):
     time: Optional[str] = None
 
 
-class ApprovalInstanceResponse(BaseModel):
+class ApprovalInstanceResponseWithBiz(BaseModel):
     id: int
     flow_id: Optional[int]
     instance_no: str
@@ -69,9 +70,15 @@ class ApprovalInstanceResponse(BaseModel):
     approval_chain: List[dict]
     total_steps: Optional[int]
     created_at: datetime
+    biz_title: Optional[str] = None
+    biz_price: Optional[float] = None
 
     class Config:
         from_attributes = True
+
+
+# Alias for backwards compat
+ApprovalInstanceResponse = ApprovalInstanceResponseWithBiz
 
 
 class ApprovalInstanceListResponse(BaseModel):
@@ -81,6 +88,44 @@ class ApprovalInstanceListResponse(BaseModel):
 
 class ApprovalActionRequest(BaseModel):
     comment: Optional[str] = None
+
+
+# ============ Helper: enrich list items with biz data ============
+async def _enrich_items(items: List[ApprovalInstance], db: AsyncSession) -> List[dict]:
+    """Enrich approval instances with biz_title and biz_price for purchase_request type."""
+    pr_items = [i for i in items if i.biz_type == "purchase_request" and i.biz_id]
+    pr_map: dict[int, dict] = {}
+    if pr_items:
+        pr_ids = [i.biz_id for i in pr_items]
+        result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id.in_(pr_ids)))
+        for pr in result.scalars().all():
+            pr_map[pr.id] = pr
+
+    out = []
+    for item in items:
+        data = {
+            "id": item.id,
+            "flow_id": item.flow_id,
+            "instance_no": item.instance_no,
+            "biz_type": item.biz_type,
+            "biz_id": item.biz_id,
+            "applicant_id": item.applicant_id,
+            "applicant_name": item.applicant_name,
+            "current_step": item.current_step,
+            "status": item.status,
+            "approval_chain": item.approval_chain or [],
+            "total_steps": item.total_steps,
+            "created_at": item.created_at,
+        }
+        if item.biz_type == "purchase_request" and item.biz_id and item.biz_id in pr_map:
+            pr = pr_map[item.biz_id]
+            data["biz_title"] = pr.title
+            data["biz_price"] = pr.estimated_price
+        else:
+            data["biz_title"] = None
+            data["biz_price"] = None
+        out.append(ApprovalInstanceResponseWithBiz(**data))
+    return out
 
 
 # ============ Approval Flows ============
@@ -204,7 +249,8 @@ async def list_approval_instances(
     result = await db.execute(query)
     items = result.scalars().all()
 
-    return {"total": total, "items": items}
+    enriched = await _enrich_items(list(items), db)
+    return {"total": total, "items": enriched}
 
 
 @router.get("/my-pending", response_model=ApprovalInstanceListResponse)
@@ -223,7 +269,8 @@ async def list_my_pending_approvals(
     query = query.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(query)
     items = result.scalars().all()
-    return {"total": total, "items": items}
+    enriched = await _enrich_items(list(items), db)
+    return {"total": total, "items": enriched}
 
 
 @router.get("/my-applications", response_model=ApprovalInstanceListResponse)
@@ -242,7 +289,8 @@ async def list_my_applications(
     query = query.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(query)
     items = result.scalars().all()
-    return {"total": total, "items": items}
+    enriched = await _enrich_items(list(items), db)
+    return {"total": total, "items": enriched}
 
 
 @router.get("/my-history", response_model=ApprovalInstanceListResponse)
@@ -264,7 +312,8 @@ async def list_my_approval_history(
     query = query.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(query)
     items = result.scalars().all()
-    return {"total": total, "items": items}
+    enriched = await _enrich_items(list(items), db)
+    return {"total": total, "items": enriched}
 
 
 @router.get("/{instance_id}", response_model=ApprovalInstanceResponse)
@@ -278,7 +327,8 @@ async def get_approval_instance(
     instance = result.scalar_one_or_none()
     if not instance:
         raise HTTPException(status_code=404, detail="审批实例不存在")
-    return instance
+    enriched = await _enrich_items([instance], db)
+    return enriched[0]
 
 
 @router.post("/{instance_id}/approve")

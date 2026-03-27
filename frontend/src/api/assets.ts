@@ -44,3 +44,18 @@ export const assetsApi = {
     return downloadFile('/assets/export', params, filename)
   }
 }
+
+export const maintenanceApi = {
+  list(params: { asset_id: number; page?: number; page_size?: number }) {
+    return request.get('/asset-maintenance-logs', { params })
+  },
+  create(data: any) {
+    return request.post('/asset-maintenance-logs', data)
+  },
+  update(id: number, data: any) {
+    return request.put(`/asset-maintenance-logs/${id}`, data)
+  },
+  delete(id: number) {
+    return request.delete(`/asset-maintenance-logs/${id}`)
+  },
+}
