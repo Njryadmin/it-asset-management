@@ -338,18 +338,27 @@ async function reset() {
 
 async function handleExport(command: string) {
   try {
-    const response = await fetch('/api/v1/departments/export', {
+    // 收集当前可见字段
+    const visibleFields = columns.value.filter(col => col.visible).map(col => col.key)
+    const params = new URLSearchParams()
+    if (visibleFields.length > 0) {
+      params.set('fields', visibleFields.join(','))
+    }
+    const queryString = params.toString()
+    const url = `/api/v1/departments/export${queryString ? '?' + queryString : ''}`
+    const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` }
     })
+    if (!response.ok) throw new Error('导出失败')
     const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
+    const blobUrl = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
+    a.href = blobUrl
     a.download = `departments_${dayjs().format('YYYYMMDD_HHmmss')}.csv`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    window.URL.revokeObjectURL(blobUrl)
     ElMessage.success('导出成功')
   } catch (error) {
     ElMessage.error('导出失败')

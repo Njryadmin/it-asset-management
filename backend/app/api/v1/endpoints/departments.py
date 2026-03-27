@@ -162,32 +162,53 @@ async def delete_department(
 
 @router.get("/export")
 async def export_departments(
+    fields: Optional[str] = Query(None, description="导出字段，逗号分隔，如'name,code,description'"),
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    """导出所有部门为CSV"""
+    """导出部门为CSV（支持按字段导出）"""
     result = await db.execute(select(Department))
     departments = result.scalars().all()
     
     output = io.StringIO()
     writer = csv.writer(output)
     
-    # Header
-    writer.writerow(['部门名称', '编码', '上级部门名称', '描述', '创建时间'])
+    # 字段配置：key -> (中文表头, 取值函数)
+    FIELD_CONFIG = {
+        'name': ('部门名称', lambda d: d.name),
+        'code': ('编码', lambda d: d.code or ''),
+        'parent': ('上级部门名称', None),  # 特殊处理
+        'description': ('描述', lambda d: d.description or ''),
+        'created_at': ('创建时间', lambda d: d.created_at.strftime('%Y-%m-%d %H:%M:%S') if d.created_at else ''),
+    }
     
-    # Build parent name lookup
-    dept_map = {dept.id: dept.name for dept in departments}
+    # 支持的字段列表（按顺序）
+    ALL_FIELDS = ['name', 'code', 'parent', 'description', 'created_at']
     
-    # Data
+    # 确定要导出的字段
+    if fields:
+        selected = [f.strip() for f in fields.split(',') if f.strip() in FIELD_CONFIG]
+    else:
+        selected = ALL_FIELDS
+    
+    # Build parent name lookup（从所有部门中构建，确保能找到）
+    all_depts_result = await db.execute(select(Department.id, Department.name))
+    dept_id_to_name = {row.id: row.name for row in all_depts_result.scalars().all()}
+    
+    # 写入表头
+    headers = [FIELD_CONFIG[f][0] for f in selected]
+    writer.writerow(headers)
+    
+    # 写入数据
     for dept in departments:
-        parent_name = dept_map.get(dept.parent_id, '') if dept.parent_id else ''
-        writer.writerow([
-            dept.name,
-            dept.code or '',
-            parent_name,
-            dept.description or '',
-            dept.created_at.strftime('%Y-%m-%d %H:%M:%S') if dept.created_at else ''
-        ])
+        row = []
+        for f in selected:
+            if f == 'parent':
+                parent_name = dept_id_to_name.get(dept.parent_id, '') if dept.parent_id else ''
+                row.append(parent_name)
+            else:
+                row.append(FIELD_CONFIG[f][1](dept))
+        writer.writerow(row)
     
     output.seek(0)
     bom = '\ufeff'
