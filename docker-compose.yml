@@ -1,17 +1,33 @@
 version: '3.8'
 
+# ============================================================
+# IT 资产管理系统 - Docker Compose 配置
+# ============================================================
+# 使用说明：
+#   1. 默认配置可直接运行: docker-compose up -d
+#   2. 生产环境请修改以下环境变量:
+#      - SECRET_KEY（后端 JWT 密钥，必须更换）
+#      - POSTGRES_PASSWORD（数据库密码，必须更换）
+#   3. 完整环境变量说明见 README 或下方注释
+
 services:
   postgres:
     image: postgres:15-alpine
     environment:
+      # 数据库用户名
       POSTGRES_USER: postgres
+      # 数据库密码（生产环境请修改）
       POSTGRES_PASSWORD: postgres
+      # 数据库名称
       POSTGRES_DB: itasset
     volumes:
+      # 数据持久化目录，删除容器后数据保留
       - postgres_data:/var/lib/postgresql/data
     ports:
+      # PostgreSQL 端口映射（宿主机:容器）
       - "5432:5432"
     healthcheck:
+      # 健康检查：容器启动后每10秒检查一次 PostgreSQL 是否就绪
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
@@ -20,8 +36,10 @@ services:
   redis:
     image: redis:7-alpine
     ports:
+      # Redis 端口映射（宿主机:容器）
       - "6379:6379"
     healthcheck:
+      # 健康检查：容器启动后每10秒检查一次 Redis 是否就绪
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
@@ -32,25 +50,38 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
+      # 后端 API 端口（宿主机:容器）
       - "8000:8000"
     environment:
+      # ---------- 数据库配置 ----------
+      # PostgreSQL 主机名（对应 docker-compose service 名称）
       - POSTGRES_SERVER=postgres
       - POSTGRES_USER=postgres
+      # 数据库密码（生产环境必须修改）
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=itasset
       - POSTGRES_PORT=5432
+
+      # ---------- Redis 配置 ----------
+      # Redis 主机名（对应 docker-compose service 名称）
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+
+      # ---------- 安全配置 ----------
+      # JWT 签名密钥（生产环境必须更换为随机字符串，建议 32 位以上）
+      # 生成方式: python -c "import secrets; print(secrets.token_hex(32))"
       - SECRET_KEY=your-secret-key-change-in-production
     volumes:
+      # 静态文件持久化（上传的 Logo/Favicon 等，删除容器后保留）
       - static_data:/app/static
     depends_on:
+      # 等待 PostgreSQL 和 Redis 健康检查通过后再启动
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     command: >
-      sh -c "sleep 5 && 
+      sh -c "sleep 5 &&
              gunicorn --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker app.main:app --workers 2"
 
   frontend:
@@ -58,10 +89,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
+      # 前端页面端口（宿主机:容器）
       - "3030:80"
     depends_on:
+      # 等待后端启动后再构建前端（避免前端构建时后端未就绪）
       - backend
 
 volumes:
+  # PostgreSQL 数据持久化卷（删除容器后数据不丢失）
   postgres_data:
+  # 静态文件持久化卷（Logo/Favicon/上传文件等）
   static_data:
