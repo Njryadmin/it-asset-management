@@ -14,9 +14,10 @@
       :class="{ 'sidebar--open': sidebarVisible }"
     >
       <div class="sidebar__header">
-        <div class="sidebar__logo">
-          <span class="sidebar__logo-icon">💻</span>
-          <span class="sidebar__logo-text">IT资产</span>
+        <div class="sidebar__logo" @click="$router.push('/')">
+          <img v-if="siteLogo" :src="siteLogo" class="sidebar__logo-img" alt="logo" />
+          <span v-else class="sidebar__logo-icon">💻</span>
+          <span class="sidebar__logo-text">{{ siteName || 'IT资产' }}</span>
         </div>
       </div>
 
@@ -136,12 +137,15 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { settingsApi } from '@/api/settings'
 import { ElMessageBox } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const sidebarVisible = ref(false)
+const siteLogo = ref('')
+const siteName = ref('')
 
 const routeTitleMap: Record<string, string> = {
   '/': '仪表盘',
@@ -196,10 +200,18 @@ watch(sidebarVisible, (visible) => {
   }
 })
 
-// Fetch user on mount if token exists
-onMounted(() => {
+// Fetch user and settings on mount
+onMounted(async () => {
   if (authStore.token) {
     authStore.fetchUser().catch(() => {})
+  }
+  // Fetch site settings for logo/name
+  try {
+    const res = await settingsApi.get()
+    siteLogo.value = (res.data as any).logo_url || ''
+    siteName.value = (res.data as any).system_name || 'IT资产'
+  } catch {
+    // ignore
   }
 })
 </script>
@@ -241,6 +253,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
+}
+
+.sidebar__logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .sidebar__logo-icon {

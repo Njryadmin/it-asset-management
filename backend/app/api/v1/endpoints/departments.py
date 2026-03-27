@@ -193,7 +193,7 @@ async def export_departments(
     
     # Build parent name lookup（从所有部门中构建，确保能找到）
     all_depts_result = await db.execute(select(Department.id, Department.name))
-    dept_id_to_name = {row.id: row.name for row in all_depts_result.scalars().all()}
+    dept_id_to_name = {row[0]: row[1] for row in all_depts_result.all()}
     
     # 写入表头
     headers = [FIELD_CONFIG[f][0] for f in selected]

@@ -94,88 +94,140 @@
       <!-- ── Left Column ── -->
       <el-col :xs="24" :md="14">
 
-        <!-- Asset Status Donut -->
+        <!-- Asset Status Donut — Redesigned -->
         <div class="panel anim-fade-in-up" style="animation-delay:100ms">
           <div class="panel__header">
-            <span class="panel__title">资产状态分布</span>
+            <span class="panel__title">📊 资产状态分布</span>
             <span class="panel__badge">共 {{ stats.totalAssets || 0 }} 项</span>
           </div>
-          <div class="panel__body donut-layout">
-            <div class="donut-wrap">
-              <div class="donut-chart" :style="donutStyle">
-                <div class="donut-center">
-                  <span class="donut-center__num">{{ stats.totalAssets || 0 }}</span>
-                  <span class="donut-center__txt">资产</span>
+          <div class="panel__body status-dist-grid">
+            <!-- Donut Chart -->
+            <div class="donut-wrapper">
+              <div class="donut-ring">
+                <svg viewBox="0 0 200 200" class="donut-svg">
+                  <circle
+                    v-for="(seg, i) in donutSegments"
+                    :key="seg.key"
+                    cx="100" cy="100" r="72"
+                    fill="none"
+                    :stroke="seg.color"
+                    stroke-width="22"
+                    :stroke-dasharray="seg.dashArray"
+                    :stroke-dashoffset="seg.dashOffset"
+                    :stroke-linecap="seg.dashArray !== '0 452.39' ? 'butt' : 'butt'"
+                    class="donut-seg"
+                    :style="{ animationDelay: i * 80 + 'ms' }"
+                  />
+                </svg>
+                <div class="donut-core">
+                  <span class="donut-core__pct">{{ overallUsagePct }}%</span>
+                  <span class="donut-core__label">使用率</span>
                 </div>
               </div>
             </div>
-            <div class="donut-legend">
+            <!-- Status Cards -->
+            <div class="status-cards">
               <div
-                v-for="item in statusLegendItems"
+                v-for="item in statusCardItems"
                 :key="item.key"
-                class="legend-item"
+                class="status-card"
+                :style="{ '--status-color': item.color }"
               >
-                <span class="legend-dot" :style="{ background: item.color }"></span>
-                <span class="legend-label">{{ item.label }}</span>
-                <span class="legend-count">{{ item.count }}</span>
-                <span class="legend-pct">{{ item.pct }}%</span>
+                <div class="status-card__top">
+                  <span class="status-card__name">{{ item.label }}</span>
+                  <span class="status-card__count" :style="{ color: item.color }">{{ item.count }}</span>
+                </div>
+                <div class="status-card__bar-track">
+                  <div
+                    class="status-card__bar-fill"
+                    :style="{ width: item.pct + '%', background: item.color }"
+                  ></div>
+                </div>
+                <div class="status-card__bottom">
+                  <span class="status-card__pct">{{ item.pct }}%</span>
+                  <span class="status-card__pct-label">占比</span>
+                </div>
               </div>
-              <el-empty
-                v-if="!hasStatusData"
-                description="暂无数据"
-                :image-size="60"
-              />
+              <el-empty v-if="!hasStatusData" description="暂无数据" :image-size="60" />
             </div>
           </div>
         </div>
 
-        <!-- Asset Usage Rate Progress -->
+        <!-- Asset Usage Rate — Redesigned -->
         <div class="panel anim-fade-in-up" style="animation-delay:160ms">
           <div class="panel__header">
-            <span class="panel__title">资产使用率</span>
+            <span class="panel__title">📈 资产使用率</span>
+            <span class="panel__badge panel__badge--green">整体 {{ overallUsagePct }}%</span>
           </div>
-          <div class="panel__body usage-rates">
-            <div class="usage-rate-item">
-              <div class="usage-rate-item__label">
-                <span>使用中</span>
-                <span class="usage-rate-item__count">
-                  {{ stats.assetsByStatus?.inUse || 0 }} / {{ stats.totalAssets || 0 }}
-                </span>
+          <div class="panel__body usage-section">
+            <!-- Usage Gauge -->
+            <div class="usage-gauge-wrap">
+              <div class="usage-gauge">
+                <svg viewBox="0 0 120 120" class="gauge-svg">
+                  <circle
+                    cx="60" cy="60" r="50"
+                    fill="none"
+                    stroke="var(--wechat-bg)"
+                    stroke-width="10"
+                  />
+                  <circle
+                    cx="60" cy="60" r="50"
+                    fill="none"
+                    :stroke="usageGaugeColor"
+                    stroke-width="10"
+                    stroke-linecap="round"
+                    :stroke-dasharray="gaugeDashArray"
+                    stroke-dashoffset="0"
+                    transform="rotate(-90 60 60)"
+                    class="gauge-fill"
+                  />
+                </svg>
+                <div class="gauge-label">
+                  <span class="gauge-label__pct" :style="{ color: usageGaugeColor }">{{ overallUsagePct }}%</span>
+                  <span class="gauge-label__txt">使用率</span>
+                </div>
               </div>
-              <el-progress
-                :percentage="usageRate('inUse')"
-                :stroke-width="10"
-                :color="statusColorMap.inUse"
-                :show-text="true"
-              />
+              <div class="usage-summary">
+                <div class="usage-summary__item">
+                  <span class="usage-summary__num" style="color:#1AAD19">{{ stats.assetsByStatus?.inUse || 0 }}</span>
+                  <span class="usage-summary__desc">在用资产</span>
+                </div>
+                <div class="usage-summary__divider"></div>
+                <div class="usage-summary__item">
+                  <span class="usage-summary__num" style="color:#909399">{{ stats.assetsByStatus?.idle || 0 }}</span>
+                  <span class="usage-summary__desc">闲置资产</span>
+                </div>
+                <div class="usage-summary__divider"></div>
+                <div class="usage-summary__item">
+                  <span class="usage-summary__num" style="color:#FF991A">{{ stats.assetsByStatus?.maintenance || 0 }}</span>
+                  <span class="usage-summary__desc">维护中</span>
+                </div>
+              </div>
             </div>
-            <div class="usage-rate-item">
-              <div class="usage-rate-item__label">
-                <span>闲置中</span>
-                <span class="usage-rate-item__count">
-                  {{ stats.assetsByStatus?.idle || 0 }} / {{ stats.totalAssets || 0 }}
-                </span>
+            <!-- Animated Rate Bars -->
+            <div class="rate-bars">
+              <div v-for="bar in usageBarItems" :key="bar.key" class="rate-bar-item">
+                <div class="rate-bar-item__header">
+                  <div class="rate-bar-item__info">
+                    <span class="rate-bar-dot" :style="{ background: bar.color }"></span>
+                    <span class="rate-bar-item__name">{{ bar.label }}</span>
+                  </div>
+                  <div class="rate-bar-item__nums">
+                    <span class="rate-bar-item__count" :style="{ color: bar.color }">{{ bar.count }}</span>
+                    <span class="rate-bar-item__total">/ {{ stats.totalAssets || 0 }}</span>
+                  </div>
+                </div>
+                <div class="rate-bar-track">
+                  <div
+                    class="rate-bar-fill"
+                    :class="{ 'rate-bar-fill--animated': bar.count > 0 }"
+                    :style="{
+                      width: bar.pct + '%',
+                      background: `linear-gradient(90deg, ${bar.color}99, ${bar.color})`
+                    }"
+                  ></div>
+                </div>
               </div>
-              <el-progress
-                :percentage="usageRate('idle')"
-                :stroke-width="10"
-                :color="statusColorMap.idle"
-                :show-text="true"
-              />
-            </div>
-            <div class="usage-rate-item">
-              <div class="usage-rate-item__label">
-                <span>维护中</span>
-                <span class="usage-rate-item__count">
-                  {{ stats.assetsByStatus?.maintenance || 0 }} / {{ stats.totalAssets || 0 }}
-                </span>
-              </div>
-              <el-progress
-                :percentage="usageRate('maintenance')"
-                :stroke-width="10"
-                :color="statusColorMap.maintenance"
-                :show-text="true"
-              />
             </div>
           </div>
         </div>
@@ -505,49 +557,108 @@ const hasStatusData = computed(() => {
   return Object.values(stats.value.assetsByStatus || {}).some((v: any) => v > 0)
 })
 
-// ── Donut Chart ──
-const donutStyle = computed(() => {
-  const total = stats.value.totalAssets || 0
-  if (!total) return {}
+// ── SVG Donut Chart ──
+const CIRCUMFERENCE = 2 * Math.PI * 72  // ≈ 452.39
 
-  const gradientParts: string[] = []
-  let currentDeg = 0
+interface DonutSeg {
+  key: string
+  color: string
+  dashArray: string
+  dashOffset: string
+}
+
+const donutSegments = computed<DonutSeg[]>(() => {
+  const total = stats.value.totalAssets || 0
+  if (!total) return []
+
+  const segments: DonutSeg[] = []
+  let accumulated = 0
 
   for (const key of statusOrder) {
     const count = (stats.value.assetsByStatus as any)?.[key] || 0
     if (!count) continue
-    const deg = (count / total) * 360
-    gradientParts.push(`${statusColorMap[key] || '#909399'} ${currentDeg}deg ${currentDeg + deg}deg`)
-    currentDeg += deg
-  }
-  if (currentDeg < 360) {
-    gradientParts.push(`#F0F0F0 ${currentDeg}deg 360deg`)
+
+    const pct = count / total
+    const arcLen = pct * CIRCUMFERENCE
+    const gapLen = CIRCUMFERENCE - arcLen
+
+    segments.push({
+      key,
+      color: statusColorMap[key] || '#909399',
+      dashArray: `${arcLen.toFixed(2)} ${gapLen.toFixed(2)}`,
+      dashOffset: (-accumulated * CIRCUMFERENCE).toFixed(2),
+    })
+    accumulated += pct
   }
 
-  return { background: `conic-gradient(${gradientParts.join(', ')})` }
+  return segments
 })
 
-interface LegendItem {
+interface StatusCardItem {
   key: string
   label: string
   color: string
   count: number
-  pct: string
+  pct: number
 }
 
-const statusLegendItems = computed<LegendItem[]>(() => {
+const statusCardItems = computed<StatusCardItem[]>(() => {
   const total = stats.value.totalAssets || 0
-  return statusOrder
-    .map(key => {
-      const count = (stats.value.assetsByStatus as any)?.[key] || 0
-      return {
-        key,
-        label: statusLabelMap[key] || key,
-        color: statusColorMap[key] || '#909399',
-        count,
-        pct: total ? ((count / total) * 100).toFixed(1) : '0',
-      }
-    })
+  return statusOrder.map(key => {
+    const count = (stats.value.assetsByStatus as any)?.[key] || 0
+    return {
+      key,
+      label: statusLabelMap[key] || key,
+      color: statusColorMap[key] || '#909399',
+      count,
+      pct: total ? Math.round((count / total) * 100) : 0,
+    }
+  })
+})
+
+// ── Usage Rate ──
+const overallUsagePct = computed(() => {
+  const total = stats.value.totalAssets || 0
+  if (!total) return 0
+  const inUse = (stats.value.assetsByStatus as any)?.inUse || 0
+  return Math.round((inUse / total) * 100)
+})
+
+const usageGaugeColor = computed(() => {
+  const pct = overallUsagePct.value
+  if (pct >= 70) return '#1AAD19'
+  if (pct >= 40) return '#FF991A'
+  return '#909399'
+})
+
+const gaugeDashArray = computed(() => {
+  const pct = overallUsagePct.value / 100
+  const filled = pct * (2 * Math.PI * 50)
+  const total = 2 * Math.PI * 50
+  return `${filled.toFixed(2)} ${(total - filled).toFixed(2)}`
+})
+
+interface UsageBarItem {
+  key: string
+  label: string
+  color: string
+  count: number
+  pct: number
+}
+
+const usageBarItems = computed<UsageBarItem[]>(() => {
+  const total = stats.value.totalAssets || 0
+  const keys = ['inUse', 'idle', 'maintenance']
+  return keys.map(key => {
+    const count = (stats.value.assetsByStatus as any)?.[key] || 0
+    return {
+      key,
+      label: statusLabelMap[key] || key,
+      color: statusColorMap[key] || '#909399',
+      count,
+      pct: total ? Math.round((count / total) * 100) : 0,
+    }
+  })
 })
 
 // ── Fetch Data ──
@@ -564,8 +675,8 @@ async function fetchSettings() {
   try {
     const response = await settingsApi.get()
     if (response.data) {
-      settings.value.systemName = (response.data as any).systemName || (response.data as any).siteTitle || 'IT 资产管理系统'
-      settings.value.logoUrl = (response.data as any).logoUrl || ''
+      settings.value.systemName = (response.data as any).system_name || (response.data as any).siteTitle || 'IT 资产管理系统'
+      settings.value.logoUrl = (response.data as any).logo_url || ''
     }
   } catch (error) {
     console.error('Failed to fetch settings:', error)
@@ -789,120 +900,347 @@ onMounted(async () => {
   padding: 18px;
 }
 
-/* ── Donut Chart ── */
-.donut-layout {
-  display: flex;
+/* ── Status Distribution Grid ── */
+.status-dist-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 20px;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
 }
 
-.donut-wrap {
+@media (max-width: 600px) {
+  .status-dist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Donut Ring */
+.donut-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.donut-ring {
+  position: relative;
+  width: 160px;
+  height: 160px;
   flex-shrink: 0;
 }
 
-.donut-chart {
-  position: relative;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.06));
 }
 
-.donut-center {
+.donut-seg {
+  transform-origin: center;
+  animation: donut-reveal 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes donut-reveal {
+  from {
+    stroke-dasharray: 0 452.39;
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.donut-core {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: var(--wechat-card);
-  margin: 16px;
 }
 
-.donut-center__num {
-  font-size: 24px;
+.donut-core__pct {
+  font-size: 26px;
   font-weight: 800;
   color: var(--wechat-text);
   line-height: 1;
+  letter-spacing: -1px;
 }
 
-.donut-center__txt {
+.donut-core__label {
+  font-size: 11px;
+  color: var(--wechat-text-secondary);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* Status Cards */
+.status-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.status-card {
+  background: var(--wechat-bg);
+  border: 1px solid var(--wechat-border-light);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.status-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--status-color);
+  border-radius: 0 2px 2px 0;
+}
+
+.status-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.status-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.status-card__name {
+  font-size: 12px;
+  color: var(--wechat-text-secondary);
+  font-weight: 500;
+}
+
+.status-card__count {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.status-card__bar-track {
+  height: 4px;
+  background: var(--wechat-border-light);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.status-card__bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 2px;
+}
+
+.status-card__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-card__pct {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--wechat-text);
+}
+
+.status-card__pct-label {
+  font-size: 11px;
+  color: var(--wechat-text-placeholder);
+}
+
+/* ── Usage Rate Section ── */
+.usage-section {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .usage-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Usage Gauge */
+.usage-gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.usage-gauge {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gauge-fill {
+  animation: gauge-reveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition: stroke-dasharray 1s ease;
+}
+
+@keyframes gauge-reveal {
+  from {
+    stroke-dasharray: 0 314.16;
+  }
+}
+
+.gauge-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-label__pct {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.gauge-label__txt {
   font-size: 11px;
   color: var(--wechat-text-secondary);
   margin-top: 2px;
+  font-weight: 500;
 }
 
-.donut-legend {
+.usage-summary {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  background: var(--wechat-bg);
+  border: 1px solid var(--wechat-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.usage-summary__item {
   flex: 1;
-  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 6px;
+  gap: 2px;
+}
+
+.usage-summary__num {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.usage-summary__desc {
+  font-size: 10px;
+  color: var(--wechat-text-secondary);
+  font-weight: 500;
+}
+
+.usage-summary__divider {
+  width: 1px;
+  height: 36px;
+  background: var(--wechat-border-light);
+  flex-shrink: 0;
+}
+
+/* Rate Bars */
+.rate-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rate-bar-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.legend-item {
+.rate-bar-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rate-bar-item__info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 6px;
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast);
+  gap: 7px;
 }
 
-.legend-item:hover {
-  background: var(--wechat-bg);
-}
-
-.legend-dot {
+.rate-bar-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.legend-label {
-  flex: 1;
+.rate-bar-item__name {
   font-size: 13px;
   color: var(--wechat-text-secondary);
+  font-weight: 500;
 }
 
-.legend-count {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--wechat-text);
-  min-width: 28px;
-  text-align: right;
+.rate-bar-item__nums {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
 }
 
-.legend-pct {
+.rate-bar-item__count {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.rate-bar-item__total {
   font-size: 11px;
   color: var(--wechat-text-placeholder);
-  min-width: 36px;
-  text-align: right;
 }
 
-/* ── Usage Rate Progress ── */
-.usage-rates {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.rate-bar-track {
+  height: 8px;
+  background: var(--wechat-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--wechat-border-light);
 }
 
-.usage-rate-item__label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  font-size: 13px;
-  color: var(--wechat-text-secondary);
+.rate-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 2px;
 }
 
-.usage-rate-item__count {
-  font-weight: 600;
-  color: var(--wechat-text);
-  font-size: 13px;
+.rate-bar-fill--animated {
+  background-size: 20px 20px;
+  animation: bar-stripes 1s linear infinite;
+}
+
+@keyframes bar-stripes {
+  from { background-position: 0 0; }
+  to { background-position: 20px 0; }
 }
 
 /* ── Purchase List ── */
@@ -1146,3 +1484,4 @@ onMounted(async () => {
 }
 
 </style>
+/* UNIQUE_BUILD_MARKER_1774576057 */
