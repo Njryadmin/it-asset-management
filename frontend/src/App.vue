@@ -91,5 +91,14 @@ onMounted(() => {
     document.documentElement.setAttribute('data-theme', savedTheme)
     applyTheme(savedTheme)
   }
+  // Expose global theme toggle for header button
+  ;(window as any).__toggleTheme = () => {
+    const current = localStorage.getItem('app-theme') || 'default'
+    const next = current === 'default' ? 'dark' : 'default'
+    localStorage.setItem('app-theme', next)
+    document.documentElement.setAttribute('data-theme', next)
+    applyTheme(next)
+  }
+  ;(window as any).__getTheme = () => localStorage.getItem('app-theme') || 'default'
 })
 </script>

@@ -28,6 +28,9 @@ async def init_db():
     # Import all models to ensure their tables are created
     from app.models import User, Category, Supplier, Department, Asset  # noqa: F401
     from app.models import SystemSettings  # noqa: F401 - ensures table is created
+    from app.models.audit_log import AuditLog  # noqa: F401
+    from app.models.approval_flow import ApprovalFlow  # noqa: F401
+    from app.models.approval_instance import ApprovalInstance  # noqa: F401
     
     # First, drop existing enum types if they exist (fixes PostgreSQL enum conflict)
     async with engine.begin() as conn:

@@ -114,7 +114,11 @@
       <!-- Table -->
       <el-table :data="assetStore.assets" v-loading="assetStore.loading" style="width: 100%" class="data-table">
         <template v-for="col in columns" :key="col.key">
-          <el-table-column v-if="col.visible && col.key === 'name'" prop="name" label="资产名称" min-width="150" />
+          <el-table-column v-if="col.visible && col.key === 'name'" prop="name" label="资产名称" min-width="150">
+            <template #default="{ row }">
+              <router-link :to="`/assets/${row.id}`" class="asset-name-link">{{ row.name }}</router-link>
+            </template>
+          </el-table-column>
           <el-table-column v-if="col.visible && col.key === 'assetCode'" prop="assetCode" label="资产编号" width="140" />
           <el-table-column v-if="col.visible && col.key === 'serialNumber'" prop="serialNumber" label="序列号" width="140" />
           <el-table-column v-if="col.visible && col.key === 'category'" prop="categoryId" label="分类" width="120">
@@ -696,5 +700,14 @@ onMounted(async () => {
   .el-table :deep(.el-button) {
     padding: 4px 6px;
   }
+}
+
+.asset-name-link {
+  color: var(--wechat-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.asset-name-link:hover {
+  text-decoration: underline;
 }
 </style>

@@ -62,6 +62,18 @@
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
+        <el-menu-item v-if="authStore.user?.isSuperuser" index="/approvals">
+          <el-icon><DocumentChecked /></el-icon>
+          <span>审批管理</span>
+        </el-menu-item>
+        <el-menu-item v-if="authStore.user?.isSuperuser" index="/audit">
+          <el-icon><Histogram /></el-icon>
+          <span>审计日志</span>
+        </el-menu-item>
+        <el-menu-item v-if="authStore.user?.isSuperuser" index="/reports">
+          <el-icon><DataAnalysis /></el-icon>
+          <span>报表中心</span>
+        </el-menu-item>
         <el-menu-item index="/settings">
           <el-icon><Setting /></el-icon>
           <span>系统设置</span>
@@ -94,6 +106,14 @@
         </div>
 
         <div class="header__right">
+          <!-- Theme Toggle (Lobe Theme style) -->
+          <button class="theme-toggle" @click="toggleTheme" :title="currentTheme === 'dark' ? '切换浅色主题' : '切换深色主题'">
+            <el-icon :size="18">
+              <Sunny v-if="currentTheme === 'dark'" />
+              <Moon v-else />
+            </el-icon>
+          </button>
+
           <!-- User dropdown -->
           <el-dropdown trigger="click" @command="handleCommand">
             <span class="user-info">
@@ -138,6 +158,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { settingsApi } from '@/api/settings'
 import { ElMessageBox } from 'element-plus'
+import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -145,6 +166,12 @@ const authStore = useAuthStore()
 const sidebarVisible = ref(false)
 const siteLogo = ref('')
 const siteName = ref('')
+const currentTheme = ref((window as any).__getTheme?.() || 'default')
+
+function toggleTheme() {
+  ;(window as any).__toggleTheme?.()
+  currentTheme.value = (window as any).__getTheme?.() || 'default'
+}
 
 const routeTitleMap: Record<string, string> = {
   '/': '仪表盘',
@@ -154,6 +181,9 @@ const routeTitleMap: Record<string, string> = {
   '/suppliers': '供应商管理',
   '/purchases': '采购管理',
   '/users': '用户管理',
+  '/approvals': '审批管理',
+  '/audit': '审计日志',
+  '/reports': '报表中心',
   '/settings': '系统设置',
 }
 
@@ -418,6 +448,30 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* ── Theme Toggle Button (Lobe Theme style) ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--wechat-bg);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--wechat-text-secondary);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  background: var(--wechat-bg-hover);
+  color: var(--wechat-text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.theme-toggle:active {
+  transform: scale(0.94);
 }
 
 /* ── Hamburger ── */

@@ -67,6 +67,30 @@ const routes: RouteRecordRaw[] = [
         path: 'departments',
         name: 'Departments',
         component: () => import('@/views/departments/DepartmentList.vue')
+      },
+      {
+        path: 'audit',
+        name: 'AuditLog',
+        component: () => import('@/views/audit/AuditLogList.vue'),
+        meta: { requiresAuth: true, adminOnly: true }
+      },
+      {
+        path: 'approvals',
+        name: 'Approvals',
+        component: () => import('@/views/approvals/ApprovalList.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'reports',
+        name: 'AssetReports',
+        component: () => import('@/views/reports/AssetReports.vue'),
+        meta: { requiresAuth: true, adminOnly: true }
+      },
+      {
+        path: 'assets/:id',
+        name: 'AssetDetail',
+        component: () => import('@/views/assets/AssetDetail.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   }

@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Enum, Float
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Enum, Float, Date
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -102,6 +103,14 @@ class Asset(Base):
     description = Column(Text)
     specs = Column(Text)  # JSON string for specifications
     region = Column(String(100), nullable=True)  # 地区
+    
+    # New fields
+    brand = Column(String(100), nullable=True)
+    model = Column(String(100), nullable=True)
+    location = Column(String(200), nullable=True)
+    purchase_date = Column(Date, nullable=True)  # Plain date without time
+    importance_level = Column(String(20), nullable=True)  # critical/important/normal/low
+    deleted_at = Column(DateTime(timezone=True), nullable=True)  # Soft delete
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

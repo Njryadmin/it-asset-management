@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 
 
 # ============ User Schemas ============
@@ -151,12 +151,17 @@ class AssetBase(BaseModel):
     department_id: Optional[int] = None
     assigned_to: Optional[int] = None
     status: str = "idle"
-    purchase_date: Optional[datetime] = None
+    purchase_date: Optional[date] = None
     purchase_price: Optional[float] = None
     warranty_expire_date: Optional[datetime] = None
     description: Optional[str] = None
     specs: Optional[str] = None
     region: Optional[str] = None
+    # New fields
+    brand: Optional[str] = None
+    model: Optional[str] = None
+    location: Optional[str] = None
+    importance_level: Optional[str] = None
 
 
 class AssetCreate(AssetBase):
@@ -172,12 +177,17 @@ class AssetUpdate(BaseModel):
     department_id: Optional[int] = None
     assigned_to: Optional[int] = None
     status: Optional[str] = None
-    purchase_date: Optional[datetime] = None
+    purchase_date: Optional[date] = None
     purchase_price: Optional[float] = None
     warranty_expire_date: Optional[datetime] = None
     description: Optional[str] = None
     specs: Optional[str] = None
     region: Optional[str] = None
+    # New fields
+    brand: Optional[str] = None
+    model: Optional[str] = None
+    location: Optional[str] = None
+    importance_level: Optional[str] = None
 
 
 class AssetResponse(AssetBase):
@@ -186,6 +196,7 @@ class AssetResponse(AssetBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
 
 
 class AssetListResponse(BaseModel):
