@@ -17,7 +17,6 @@
         <div class="sidebar__logo" @click="$router.push('/')">
           <img v-if="siteLogo" :src="siteLogo" class="sidebar__logo-img" alt="logo" />
           <span v-else class="sidebar__logo-icon">💻</span>
-          <span class="sidebar__logo-text">{{ siteName || 'IT资产' }}</span>
         </div>
       </div>
 
@@ -208,8 +207,8 @@ onMounted(async () => {
   // Fetch site settings for logo/name
   try {
     const res = await settingsApi.get()
-    siteLogo.value = (res.data as any).logo_url || ''
-    siteName.value = (res.data as any).system_name || 'IT资产'
+    siteLogo.value = (res.data as any).logoUrl || ''
+    siteName.value = (res.data as any).systemName || 'IT资产'
   } catch {
     // ignore
   }
@@ -241,10 +240,11 @@ onMounted(async () => {
 }
 
 .sidebar__header {
-  height: 56px;
+  height: 60px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  justify-content: center;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
 }
@@ -252,13 +252,15 @@ onMounted(async () => {
 .sidebar__logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
   cursor: pointer;
+  width: 100%;
+  padding: 0;
 }
 
 .sidebar__logo-img {
-  height: 32px;
-  width: auto;
+  width: 100%;
+  height: 44px;
   object-fit: contain;
   border-radius: 6px;
 }

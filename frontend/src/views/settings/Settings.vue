@@ -204,6 +204,49 @@
           </div>
         </div>
 
+        <!-- 公告设置卡片 -->
+        <div class="settings-card anim-fade-in-up" style="animation-delay: 120ms">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon" style="background: linear-gradient(135deg, #FF9500, #FF6B00);">
+                <el-icon><Bell /></el-icon>
+              </div>
+              <div>
+                <h3 class="card-title">公告设置</h3>
+                <p class="card-subtitle">在仪表盘顶部显示滚动公告信息</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <el-form label-position="top">
+              <el-form-item label="启用公告">
+                <div class="switch-row">
+                  <el-switch v-model="form.announcement_enabled" />
+                  <span class="switch-desc">开启后仪表盘顶部将显示滚动公告</span>
+                </div>
+              </el-form-item>
+
+              <el-form-item v-if="form.announcement_enabled" label="公告内容">
+                <el-input
+                  v-model="form.announcement"
+                  type="textarea"
+                  :rows="4"
+                  placeholder="请输入公告内容，例如：本周系统将于周六22:00-23:00进行维护升级，届时服务将暂时中断。"
+                  clearable
+                />
+                <div class="form-tip">支持多行文本，将在仪表盘顶部自动滚动显示</div>
+              </el-form-item>
+            </el-form>
+          </div>
+          <div class="card-footer">
+            <el-button @click="cancelAnnouncement">取消</el-button>
+            <el-button type="primary" :loading="savingAnnouncement" @click="saveAnnouncement">
+              <el-icon v-if="!savingAnnouncement"><Check /></el-icon>
+              保存公告设置
+            </el-button>
+          </div>
+        </div>
+
         <!-- 主题设置卡片 -->
         <div class="settings-card anim-fade-in-up" style="animation-delay: 160ms">
           <div class="card-header">
@@ -318,7 +361,7 @@ import { settingsApi } from '@/api/settings'
 import { useAuthStore } from '@/stores/auth'
 import { ElMessage } from 'element-plus'
 import {
-  Check, Plus, Picture, RefreshRight, Setting, Brush,
+  Check, Plus, Picture, RefreshRight, Setting, Brush, Bell,
   View, Monitor, Phone, Message, Grid, Sunny
 } from '@element-plus/icons-vue'
 
@@ -368,6 +411,7 @@ const previewPrimary = computed(() => currentThemeData.value.primary)
 
 const savingSite = ref(false)
 const savingBasic = ref(false)
+const savingAnnouncement = ref(false)
 
 // ── Form Data ──
 const form = reactive({
@@ -380,7 +424,9 @@ const form = reactive({
   auto_backup: true,
   backup_retention_days: 30,
   logo_url: '',
-  favicon_url: ''
+  favicon_url: '',
+  announcement: '',
+  announcement_enabled: false
 })
 
 // ── Temp state for previews before save ──
@@ -452,10 +498,22 @@ async function uploadFavicon(file: File) {
 // ── Fetch settings ──
 async function fetchSettings() {
   try {
-    const res = await settingsApi.get()
-    Object.assign(form, res.data)
-    tempLogoUrl.value = res.data.logo_url || ''
-    tempFaviconUrl.value = res.data.favicon_url || ''
+    const res: any = await settingsApi.get()
+    const d = res.data as any
+    form.site_name = d.systemName || ''
+    form.site_description = d.siteDescription || ''
+    form.company_name = d.companyName || ''
+    form.contact_email = d.contactEmail || ''
+    form.contact_phone = d.contactPhone || ''
+    form.asset_code_prefix = d.assetCodePrefix || 'ASSET'
+    form.auto_backup = d.autoBackup ?? true
+    form.backup_retention_days = d.backupRetentionDays || 30
+    form.logo_url = d.logoUrl || ''
+    form.favicon_url = d.faviconUrl || ''
+    form.announcement = d.announcement || ''
+    form.announcement_enabled = d.announcementEnabled ?? false
+    tempLogoUrl.value = d.logoUrl || ''
+    tempFaviconUrl.value = d.faviconUrl || ''
   } catch {
     ElMessage.error('获取设置失败')
   }
@@ -468,6 +526,9 @@ async function saveSiteInfo() {
     await settingsApi.update({
       system_name: form.site_name,
       site_description: form.site_description,
+      company_name: form.company_name,
+      contact_email: form.contact_email,
+      contact_phone: form.contact_phone,
       logo_url: form.logo_url,
       favicon_url: form.favicon_url
     })
@@ -504,6 +565,25 @@ function cancelSiteInfo() {
 }
 
 function cancelBasic() {
+  fetchSettings()
+}
+
+async function saveAnnouncement() {
+  savingAnnouncement.value = true
+  try {
+    await settingsApi.update({
+      announcement: form.announcement,
+      announcement_enabled: form.announcement_enabled
+    })
+    ElMessage.success('公告设置已保存')
+  } catch {
+    // handled by interceptor
+  } finally {
+    savingAnnouncement.value = false
+  }
+}
+
+function cancelAnnouncement() {
   fetchSettings()
 }
 
@@ -621,7 +701,7 @@ onMounted(() => {
 
 .site-icon { background: linear-gradient(135deg, #07C160, #1AAD19); }
 .basic-icon { background: linear-gradient(135deg, #FF991A, #FFB84D); }
-.theme-icon { background: linear-gradient(135deg, #586IGC, #7B8CDE); }
+.theme-icon { background: linear-gradient(135deg, #5862BC, #7B8CDE); }
 
 .card-title {
   font-size: 16px;

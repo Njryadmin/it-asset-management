@@ -687,20 +687,59 @@ html, body {
 .font-bold   { font-weight: 700 !important; }
 .font-medium { font-weight: 500 !important; }
 
-/* ── Mobile Responsive ── */
+/* ── Action Links (text-link style, WeChat-inspired) ── */
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--wechat-primary);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+
+.action-link:hover {
+  background-color: rgba(26, 173, 25, 0.08);
+  color: var(--wechat-primary);
+}
+
+.action-link .el-icon {
+  font-size: 14px;
+}
+
+.action-link--danger {
+  color: var(--wechat-danger);
+}
+
+.action-link--danger:hover {
+  background-color: rgba(245, 108, 108, 0.08);
+  color: var(--wechat-danger);
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
   html, body {
     font-size: 13px;
   }
 
   .page-container {
-    padding: 0 12px;
+    padding: 0 10px;
   }
 
   /* Smaller buttons on mobile */
   .el-button {
-    font-size: 13px !important;
-    padding: 9px 14px !important;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+
+  /* Header actions - smaller buttons and wrapping */
+  .header-actions {
+    gap: 6px !important;
+    flex-wrap: wrap !important;
   }
 
   /* Scrollable table wrapper */
@@ -716,9 +755,6 @@ html, body {
   .card-header {
     flex-direction: column !important;
     align-items: flex-start !important;
-  }
-  .header-actions {
-    flex-wrap: wrap !important;
   }
 
   /* Responsive dialogs */
@@ -738,16 +774,41 @@ html, body {
     flex-wrap: wrap;
     gap: 8px;
   }
+
+  /* Sidebar - collapse to hamburger on mobile */
+  .sidebar {
+    position: fixed !important;
+    left: -200px !important;
+    z-index: 2000 !important;
+    transition: left 0.3s ease !important;
+  }
+  .sidebar.sidebar--open {
+    left: 0 !important;
+  }
+  .sidebar-overlay {
+    display: block !important;
+  }
+  .main-content {
+    margin-left: 0 !important;
+  }
 }
 
 @media (max-width: 480px) {
+  html, body {
+    font-size: 12px;
+  }
   .el-button {
-    padding: 8px 12px !important;
+    padding: 5px 8px !important;
+    font-size: 12px !important;
   }
   .search-bar {
     flex-wrap: wrap !important;
   }
   .search-input {
+    width: 100% !important;
+  }
+  /* Upload zone full width on tiny screens */
+  .upload-zone {
     width: 100% !important;
   }
 }

@@ -165,21 +165,16 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作" width="110" fixed="right">
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="$router.push(`/assets/${row.id}/edit`)">
+            <span class="action-link" @click="$router.push(`/assets/${row.id}/edit`)">
               <el-icon><Edit /></el-icon>
-            </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
-              <el-button type="primary" link>
-                <el-icon><More /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <span>编辑</span>
+            </span>
+            <span class="action-link action-link--danger" @click="handleDelete(row.id)">
+              <el-icon><Delete /></el-icon>
+              <span>删除</span>
+            </span>
           </template>
         </el-table-column>
       </el-table>
@@ -233,7 +228,7 @@
     </el-drawer>
 
     <!-- Import Dialog -->
-    <el-dialog v-model="showImportDialog" title="导入资产" width="500px" class="custom-dialog">
+    <el-dialog v-model="showImportDialog" title="导入资产" width="90%" max-width="500px" class="custom-dialog">
       <el-upload
         ref="uploadRef"
         class="upload-demo"
@@ -254,8 +249,8 @@
         </template>
       </el-upload>
       <template #footer>
-        <el-button @click="showImportDialog = false">取消</el-button>
         <el-button type="primary" @click="submitImport">确定导入</el-button>
+        <el-button @click="showImportDialog = false">取消</el-button>
       </template>
     </el-dialog>
   </div>

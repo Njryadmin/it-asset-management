@@ -1,11 +1,11 @@
 <template>
-  <div class="category-list">
+  <div class="category-list page-container">
     <el-card class="main-card">
       <template #header>
         <div class="card-header">
           <div class="header-left">
             <h3 class="page-title">分类管理</h3>
-            <span class="category-count">共 {{ categoryStore.categories.length }} 个分类</span>
+            <span class="item-count">共 {{ categoryStore.categories.length }} 个分类</span>
           </div>
           <div class="header-actions">
             <el-dropdown trigger="click" @command="handleExport">
@@ -38,23 +38,29 @@
           placeholder="搜索分类名称..."
           clearable
           class="search-input"
+          @clear="handleSearch"
+          @keyup.enter="handleSearch"
         >
           <template #prefix>
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
+        <el-button type="primary" @click="handleSearch">查询</el-button>
+        <el-button @click="handleReset">重置</el-button>
       </div>
 
       <!-- Category Tree -->
-      <div class="category-container">
+      <div class="tree-container">
         <el-tree
           v-if="filteredCategories.length > 0"
+          ref="treeRef"
           :data="filteredCategories"
           :props="{ label: 'name', children: 'children' }"
           default-expand-all
           node-key="id"
           class="category-tree"
           :expand-on-click-node="false"
+          highlight-current
         >
           <template #default="{ node, data }">
             <div class="tree-node-wrapper">
@@ -64,22 +70,22 @@
                 </div>
                 <div class="node-info">
                   <span class="node-name">{{ data.name }}</span>
-                  <span class="node-code" v-if="data.code">{{ data.code }}</span>
+                  <span class="node-meta" v-if="data.code">{{ data.code }}</span>
                 </div>
               </div>
               <div class="node-actions">
-                <el-button type="primary" link size="small" @click="showDialog('create', data)">
+                <span class="action-link" @click="showDialog('create', data)">
                   <el-icon><Plus /></el-icon>
-                  添加子分类
-                </el-button>
-                <el-button type="primary" link size="small" @click="showDialog('edit', data)">
+                  <span>添加子分类</span>
+                </span>
+                <span class="action-link" @click="showDialog('edit', data)">
                   <el-icon><Edit /></el-icon>
-                  编辑
-                </el-button>
-                <el-button type="danger" link size="small" @click="handleDelete(data.id)">
+                  <span>编辑</span>
+                </span>
+                <span class="action-link action-link--danger" @click="handleDelete(data.id)">
                   <el-icon><Delete /></el-icon>
-                  删除
-                </el-button>
+                  <span>删除</span>
+                </span>
               </div>
             </div>
           </template>
@@ -92,7 +98,7 @@
     </el-card>
 
     <!-- Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" class="custom-dialog">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="90%" max-width="500px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="分类名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入分类名称" />
@@ -114,7 +120,7 @@
     </el-dialog>
 
     <!-- Import Dialog -->
-    <el-dialog v-model="showImportDialog" title="导入分类" width="500px" class="custom-dialog">
+    <el-dialog v-model="showImportDialog" title="导入分类" width="90%" max-width="500px" class="custom-dialog">
       <el-upload
         ref="uploadRef"
         class="upload-demo"
@@ -152,6 +158,7 @@ import dayjs from 'dayjs'
 
 const categoryStore = useCategoryStore()
 const formRef = ref<FormInstance>()
+const treeRef = ref()
 const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogMode = ref<'create' | 'edit'>('create')
@@ -213,8 +220,8 @@ const parentName = computed(() => {
 // Generate consistent color for category based on id
 function getCategoryColor(id: number): string {
   const colors = [
-    '#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#a371f7',
-    '#909399', '#2eb872', '#ff8c00', '#00bcd4', '#ff5722'
+    '#1AAD19', '#07C160', '#33B520', '#409EFF', '#67C23A',
+    '#E6A23C', '#F56C6C', '#A371F7', '#909399', '#2EB872'
   ]
   return colors[id % colors.length]
 }
@@ -339,6 +346,14 @@ function downloadTemplate() {
   window.URL.revokeObjectURL(url)
 }
 
+function handleSearch() {
+  // filteredCategories is computed, no explicit fetch needed
+}
+
+function handleReset() {
+  searchKeyword.value = ''
+}
+
 onMounted(() => {
   categoryStore.fetchTree()
 })
@@ -378,7 +393,7 @@ onMounted(() => {
   color: var(--wechat-text);
 }
 
-.category-count {
+.item-count {
   font-size: 13px;
   color: var(--wechat-text-secondary);
 }
@@ -391,35 +406,56 @@ onMounted(() => {
 
 .search-bar {
   margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-input {
+  flex: 1;
+  min-width: 200px;
   max-width: 320px;
-  width: 100%;
 }
 
-.category-container {
+.tree-container {
   min-height: 300px;
 }
 
 .category-tree {
-  padding: 8px 0;
+  padding: 4px 0;
   background: transparent;
 }
 
 .category-tree :deep(.el-tree-node) {
-  padding: 4px 0;
+  padding: 2px 0;
 }
 
 .category-tree :deep(.el-tree-node__content) {
   height: auto !important;
-  min-height: 72px;
   padding: 0 12px;
   align-items: stretch;
+  border-radius: var(--radius-md);
+  margin: 2px 0;
+  transition: background-color var(--transition-fast);
+}
+
+.category-tree :deep(.el-tree-node__content:hover) {
+  background-color: var(--wechat-bg) !important;
+}
+
+.category-tree :deep(.el-tree-node.is-current > .el-tree-node__content) {
+  background-color: var(--wechat-sidebar-active-bg) !important;
 }
 
 .category-tree :deep(.el-tree-node__expand-icon) {
-  padding: 24px 8px;
+  padding: 20px 8px;
+  font-size: 14px;
+  color: var(--wechat-text-secondary);
+}
+
+.category-tree :deep(.el-tree-node__expand-icon.is-leaf) {
+  color: transparent;
 }
 
 .tree-node-wrapper {
@@ -427,48 +463,48 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 16px 12px;
-  margin: 4px 0;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-  min-height: 72px;
+  padding: 12px 8px;
   box-sizing: border-box;
-}
-
-.tree-node-wrapper:hover {
-  background: var(--wechat-bg) !important;
+  min-height: 56px;
 }
 
 .node-content {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .node-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .node-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .node-name {
   font-weight: 500;
   color: var(--wechat-text);
   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.node-code {
+.node-meta {
   font-size: 12px;
   color: var(--wechat-text-secondary);
 }
@@ -476,6 +512,8 @@ onMounted(() => {
 .node-actions {
   display: flex;
   gap: 4px;
+  flex-shrink: 0;
+  padding-left: 12px;
 }
 
 .custom-dialog :deep(.el-dialog) {
@@ -484,5 +522,93 @@ onMounted(() => {
 
 .upload-demo {
   text-align: center;
+}
+
+/* ── Responsive: 768px ── */
+@media (max-width: 768px) {
+  .card-header {
+    padding: 10px 12px;
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .search-bar {
+    margin-bottom: 12px;
+  }
+
+  .search-input {
+    min-width: 0;
+    max-width: 100%;
+    flex: 1;
+  }
+
+  .tree-node-wrapper {
+    padding: 10px 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .node-content {
+    flex: 1 1 calc(100% - 120px);
+  }
+
+  .node-actions {
+    flex-wrap: wrap;
+    gap: 2px;
+    padding-left: 0;
+  }
+
+  .action-link {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+
+  .action-link .el-icon {
+    font-size: 12px;
+  }
+
+  .action-link span {
+    display: inline;
+  }
+}
+
+/* ── Responsive: 480px ── */
+@media (max-width: 480px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .search-bar {
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .tree-node-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .node-actions {
+    width: 100%;
+    padding-left: 48px;
+    justify-content: flex-start;
+  }
+
+  .action-link span {
+    display: inline;
+  }
 }
 </style>

@@ -15,11 +15,11 @@
       <div class="brand-panel">
         <div class="brand-panel__content">
           <div class="brand-logo">
-            <img v-if="settings.logo_url" :src="settings.logo_url" alt="Logo" class="brand-logo__img" />
+            <img v-if="settings.logoUrl" :src="settings.logoUrl" alt="Logo" class="brand-logo__img" />
             <span v-else class="brand-logo__icon">💻</span>
           </div>
-          <h2 class="brand-title">{{ settings.system_name || 'IT资产管理系统' }}</h2>
-          <p class="brand-desc">{{ settings.site_description || '高效、便捷的资产管理解决方案' }}</p>
+          <h2 class="brand-title">{{ settings.systemName || 'IT资产管理系统' }}</h2>
+          <p class="brand-desc">{{ settings.siteDescription || '高效、便捷的资产管理解决方案' }}</p>
           <div class="brand-features">
             <div class="feature-item" v-for="f in features" :key="f.icon">
               <span class="feature-icon">{{ f.icon }}</span>
@@ -34,9 +34,9 @@
         <div class="login-card__inner">
           <!-- Mobile logo -->
           <div class="mobile-brand">
-            <img v-if="settings.logo_url" :src="settings.logo_url" alt="Logo" class="mobile-brand__img" />
+            <img v-if="settings.logoUrl" :src="settings.logoUrl" alt="Logo" class="mobile-brand__img" />
             <span v-else class="mobile-brand__icon">💻</span>
-            <span class="mobile-brand__name">{{ settings.system_name || 'IT资产管理系统' }}</span>
+            <span class="mobile-brand__name">{{ settings.systemName || 'IT资产管理系统' }}</span>
           </div>
 
           <!-- Header -->
@@ -99,7 +99,7 @@
 
           <!-- Footer -->
           <div class="login-card__footer">
-            <span>{{ settings.system_name || 'IT资产管理系统' }} · v1.0</span>
+            <span>{{ settings.systemName || 'IT资产管理系统' }} · v1.0</span>
           </div>
         </div>
       </div>
@@ -127,10 +127,10 @@ const form = reactive({
 })
 
 const settings = reactive({
-  system_name: 'IT资产管理系统',
+  systemName: 'IT资产管理系统',
   site_title: '',
-  site_description: '',
-  logo_url: ''
+  siteDescription: '',
+  logoUrl: ''
 })
 
 const rules: FormRules = {
@@ -155,10 +155,10 @@ onMounted(async () => {
   }
 
   try {
-    const res = await settingsApi.get()
-    if (res.data.system_name) settings.system_name = res.data.system_name
-    if (res.data.site_description) settings.site_description = res.data.site_description
-    if (res.data.logo_url) settings.logo_url = res.data.logo_url
+    const res: any = await settingsApi.get()
+    if (res.data.systemName) settings.systemName = res.data.systemName
+    if (res.data.siteDescription) settings.siteDescription = res.data.siteDescription
+    if (res.data.logoUrl) settings.logoUrl = res.data.logoUrl
   } catch {
     // Use defaults
   }

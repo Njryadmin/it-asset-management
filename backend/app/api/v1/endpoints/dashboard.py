@@ -23,11 +23,14 @@ async def get_dashboard_stats(
     total_users = await db.scalar(select(func.count(User.id)))
     total_purchase_requests = await db.scalar(select(func.count(PurchaseRequest.id)))
     
-    # Assets by status
+    # Assets by status (convert keys to camelCase for frontend)
     status_result = await db.execute(
         select(Asset.status, func.count(Asset.id)).group_by(Asset.status)
     )
-    assets_by_status = {row[0].value: row[1] for row in status_result.all()}
+    def to_camel(snake_str):
+        parts = snake_str.split('_')
+        return parts[0] + ''.join(p.capitalize() for p in parts[1:])
+    assets_by_status = {to_camel(row[0].value): row[1] for row in status_result.all()}
     
     # Assets by category
     category_result = await db.execute(

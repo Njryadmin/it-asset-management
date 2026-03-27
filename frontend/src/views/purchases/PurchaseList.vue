@@ -110,32 +110,16 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作" width="110" fixed="right">
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="showDialog('edit', row)">
+            <span class="action-link" @click="showDialog('edit', row)">
               <el-icon><Edit /></el-icon>
-            </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
-              <el-button type="primary" link>
-                <el-icon><More /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <template v-if="row.status === 'draft'">
-                    <el-dropdown-item command="submit">提交</el-dropdown-item>
-                    <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
-                  </template>
-                  <template v-else-if="row.status === 'pending' && isAdmin">
-                    <el-dropdown-item command="approve">通过</el-dropdown-item>
-                    <el-dropdown-item command="reject">拒绝</el-dropdown-item>
-                  </template>
-                  <template v-else-if="row.status === 'approved' && isAdmin">
-                    <el-dropdown-item command="purchase">标记已采购</el-dropdown-item>
-                  </template>
-                  <el-dropdown-item v-if="row.status !== 'draft' && row.status !== 'pending' && row.status !== 'approved'" disabled>无操作</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <span>编辑</span>
+            </span>
+            <span class="action-link action-link--danger" @click="handleDelete(row.id)">
+              <el-icon><Delete /></el-icon>
+              <span>删除</span>
+            </span>
           </template>
         </el-table-column>
       </el-table>
@@ -152,7 +136,7 @@
     </el-card>
 
     <!-- Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" class="custom-dialog">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="90%" max-width="600px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="标题" prop="title">
           <el-input v-model="form.title" placeholder="请输入标题" />
@@ -182,7 +166,7 @@
     </el-dialog>
 
     <!-- Approve/Reject Dialog -->
-    <el-dialog v-model="actionDialogVisible" :title="actionTitle" width="400px" class="custom-dialog">
+    <el-dialog v-model="actionDialogVisible" :title="actionTitle" width="90%" max-width="400px" class="custom-dialog">
       <el-form>
         <el-form-item label="审批意见">
           <el-input v-model="actionComment" type="textarea" :rows="3" placeholder="请输入审批意见" />
@@ -195,7 +179,7 @@
     </el-dialog>
 
     <!-- Purchase Dialog -->
-    <el-dialog v-model="purchaseDialogVisible" title="标记已采购" width="400px" class="custom-dialog">
+    <el-dialog v-model="purchaseDialogVisible" title="标记已采购" width="90%" max-width="400px" class="custom-dialog">
       <el-form>
         <el-form-item label="实际价格">
           <el-input-number v-model="actualPrice" :min="0" :precision="2" placeholder="请输入实际价格" />

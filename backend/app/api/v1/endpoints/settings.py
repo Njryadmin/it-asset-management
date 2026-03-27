@@ -110,15 +110,16 @@ def settings_to_dict(settings: SystemSettings) -> Dict[str, Any]:
         "backup_retention_days": settings.backup_retention_days,
         "logo_url": settings.logo_url,
         "favicon_url": settings.favicon_url,
+        "announcement": settings.announcement or "",
+        "announcement_enabled": settings.announcement_enabled or False,
     }
 
 
 @router.get("")
 async def get_settings(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
 ):
-    """获取系统设置"""
+    """获取系统设置（公开接口）"""
     settings = await get_or_create_settings(db)
     return settings_to_dict(settings)
 
@@ -138,7 +139,8 @@ async def update_settings(
     allowed_keys = {
         "system_name", "site_title", "site_description", "company_name", 
         "contact_email", "contact_phone", "asset_code_prefix", 
-        "auto_backup", "backup_retention_days", "logo_url", "favicon_url"
+        "auto_backup", "backup_retention_days", "logo_url", "favicon_url",
+        "announcement", "announcement_enabled"
     }
     
     for key, value in new_settings.items():

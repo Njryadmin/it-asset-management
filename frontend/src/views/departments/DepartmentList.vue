@@ -89,21 +89,9 @@
           <el-table-column v-if="col.visible && col.key === 'code'" prop="code" label="编码" width="120" />
           <el-table-column v-if="col.visible && col.key === 'description'" prop="description" label="描述" min-width="200" show-overflow-tooltip />
         </template>
-        <el-table-column label="操作" width="110" fixed="right">
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="showDialog('edit', row)">
-              <el-icon><Edit /></el-icon>
-            </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
-              <el-button type="primary" link>
-                <el-icon><More /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <span class="action-link" @click="showDialog('edit', row)"><el-icon><Edit /></el-icon><span>编辑</span></span><span class="action-link action-link--danger" @click="handleDelete(row.id)"><el-icon><Delete /></el-icon><span>删除</span></span>
           </template>
         </el-table-column>
       </el-table>
@@ -120,7 +108,7 @@
     </el-card>
 
     <!-- Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" class="custom-dialog">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="90%" max-width="500px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="部门名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入部门名称" />
@@ -144,7 +132,7 @@
     </el-dialog>
 
     <!-- Import Dialog -->
-    <el-dialog v-model="showImportDialog" title="导入部门" width="500px" class="custom-dialog">
+    <el-dialog v-model="showImportDialog" title="导入部门" width="90%" max-width="500px" class="custom-dialog">
       <el-upload
         ref="uploadRef"
         class="upload-demo"

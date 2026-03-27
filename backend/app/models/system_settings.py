@@ -19,3 +19,5 @@ class SystemSettings(Base):
     backup_retention_days = Column(Integer, default=30)
     logo_url = Column(String(500), default="")
     favicon_url = Column(String(500), default="")
+    announcement = Column(Text, default="")
+    announcement_enabled = Column(Boolean, default=False)

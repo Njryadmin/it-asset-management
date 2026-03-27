@@ -97,22 +97,16 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作" width="110" fixed="right">
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="showDialog('edit', row)">
+            <span class="action-link" @click="showDialog('edit', row)">
               <el-icon><Edit /></el-icon>
-            </el-button>
-            <el-dropdown trigger="click" @command="(cmd: string) => handleActionCommand(cmd, row)">
-              <el-button type="primary" link>
-                <el-icon><More /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="password">改密</el-dropdown-item>
-                  <el-dropdown-item command="delete" style="color: #f56c6c">删除</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <span>编辑</span>
+            </span>
+            <span class="action-link action-link--danger" @click="handleDelete(row.id)">
+              <el-icon><Delete /></el-icon>
+              <span>删除</span>
+            </span>
           </template>
         </el-table-column>
       </el-table>
@@ -129,7 +123,7 @@
     </el-card>
 
     <!-- User Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" class="custom-dialog">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="90%" max-width="500px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="请输入用户名" :disabled="dialogMode === 'edit'" />
@@ -154,7 +148,7 @@
     </el-dialog>
 
     <!-- Password Dialog -->
-    <el-dialog v-model="passwordDialogVisible" title="修改密码" width="400px" class="custom-dialog">
+    <el-dialog v-model="passwordDialogVisible" title="修改密码" width="90%" max-width="400px" class="custom-dialog">
       <el-form>
         <el-form-item label="新密码">
           <el-input v-model="newPassword" type="password" placeholder="请输入新密码" show-password />

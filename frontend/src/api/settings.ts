@@ -12,6 +12,8 @@ export interface SystemSettings {
   backup_retention_days: number
   logo_url: string
   favicon_url: string
+  announcement: string
+  announcement_enabled: boolean
 }
 
 export interface UserProfile {

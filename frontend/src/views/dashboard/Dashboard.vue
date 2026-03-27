@@ -1,15 +1,23 @@
 <template>
   <div class="dashboard">
 
+    <!-- ══ Scrolling Announcement ══ -->
+    <div v-if="settings.announcement_enabled && settings.announcement" class="announcement-bar">
+      <div class="announcement-inner">
+        <span class="announcement-icon">📢</span>
+        <span class="announcement-text">{{ settings.announcement }}&nbsp;&nbsp;&nbsp;&nbsp;{{ settings.announcement }}</span>
+      </div>
+    </div>
+
     <!-- ══ Brand Header ══ -->
     <div class="brand-header anim-fade-in-up">
       <div class="brand-header__left">
-        <div v-if="settings.logoUrl" class="brand-header__logo">
-          <img :src="settings.logoUrl" :alt="settings.systemName" />
+        <div v-if="settings.faviconUrl" class="brand-header__logo">
+          <img :src="settings.faviconUrl" :alt="settings.systemName" class="brand-header__logo-img" />
         </div>
         <div v-else class="brand-header__icon">💻</div>
         <div class="brand-header__info">
-          <div class="brand-header__name">{{ settings.systemName || 'IT 资产管理系统' }}</div>
+          <div class="brand-header__name">仪表盘</div>
           <div class="brand-header__sub">{{ greetingText }} · {{ currentWeekday }}</div>
         </div>
       </div>
@@ -446,6 +454,9 @@ const assetStore = useAssetStore()
 const settings = ref({
   systemName: 'IT 资产管理系统',
   logoUrl: '',
+  faviconUrl: '',
+  announcement: '',
+  announcement_enabled: false,
 })
 
 // ── Dashboard Stats ──
@@ -675,8 +686,11 @@ async function fetchSettings() {
   try {
     const response = await settingsApi.get()
     if (response.data) {
-      settings.value.systemName = (response.data as any).system_name || (response.data as any).siteTitle || 'IT 资产管理系统'
-      settings.value.logoUrl = (response.data as any).logo_url || ''
+      settings.value.systemName = (response.data as any).systemName || (response.data as any).siteTitle || 'IT 资产管理系统'
+      settings.value.logoUrl = (response.data as any).logoUrl || ''
+      settings.value.faviconUrl = (response.data as any).faviconUrl || ''
+      settings.value.announcement = (response.data as any).announcement || ''
+      settings.value.announcement_enabled = (response.data as any).announcementEnabled ?? false
     }
   } catch (error) {
     console.error('Failed to fetch settings:', error)
@@ -735,12 +749,10 @@ onMounted(async () => {
 }
 
 .brand-header__logo img {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   object-fit: contain;
-  background: var(--wechat-bg);
-  padding: 4px;
 }
 
 .brand-header__icon {
@@ -1428,19 +1440,28 @@ onMounted(async () => {
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .brand-header {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
-    padding: 16px 18px;
+    padding: 14px 16px;
   }
   .brand-header__right {
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 12px;
-    align-items: center;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 2px;
   }
   .brand-header__time {
-    font-size: 18px;
+    font-size: 16px;
+  }
+  .brand-header__date {
+    font-size: 11px;
+  }
+  .brand-header__name {
+    font-size: 16px;
+  }
+  .brand-header__sub {
+    font-size: 11px;
   }
   .stats-grid .el-col {
     margin-bottom: 0;
@@ -1466,21 +1487,126 @@ onMounted(async () => {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+  /* Override el-row to be a flex-wrap container for cards */
+  .stats-grid.el-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    margin: 0 !important;
+  }
   .stats-grid .el-col {
-    padding: 0 4px !important;
+    display: block !important;
+    width: calc(50% - 5px) !important;
+    max-width: calc(50% - 5px) !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   .stat-card {
-    padding: 12px 10px;
+    padding: 16px 12px !important;
+    margin: 0 !important;
+    min-height: 90px;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  .stat-card__body {
+    flex: 1 !important;
+    min-width: 0 !important;
   }
   .stat-card__value {
-    font-size: 20px;
+    font-size: 24px !important;
+    line-height: 1 !important;
+  }
+  .stat-card__label {
+    font-size: 11px !important;
+    margin-top: 2px !important;
   }
   .stat-card__icon {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+    flex-shrink: 0 !important;
+    margin-right: 10px !important;
   }
+  .announcement-bar {
+    margin-bottom: 10px;
+  }
+  .announcement-text {
+    font-size: 13px !important;
+  }
+  .panel {
+    padding: 14px 12px !important;
+  }
+  .panel__body {
+    padding: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Single column for very small screens */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .stat-card {
+    padding: 14px 12px !important;
+    min-height: 80px;
+  }
+  .stat-card__value {
+    font-size: 24px !important;
+  }
+  .stat-card__label {
+    font-size: 11px !important;
+  }
+  .stat-card__icon {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+  }
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .quick-action {
+    padding: 12px 8px !important;
+  }
+}
+
+/* ── Scrolling Announcement ── */
+.announcement-bar {
+  background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+  color: #fff;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+}
+
+.announcement-inner {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  animation: marquee 25s linear infinite;
+}
+
+.announcement-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  padding: 0 12px;
+}
+
+.announcement-text {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 </style>

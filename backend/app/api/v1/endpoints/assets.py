@@ -92,80 +92,6 @@ async def get_asset_stats(
 # IMPORTANT: /export and /import must be defined BEFORE /{asset_id}
 # otherwise FastAPI will match them as {asset_id}
 
-@router.get("/export")
-async def export_assets(
-    keyword: Optional[str] = Query(None, description="搜索关键词"),
-    category_id: Optional[int] = Query(None, description="分类ID"),
-    status: Optional[str] = Query(None, description="资产状态"),
-    department_id: Optional[int] = Query(None, description="部门ID"),
-    region: Optional[str] = Query(None, description="地区"),
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
-):
-    """导出资产为CSV（支持筛选）"""
-    query = select(Asset)
-    
-    if keyword:
-        query = query.where(
-            Asset.name.ilike(f"%{keyword}%") |
-            Asset.asset_code.ilike(f"%{keyword}%") |
-            Asset.serial_number.ilike(f"%{keyword}%")
-        )
-    if category_id is not None:
-        query = query.where(Asset.category_id == category_id)
-    if status:
-        query = query.where(Asset.status == status)
-    if department_id is not None:
-        query = query.where(Asset.department_id == department_id)
-    if region:
-        query = query.where(Asset.region.ilike(f"%{region}%"))
-    
-    result = await db.execute(query)
-    assets = result.scalars().all()
-    
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    # Header - 使用名称而非ID
-    writer.writerow([
-        '资产编号', '名称', '序列号', '分类名称', '供应商名称', '部门名称',
-        '使用人', '状态', '购入日期', '购入价格', '保修期至',
-        '描述', '规格参数', '地区'
-    ])
-    
-    # 预先加载关联数据
-    category_map = {c.id: c.name for c in (await db.execute(select(Category))).scalars().all()}
-    supplier_map = {s.id: s.name for s in (await db.execute(select(Supplier))).scalars().all()}
-    department_map = {d.id: d.name for d in (await db.execute(select(Department))).scalars().all()}
-    # 加载用户名称
-    user_result = await db.execute(select(User.id, User.username, User.full_name))
-    user_map = {u.id: (u.full_name or u.username) for u in user_result.scalars().all()}
-    
-    # Data
-    for asset in assets:
-        assigned_user = user_map.get(asset.assigned_to, '') if asset.assigned_to else ''
-        writer.writerow([
-            asset.asset_code, asset.name, asset.serial_number,
-            category_map.get(asset.category_id, ''),
-            supplier_map.get(asset.supplier_id, ''),
-            department_map.get(asset.department_id, ''),
-            assigned_user, asset.status,
-            asset.purchase_date.strftime('%Y-%m-%d') if asset.purchase_date else '',
-            asset.purchase_price, 
-            asset.warranty_expire_date.strftime('%Y-%m-%d') if asset.warranty_expire_date else '',
-            asset.description, asset.specs, asset.region or ''
-        ])
-    
-    output.seek(0)
-    # Add UTF-8 BOM for Excel compatibility
-    bom = '\ufeff'
-    return StreamingResponse(
-        iter([bom + output.getvalue()]),
-        media_type="text/csv; charset=utf-8-sig",
-        headers={"Content-Disposition": f"attachment; filename=assets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
-    )
-
-
 @router.get("/template")
 async def download_asset_template(
     current_user=Depends(get_current_active_user)
@@ -311,6 +237,80 @@ async def import_assets(
         "skipped": skipped,
         "errors": errors[:20]  # Limit error messages
     }
+
+
+@router.get("/export")
+async def export_assets(
+    keyword: Optional[str] = Query(None, description="搜索关键词"),
+    category_id: Optional[int] = Query(None, description="分类ID"),
+    status: Optional[str] = Query(None, description="资产状态"),
+    department_id: Optional[int] = Query(None, description="部门ID"),
+    region: Optional[str] = Query(None, description="地区"),
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    """导出资产为CSV（支持筛选）"""
+    query = select(Asset)
+    
+    if keyword:
+        query = query.where(
+            Asset.name.ilike(f"%{keyword}%") |
+            Asset.asset_code.ilike(f"%{keyword}%") |
+            Asset.serial_number.ilike(f"%{keyword}%")
+        )
+    if category_id is not None:
+        query = query.where(Asset.category_id == category_id)
+    if status:
+        query = query.where(Asset.status == status)
+    if department_id is not None:
+        query = query.where(Asset.department_id == department_id)
+    if region:
+        query = query.where(Asset.region.ilike(f"%{region}%"))
+    
+    result = await db.execute(query)
+    assets = result.scalars().all()
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header - 使用名称而非ID
+    writer.writerow([
+        '资产编号', '名称', '序列号', '分类名称', '供应商名称', '部门名称',
+        '使用人', '状态', '购入日期', '购入价格', '保修期至',
+        '描述', '规格参数', '地区'
+    ])
+    
+    # 预先加载关联数据
+    category_map = {c.id: c.name for c in (await db.execute(select(Category))).scalars().all()}
+    supplier_map = {s.id: s.name for s in (await db.execute(select(Supplier))).scalars().all()}
+    department_map = {d.id: d.name for d in (await db.execute(select(Department))).scalars().all()}
+    # 加载用户名称
+    user_result = await db.execute(select(User.id, User.username, User.full_name))
+    user_map = {u.id: (u.full_name or u.username) for u in user_result.scalars().all()}
+    
+    # Data
+    for asset in assets:
+        assigned_user = user_map.get(asset.assigned_to, '') if asset.assigned_to else ''
+        writer.writerow([
+            asset.asset_code, asset.name, asset.serial_number,
+            category_map.get(asset.category_id, ''),
+            supplier_map.get(asset.supplier_id, ''),
+            department_map.get(asset.department_id, ''),
+            assigned_user, asset.status,
+            asset.purchase_date.strftime('%Y-%m-%d') if asset.purchase_date else '',
+            asset.purchase_price, 
+            asset.warranty_expire_date.strftime('%Y-%m-%d') if asset.warranty_expire_date else '',
+            asset.description, asset.specs, asset.region or ''
+        ])
+    
+    output.seek(0)
+    # Add UTF-8 BOM for Excel compatibility
+    bom = '\ufeff'
+    return StreamingResponse(
+        iter([bom + output.getvalue()]),
+        media_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": f"attachment; filename=assets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+    )
 
 
 @router.get("/{asset_id}")
