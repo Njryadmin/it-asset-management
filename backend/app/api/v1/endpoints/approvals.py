@@ -140,6 +140,38 @@ async def update_approval_flow(
     return flow
 
 
+@approval_flows_router.get("/{flow_id}", response_model=ApprovalFlowResponse)
+async def get_approval_flow(
+    flow_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """获取审批流程模板详情"""
+    result = await db.execute(select(ApprovalFlow).where(ApprovalFlow.id == flow_id))
+    flow = result.scalar_one_or_none()
+    if not flow:
+        raise HTTPException(status_code=404, detail="审批流程不存在")
+    return flow
+
+
+@approval_flows_router.delete("/{flow_id}")
+async def delete_approval_flow(
+    flow_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    """删除审批流程模板（管理员）"""
+    result = await db.execute(select(ApprovalFlow).where(ApprovalFlow.id == flow_id))
+    flow = result.scalar_one_or_none()
+    if not flow:
+        raise HTTPException(status_code=404, detail="审批流程不存在")
+
+    # Soft delete by setting is_active = False
+    flow.is_active = False
+    await db.commit()
+    return {"message": "删除成功"}
+
+
 # ============ Approval Instances ============
 
 @router.get("", response_model=ApprovalInstanceListResponse)
@@ -177,6 +209,8 @@ async def list_approval_instances(
 
 @router.get("/my-pending", response_model=ApprovalInstanceListResponse)
 async def list_my_pending_approvals(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -184,9 +218,12 @@ async def list_my_pending_approvals(
     query = select(ApprovalInstance).where(
         ApprovalInstance.status == "pending"
     ).order_by(ApprovalInstance.created_at.desc())
+    count_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    total = count_result.scalar() or 0
+    query = query.offset((page - 1) * page_size).limit(page_size)
     result = await db.execute(query)
     items = result.scalars().all()
-    return {"total": len(items), "items": items}
+    return {"total": total, "items": items}
 
 
 @router.get("/my-applications", response_model=ApprovalInstanceListResponse)

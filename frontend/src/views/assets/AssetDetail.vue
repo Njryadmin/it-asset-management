@@ -45,8 +45,12 @@
               <el-tag :type="statusTagType(asset.status)" size="small">{{ statusLabel(asset.status) }}</el-tag>
             </div>
             <div class="info-item">
-              <span class="info-label">品牌型号</span>
-              <span class="info-value">{{ asset.specs || '-' }}</span>
+              <span class="info-label">品牌</span>
+              <span class="info-value">{{ asset.brand || '-' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">型号</span>
+              <span class="info-value">{{ asset.model || '-' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">序列号</span>
@@ -62,7 +66,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">使用人</span>
-              <span class="info-value">{{ asset.assignedTo || '-' }}</span>
+              <span class="info-value">{{ asset.assignedUserName || asset.assignedTo || '-' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">部门</span>
@@ -104,8 +108,11 @@
                 <el-option label="已报废" value="scrapped" />
               </el-select>
             </el-form-item>
-            <el-form-item label="品牌型号">
-              <el-input v-model="form.specs" />
+            <el-form-item label="品牌">
+              <el-input v-model="form.brand" />
+            </el-form-item>
+            <el-form-item label="型号">
+              <el-input v-model="form.model" />
             </el-form-item>
             <el-form-item label="序列号">
               <el-input v-model="form.serial_number" />
@@ -214,12 +221,14 @@ const form = reactive({
   name: '',
   category_id: undefined as number | undefined,
   status: 'in_use' as string,
-  specs: '',
+  brand: '',
+  model: '',
   serial_number: '',
   purchase_date: '',
   warranty_expire_date: '',
   department_id: undefined as number | undefined,
   assigned_to: '',
+  assignedUserName: '',
   region: '',
   purchase_price: undefined as number | undefined,
   description: ''
@@ -287,12 +296,14 @@ function populateForm(a: Asset) {
   form.name = a.name
   form.category_id = a.categoryId
   form.status = a.status
-  form.specs = a.specs || ''
+  form.brand = a.brand || ''
+  form.model = a.model || ''
   form.serial_number = a.serialNumber || ''
   form.purchase_date = a.purchaseDate || ''
   form.warranty_expire_date = a.warrantyExpireDate || ''
   form.department_id = a.departmentId || undefined
   form.assigned_to = a.assignedTo != null ? String(a.assignedTo) : ''
+  form.assignedUserName = (a as any).assignedUserName || ''
   form.region = a.region || ''
   form.purchase_price = a.purchasePrice || undefined
   form.description = a.description || ''

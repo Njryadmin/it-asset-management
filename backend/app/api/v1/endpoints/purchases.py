@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime
 
 from app.core.database import get_db
-from app.models import PurchaseRequest, PurchaseRequestStatus, User
+from app.models import PurchaseRequest, PurchaseRequestStatus, User, Asset, AssetStatus
 from app.models.approval_flow import ApprovalFlow
 from app.models.approval_instance import ApprovalInstance
 from app.schemas.schemas import (
@@ -38,6 +38,18 @@ async def get_default_purchase_flow(db: AsyncSession) -> Optional[ApprovalFlow]:
         ).order_by(ApprovalFlow.id).limit(1)
     )
     return result.scalar_one_or_none()
+
+
+async def generate_asset_code(db: AsyncSession) -> str:
+    """Generate a unique asset code like AST-202603-001"""
+    now = datetime.utcnow()
+    prefix = now.strftime("%Y%m")
+    result = await db.execute(
+        select(func.max(Asset.asset_code)).where(Asset.asset_code.like(f"AST-{prefix}%"))
+    )
+    last = result.scalar() or f"AST-{prefix}000"
+    seq = int(last.split("-")[-1]) + 1
+    return f"AST-{prefix}{seq:03d}"
 
 
 @router.get("")
@@ -327,7 +339,7 @@ async def mark_as_purchased(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """标记为已采购（仅管理员）"""
+    """标记为已采购（仅管理员）- 同时自动在资产表中创建资产记录"""
     if not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="只有管理员可以操作")
 
@@ -343,6 +355,38 @@ async def mark_as_purchased(
     if actual_price is not None:
         purchase_request.actual_price = actual_price
     purchase_request.purchased_at = datetime.utcnow()
+
+    # ── 自动创建资产记录 ──────────────────────────────────────────────
+    asset_code = await generate_asset_code(db)
+    asset = Asset(
+        name=purchase_request.title,
+        asset_code=asset_code,
+        category_id=purchase_request.category_id,
+        supplier_id=purchase_request.supplier_id,
+        department_id=getattr(purchase_request, 'department_id', None),
+        purchase_date=datetime.utcnow().date(),
+        purchase_price=purchase_request.actual_price or purchase_request.estimated_price,
+        status=AssetStatus.IDLE,
+        description=f"来源于采购申请单：{purchase_request.title} (ID: {purchase_request.id})",
+    )
+    db.add(asset)
+    await db.flush()  # 获取 asset.id
+
+    # 写入审计日志
+    from app.services.audit_service import log_action
+    await log_action(
+        db=db,
+        biz_type="assets",
+        biz_id=asset.id,
+        action="CREATE",
+        actor=current_user,
+        before=None,
+        after={"id": asset.id, "name": asset.name, "asset_code": asset.asset_code},
+        asset_code=asset.asset_code,
+        summary=f"采购入库自动创建：{asset.name}",
+    )
+    # ─────────────────────────────────────────────────────────────────
+
     await db.commit()
     await db.refresh(purchase_request)
     return purchase_request

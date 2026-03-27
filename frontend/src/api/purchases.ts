@@ -24,12 +24,54 @@ export interface ApprovalChainItem {
   time: string | null
 }
 
+export interface ApprovalFlow {
+  id: number
+  name: string
+  flowCode: string
+  applicableTo: string
+  steps: ApprovalStep[]
+  isActive: boolean
+  createdAt: string
+}
+
+export interface ApprovalStep {
+  step: number
+  name: string
+  role: string
+}
+
+export interface ApprovalFlowForm {
+  name: string
+  flowCode: string
+  applicableTo: string
+  steps: ApprovalStep[]
+  isActive: boolean
+}
+
+export const flowsApi = {
+  list() {
+    return request.get<{ total: number; items: ApprovalFlow[] }>('/approval-flows')
+  },
+  get(id: number) {
+    return request.get<ApprovalFlow>(`/approval-flows/${id}`)
+  },
+  create(data: ApprovalFlowForm) {
+    return request.post('/approval-flows', data)
+  },
+  update(id: number, data: Partial<ApprovalFlowForm>) {
+    return request.put(`/approval-flows/${id}`, data)
+  },
+  delete(id: number) {
+    return request.delete(`/approval-flows/${id}`)
+  },
+}
+
 export const approvalApi = {
   instances(params?: { status?: string; page?: number; page_size?: number }) {
     return request.get<ApiResponse<ApprovalInstance>>('/approval-instances', { params })
   },
-  myPending() {
-    return request.get<ApiResponse<ApprovalInstance>>('/approval-instances/my-pending')
+  myPending(params?: { page?: number; page_size?: number }) {
+    return request.get<ApiResponse<ApprovalInstance>>('/approval-instances/my-pending', { params })
   },
   myApplications(params?: { page?: number; page_size?: number }) {
     return request.get<ApiResponse<ApprovalInstance>>('/approval-instances/my-applications', { params })
@@ -43,9 +85,6 @@ export const approvalApi = {
   reject(id: number, data: { comment?: string }) {
     return request.post(`/approval-instances/${id}/reject`, data)
   },
-  flows() {
-    return request.get('/approval-flows')
-  }
 }
 
 export const purchasesApi = {

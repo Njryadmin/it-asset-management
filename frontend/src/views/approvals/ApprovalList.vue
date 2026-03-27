@@ -147,9 +147,9 @@ async function fetchApprovals() {
       approvals.value = res.data.items
       total.value = res.data.total
     } else if (activeTab.value === 'pending') {
-      res = await approvalApi.myPending()
-      approvals.value = res.data.items || res.data || []
-      total.value = approvals.value.length
+      res = await approvalApi.myPending({ page: filterParams.page, page_size: filterParams.page_size })
+      approvals.value = res.data.items || []
+      total.value = res.data.total || 0
     } else {
       res = await approvalApi.myHistory({ page: filterParams.page, page_size: filterParams.page_size })
       approvals.value = res.data.items

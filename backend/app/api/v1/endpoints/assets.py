@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 from typing import Optional
 import csv
 import io
@@ -319,11 +319,24 @@ async def get_asset(
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    result = await db.execute(select(Asset).where(Asset.id == asset_id))
-    asset = result.scalar_one_or_none()
+    result = await db.execute(
+        select(Asset)
+        .options(joinedload(Asset.assigned_to_user))
+        .where(Asset.id == asset_id)
+    )
+    asset = result.unique().scalar_one_or_none()
     if not asset:
         raise HTTPException(status_code=404, detail="资产不存在")
-    return asset
+
+    # Build response dict and attach assigned_user_name
+    resp = AssetResponse.model_validate(asset).model_dump()
+    if asset.assigned_to_user:
+        user = asset.assigned_to_user
+        resp["assigned_user_name"] = user.full_name or user.username
+    else:
+        resp["assigned_user_name"] = None
+
+    return resp
 
 
 @router.post("")

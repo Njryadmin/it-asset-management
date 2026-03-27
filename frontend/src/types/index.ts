@@ -107,6 +107,9 @@ export interface Asset {
   region: string | null
   createdAt: string
   updatedAt: string | null
+  brand?: string
+  model?: string
+  assignedUserName?: string
 }
 
 // Purchase Request types
@@ -184,6 +187,8 @@ export interface AssetForm {
   description?: string
   specs?: string
   region?: string
+  brand?: string
+  model?: string
 }
 
 export interface PurchaseRequestForm {

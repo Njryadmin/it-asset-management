@@ -66,6 +66,10 @@
           <el-icon><DocumentChecked /></el-icon>
           <span>审批管理</span>
         </el-menu-item>
+        <el-menu-item v-if="authStore.user?.isSuperuser" index="/approval-flows">
+          <el-icon><Setting /></el-icon>
+          <span>流程配置</span>
+        </el-menu-item>
         <el-menu-item v-if="authStore.user?.isSuperuser" index="/audit">
           <el-icon><Histogram /></el-icon>
           <span>审计日志</span>
