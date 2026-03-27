@@ -4,7 +4,7 @@ from sqlalchemy import select, func, and_
 from typing import Optional
 from datetime import datetime
 from app.core.database import get_db
-from app.models import Asset, PurchaseRequest, Category, Department, Supplier
+from app.models import Asset, PurchaseRequest, Category, Department, Supplier, AssetStatus
 from app.api.v1.endpoints.auth import get_current_active_user
 from pydantic import BaseModel
 
@@ -115,7 +115,7 @@ async def get_asset_summary(
     this_month_retired = await db.scalar(
         select(func.count(Asset.id)).where(
             Asset.deleted_at.is_(None),
-            Asset.status.value == "RETIRED",
+            Asset.status == AssetStatus.RETIRED,
             func.extract("year", Asset.updated_at) == now.year,
             func.extract("month", Asset.updated_at) == now.month,
         )
@@ -211,7 +211,7 @@ async def get_asset_trend(
         retired = await db.scalar(
             select(func.count(Asset.id)).where(
                 Asset.deleted_at.is_(None),
-                Asset.status.value == "RETIRED",
+                Asset.status == AssetStatus.RETIRED,
                 func.extract("year", Asset.updated_at) == y,
                 func.extract("month", Asset.updated_at) == m,
             )

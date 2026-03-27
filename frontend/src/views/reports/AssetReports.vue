@@ -16,7 +16,7 @@
           <el-icon><Plus /></el-icon>
         </div>
         <div class="summary-card__content">
-          <div class="summary-card__value">{{ summary.addedThisMonth }}</div>
+          <div class="summary-card__value">{{ addedThisMonth }}</div>
           <div class="summary-card__label">本月新增</div>
         </div>
       </el-card>
@@ -25,7 +25,7 @@
           <el-icon><Delete /></el-icon>
         </div>
         <div class="summary-card__content">
-          <div class="summary-card__value">{{ summary.scrappedThisMonth }}</div>
+          <div class="summary-card__value">{{ scrappedThisMonth }}</div>
           <div class="summary-card__label">本月报废</div>
         </div>
       </el-card>
@@ -34,7 +34,7 @@
           <el-icon><Check /></el-icon>
         </div>
         <div class="summary-card__content">
-          <div class="summary-card__value">{{ summary.inUse }}</div>
+          <div class="summary-card__value">{{ inUse }}</div>
           <div class="summary-card__label">在用资产</div>
         </div>
       </el-card>
@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useAssetStore } from '@/stores/assets'
 import { reportsApi, type AssetSummary } from '@/api/reportsApi'
 import { ElMessage } from 'element-plus'
@@ -121,22 +121,26 @@ const assetStore = useAssetStore()
 
 const summary = reactive<AssetSummary>({
   total: 0,
-  inUse: 0,
-  idle: 0,
-  maintenance: 0,
-  retired: 0,
-  scrapped: 0,
-  addedThisMonth: 0,
-  scrappedThisMonth: 0
+  byStatus: {},
+  byCategory: [],
+  byDepartment: [],
+  byImportance: {},
+  thisMonthNew: 0,
+  thisMonthRetired: 0
 })
 
 const distribution = reactive({
   byCategory: [] as { name: string; value: number }[],
-  byStatus: [] as { status: string; label: string; count: number }[],
-  byDepartment: [] as { name: string; count: number }[]
+  byStatus: [] as { name: string; value: number }[],
+  byDepartment: [] as { name: string; value: number }[]
 })
 
-const trend = ref<{ month: string; count: number }[]>([])
+const trend = ref<{ month: string; added: number; retired: number }[]>([])
+
+// Computed for template
+const inUse = computed(() => summary.byStatus['in_use'] ?? 0)
+const addedThisMonth = computed(() => summary.thisMonthNew)
+const scrappedThisMonth = computed(() => summary.thisMonthRetired)
 
 const dateRange = ref<string[]>([])
 const chartsLoading = ref(false)
@@ -205,9 +209,9 @@ function initStatusChart() {
     in_use: '#1AAD19', idle: '#909399', maintenance: '#FF991A', retired: '#FA5151', scrapped: '#C0C4CC'
   }
   const data = distribution.byStatus.map(d => ({
-    name: statusLabelMap[d.status] || d.status,
-    value: d.count,
-    itemStyle: { color: statusColors[d.status] || '#909399' }
+    name: statusLabelMap[d.name] || d.name,
+    value: d.value,
+    itemStyle: { color: statusColors[d.name] || '#909399' }
   }))
   statusChart.setOption({
     ...getChartBaseOption(),
@@ -227,7 +231,7 @@ function initDeptChart() {
   if (!deptChartRef.value) return
   deptChart = echarts.init(deptChartRef.value)
   const c = getWechatColors()
-  const sorted = [...distribution.byDepartment].sort((a, b) => b.count - a.count).slice(0, 10)
+  const sorted = [...distribution.byDepartment].sort((a, b) => b.value - a.value).slice(0, 10)
   deptChart.setOption({
     ...getChartBaseOption(),
     grid: { left: 80, right: 30, top: 10, bottom: 40 },
@@ -235,7 +239,7 @@ function initDeptChart() {
     yAxis: { type: 'category', data: sorted.map(d => d.name), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: c.text, fontSize: 12 } },
     series: [{
       type: 'bar',
-      data: sorted.map((d, i) => ({ value: d.count, itemStyle: { color: getWechatColors().seriesColors[i % getWechatColors().seriesColors.length] } })),
+      data: sorted.map((d, i) => ({ value: d.value, itemStyle: { color: getWechatColors().seriesColors[i % getWechatColors().seriesColors.length] } })),
       barMaxWidth: 30,
       itemStyle: { borderRadius: [0, 4, 4, 0] }
     }]
@@ -247,7 +251,7 @@ function initTrendChart() {
   trendChart = echarts.init(trendChartRef.value)
   const c = getWechatColors()
   const months = trend.value.map(t => t.month)
-  const counts = trend.value.map(t => t.count)
+  const addedData = trend.value.map(t => t.added)
   trendChart.setOption({
     ...getChartBaseOption(),
     grid: { left: 50, right: 20, top: 10, bottom: 40 },
@@ -255,7 +259,7 @@ function initTrendChart() {
     yAxis: { type: 'value', axisLine: { show: false }, splitLine: { lineStyle: { color: c.splitLine } }, axisLabel: { color: c.text } },
     series: [{
       type: 'line',
-      data: counts,
+      data: addedData,
       smooth: true,
       areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(26, 173, 25, 0.3)' }, { offset: 1, color: 'rgba(26, 173, 25, 0.02)' }]) },
       lineStyle: { color: '#1AAD19', width: 2 },
@@ -310,7 +314,7 @@ async function fetchDistribution() {
 async function fetchTrend() {
   try {
     const res = await reportsApi.assetTrend({ months: 6 })
-    trend.value = res.data
+    trend.value = res.data.items
     initTrendChart()
   } catch {
     // ignore
@@ -333,17 +337,12 @@ function resetFilters() {
 }
 
 function exportCsv() {
-  const headers = ['月份', '资产总数', '在用', '闲置', '维护中', '已退役', '已报废', '本月新增', '本月报废']
+  const headers = ['月份', '资产总数', '本月新增', '本月报废']
   const rows = [[
     dayjs().format('YYYY-MM'),
     summary.total,
-    summary.inUse,
-    summary.idle,
-    summary.maintenance,
-    summary.retired,
-    summary.scrapped,
-    summary.addedThisMonth,
-    summary.scrappedThisMonth
+    summary.thisMonthNew,
+    summary.thisMonthRetired
   ]]
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })

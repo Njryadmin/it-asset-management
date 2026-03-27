@@ -1,52 +1,48 @@
 import request from './request'
 
+// 后端返回 snake_case，经拦截器转换为 camelCase
+
 export interface AssetSummary {
   total: number
-  inUse: number
-  idle: number
-  maintenance: number
-  retired: number
-  scrapped: number
-  addedThisMonth: number
-  scrappedThisMonth: number
+  byStatus: Record<string, number>
+  byCategory: { name: string; value: number }[]
+  byDepartment: { name: string; value: number }[]
+  byImportance: Record<string, number>
+  thisMonthNew: number
+  thisMonthRetired: number
 }
 
-export interface CategoryDistribution {
-  name: string
-  value: number
+export interface DistributionResponse {
+  byCategory: { name: string; value: number }[]
+  byStatus: { name: string; value: number }[]
+  byDepartment: { name: string; value: number }[]
+  byImportance: { name: string; value: number }[]
 }
 
-export interface StatusDistribution {
-  status: string
-  label: string
-  count: number
+export interface TrendResponse {
+  items: { month: string; added: number; retired: number }[]
 }
 
-export interface DepartmentDistribution {
-  name: string
-  count: number
-}
-
-export interface TrendPoint {
-  month: string
-  count: number
+export interface PurchaseSummary {
+  totalCount: number
+  totalAmount: number
+  byStatus: Record<string, number>
+  bySupplier: { name: string; value: number }[]
+  thisMonthCount: number
+  thisMonthAmount: number
 }
 
 export const reportsApi = {
-  assetSummary(params?: { start_date?: string; end_date?: string }) {
+  assetSummary(params?: { department_id?: number; category_id?: number }) {
     return request.get<AssetSummary>('/reports/assets/summary', { params })
   },
   assetDistribution(params?: { category_id?: number; department_id?: number }) {
-    return request.get<{
-      byCategory: CategoryDistribution[]
-      byStatus: StatusDistribution[]
-      byDepartment: DepartmentDistribution[]
-    }>('/reports/assets/distribution', { params })
+    return request.get<DistributionResponse>('/reports/assets/distribution', { params })
   },
   assetTrend(params?: { months?: number }) {
-    return request.get<TrendPoint[]>('/reports/assets/trend', { params })
+    return request.get<TrendResponse>('/reports/assets/trend', { params })
   },
   purchaseSummary(params?: { start_date?: string; end_date?: string }) {
-    return request.get('/reports/purchases/summary', { params })
+    return request.get<PurchaseSummary>('/reports/purchases/summary', { params })
   }
 }
