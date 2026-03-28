@@ -43,5 +43,9 @@ export const usersApi = {
       old_password: oldPassword,
       new_password: newPassword
     })
+  },
+
+  toggleStatus(id: number) {
+    return request.post(`/users/${id}/toggle-status`)
   }
 }

@@ -22,7 +22,7 @@ export const suppliersApi = {
     return request.delete(`/suppliers/${id}`)
   },
   
-  toggleStatus(id: number, isActive: boolean) {
-    return request.put(`/suppliers/${id}`, { is_active: isActive })
+  toggleStatus(id: number) {
+    return request.post(`/suppliers/${id}/toggle-status`)
   }
 }

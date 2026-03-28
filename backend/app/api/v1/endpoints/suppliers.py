@@ -105,6 +105,24 @@ async def download_supplier_template(
     )
 
 
+@router.post("/{supplier_id}/toggle-status")
+async def toggle_supplier_status(
+    supplier_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    """切换供应商启用/禁用状态"""
+    result = await db.execute(select(Supplier).where(Supplier.id == supplier_id))
+    supplier = result.scalar_one_or_none()
+    if not supplier:
+        raise HTTPException(status_code=404, detail="供应商不存在")
+    
+    supplier.is_active = not supplier.is_active
+    await db.commit()
+    await db.refresh(supplier)
+    return {"message": "状态切换成功", "is_active": supplier.is_active}
+
+
 @router.post("/import")
 async def import_suppliers(
     file: UploadFile = File(...),

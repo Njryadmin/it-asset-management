@@ -13,6 +13,8 @@ export interface AuditLogItem {
   afterState: Record<string, any> | null
   changeSummary: string | null
   createdAt: string
+  bizTypeLabel?: string
+  actionLabel?: string
 }
 
 export const auditApi = {

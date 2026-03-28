@@ -102,11 +102,15 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <span class="action-link" @click="showDialog('edit', row)">
               <el-icon><Edit /></el-icon>
               <span>编辑</span>
+            </span>
+            <span class="action-link" :class="row.isActive ? 'action-link--warning' : 'action-link--success'" @click="handleToggleStatus(row)">
+              <el-icon><Switch /></el-icon>
+              <span>{{ row.isActive ? '禁用' : '启用' }}</span>
             </span>
             <span class="action-link action-link--danger" @click="handleDelete(row.id)">
               <el-icon><Delete /></el-icon>
@@ -321,15 +325,14 @@ async function handleDelete(id: number) {
 }
 
 async function handleToggleStatus(row: Supplier) {
-  const newStatus = !row.isActive
-  const action = newStatus ? '启用' : '禁用'
+  const action = row.isActive ? '禁用' : '启用'
   try {
     await ElMessageBox.confirm(`确定要${action}该供应商吗？`, '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    await suppliersApi.toggleStatus(row.id, newStatus)
+    await suppliersApi.toggleStatus(row.id)
     ElMessage.success(`${action}成功`)
     await supplierStore.fetchSuppliers()
   } catch (error: any) {

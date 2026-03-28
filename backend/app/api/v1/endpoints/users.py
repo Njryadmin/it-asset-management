@@ -142,6 +142,27 @@ async def update_user(
     return user
 
 
+@router.post("/{user_id}/toggle-status")
+async def toggle_user_status(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    """切换用户启用/禁用状态"""
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="不能禁用自己的账号")
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+
+    user.is_active = not user.is_active
+    await db.commit()
+    await db.refresh(user)
+    return {"message": "状态切换成功", "is_active": user.is_active}
+
+
 @router.delete("/{user_id}")
 async def delete_user(
     user_id: int,

@@ -78,10 +78,10 @@
         </el-table-column>
         <el-table-column prop="action" label="操作类型" width="110">
           <template #default="{ row }">
-            <el-tag :type="actionTagType(row.action)" size="small">{{ actionLabel(row.action) }}</el-tag>
+            <el-tag :type="actionTagType(row.action)" size="small">{{ actionLabel(row) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="bizType" label="资源类型" width="120" />
+        <el-table-column prop="bizTypeLabel" label="资源类型" width="120" />
         <el-table-column prop="bizId" label="资源ID" width="100">
           <template #default="{ row }">
             {{ row.bizId ?? '-' }}
@@ -208,15 +208,8 @@ function resetFilters() {
   fetchLogs()
 }
 
-function actionLabel(action: string) {
-  const map: Record<string, string> = {
-    CREATE: '创建',
-    UPDATE: '更新',
-    DELETE: '删除',
-    APPROVE: '审批通过',
-    REJECT: '审批拒绝'
-  }
-  return map[action] || action
+function actionLabel(row: AuditLogItem) {
+  return row.actionLabel || row.action
 }
 
 function actionTagType(action: string) {
