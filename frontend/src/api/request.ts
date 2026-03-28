@@ -116,5 +116,7 @@ export function downloadFile(url: string, params?: Record<string, any>, filename
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(downloadUrl)
+  }).catch(() => {
+    ElMessage.error('下载失败，请稍后重试')
   })
 }
