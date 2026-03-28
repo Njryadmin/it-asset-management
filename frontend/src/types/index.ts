@@ -110,6 +110,11 @@ export interface Asset {
   brand?: string
   model?: string
   assignedUserName?: string
+  location?: string
+  importanceLevel?: string
+  depreciationYears?: number
+  depreciationMethod?: string
+  salvageRate?: number
 }
 
 // Purchase Request types
@@ -189,6 +194,11 @@ export interface AssetForm {
   region?: string
   brand?: string
   model?: string
+  location?: string
+  importance_level?: string
+  depreciation_years?: number
+  depreciation_method?: string
+  salvage_rate?: number
 }
 
 export interface PurchaseRequestForm {
