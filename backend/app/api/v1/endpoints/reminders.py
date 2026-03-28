@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, lte, gte, func
+from sqlalchemy import select, and_, func
+from sqlalchemy.sql import lte, gte
 from datetime import datetime, timedelta
 from typing import Optional
 
