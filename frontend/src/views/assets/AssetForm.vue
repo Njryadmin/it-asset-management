@@ -211,4 +211,21 @@ onMounted(async () => {
 .form-container {
   max-width: 600px;
 }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .asset-form { padding: 14px; }
+  .form-container { max-width: 100%; }
+}
+@media (max-width: 768px) {
+  .asset-form { padding: 10px; }
+  .form-container { padding: 0; }
+  .el-form { }
+  .el-form-item { margin-bottom: 16px; }
+}
+@media (max-width: 480px) {
+  .asset-form { padding: 8px; }
+  .el-form-item { margin-bottom: 14px; }
+}
+
 </style>

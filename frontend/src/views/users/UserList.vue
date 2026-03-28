@@ -389,12 +389,12 @@ onMounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .header-actions {
@@ -508,4 +508,18 @@ onMounted(() => {
     padding: 4px 6px;
   }
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+  .user-page { padding: 14px; }
+}
+/* ── Small Mobile ── */
+@media (max-width: 480px) {
+  .user-page { padding: 8px; }
+  .card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .search-bar { flex-wrap: wrap; gap: 8px; }
+  .search-input { width: 100%; min-width: 0; }
+  .pagination { justify-content: center; flex-wrap: wrap; gap: 8px; }
+}
+
 </style>

@@ -280,12 +280,12 @@ onMounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .filter-bar {
@@ -321,7 +321,7 @@ onMounted(() => {
 .approval-card__title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
   flex: 1;
   line-height: 1.4;
 }
@@ -340,31 +340,31 @@ onMounted(() => {
 
 .approval-card__row .label {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
   min-width: 68px;
   flex-shrink: 0;
 }
 
 .approval-card__row .value {
   font-size: 13px;
-  color: var(--wechat-text);
+  color: var(--text-primary);
   flex: 1;
 }
 
 .approval-card__row .amount {
   font-weight: 600;
-  color: var(--wechat-warning);
+  color: var(--warning);
 }
 
 .approval-card__row .comment {
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
   font-style: italic;
 }
 
 .approval-card__footer {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--wechat-border-light);
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: flex-end;
   gap: 10px;
@@ -375,4 +375,24 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .approval-page { padding: 14px; }
+  .approval-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+}
+@media (max-width: 768px) {
+  .approval-page { padding: 10px; }
+  .card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .filter-bar { flex-direction: column; gap: 8px; }
+  .filter-bar > * { width: 100%; }
+  .approval-grid { grid-template-columns: 1fr; gap: 12px; }
+  .approval-card { }
+  .pagination-wrapper { justify-content: center; }
+}
+@media (max-width: 480px) {
+  .approval-page { padding: 8px; }
+  .pagination-wrapper { justify-content: center; flex-wrap: wrap; gap: 8px; }
+}
+
 </style>

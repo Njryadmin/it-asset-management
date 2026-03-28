@@ -372,35 +372,35 @@ const isAdmin = computed(() => authStore.user?.isSuperuser === true)
 const themeList: Record<string, any> = {
   default: {
     name: '默认主题',
-    primary: '#1AAD19',
-    bg_color: '#F5F5F5',
-    bg_color_secondary: '#E8E8E8',
+    primary: '#3B82F6',
+    bg_color: '#F1F5F9',
+    bg_color_secondary: '#E8EDF3',
     sidebar_color: 'rgba(255, 255, 255, 0.95)',
-    sidebar_text: '#333333',
-    sidebar_active_bg: 'rgba(26, 173, 25, 0.12)',
-    sidebar_active_icon: '#1AAD19',
+    sidebar_text: '#475569',
+    sidebar_active_bg: 'rgba(59, 130, 246, 0.1)',
+    sidebar_active_icon: '#3B82F6',
     header_color: '#ffffff',
     card_bg: '#ffffff',
-    text_primary: '#333333',
-    text_secondary: '#666666',
-    border_color: '#E5E5E5',
-    border_light: '#F0F0F0',
+    text_primary: '#0F172A',
+    text_secondary: '#475569',
+    border_color: '#E2E8F0',
+    border_light: '#F1F5F9',
   },
   dark: {
     name: '深色主题',
-    primary: '#07C160',
-    bg_color: '#1F1F1F',
-    bg_color_secondary: '#2D2D2D',
-    sidebar_color: '#191919',
-    sidebar_text: '#E0E0E0',
-    sidebar_active_bg: 'rgba(7, 193, 96, 0.15)',
-    sidebar_active_icon: '#07C160',
-    header_color: '#1F1F1F',
-    card_bg: '#252525',
-    text_primary: '#FFFFFF',
-    text_secondary: '#A0A0A0',
-    border_color: '#3A3A3C',
-    border_light: '#2D2D2D',
+    primary: '#3B82F6',
+    bg_color: '#09090B',
+    bg_color_secondary: '#111113',
+    sidebar_color: 'rgba(16, 16, 18, 0.92)',
+    sidebar_text: '#A1A1AA',
+    sidebar_active_bg: 'rgba(59, 130, 246, 0.12)',
+    sidebar_active_icon: '#3B82F6',
+    header_color: 'rgba(16, 16, 18, 0.88)',
+    card_bg: 'rgba(24, 24, 27, 0.85)',
+    text_primary: '#FAFAFA',
+    text_secondary: '#A1A1AA',
+    border_color: 'rgba(255, 255, 255, 0.08)',
+    border_light: 'rgba(255, 255, 255, 0.05)',
   }
 }
 
@@ -617,6 +617,11 @@ function selectTheme(key: string) {
   root.style.setProperty('--el-fill-color-blank', theme.card_bg)
 
   root.setAttribute('data-theme', key)
+  if (key === 'dark') {
+    root.classList.add('dark')
+  } else {
+    root.classList.remove('dark')
+  }
   document.body.style.backgroundColor = theme.bg_color
   localStorage.setItem('app-theme', key)
 
@@ -1219,4 +1224,13 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .settings-page { padding: 12px 10px; }
+  .settings-grid { grid-template-columns: 1fr; }
+  .settings-sidebar { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .settings-sidebar .settings-nav-card { padding: 14px 12px; }
+}
+
 </style>

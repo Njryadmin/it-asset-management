@@ -271,18 +271,19 @@ onMounted(async () => {
 
 /* ── Sidebar ── */
 .sidebar {
-  width: 210px !important;
-  min-width: 210px;
-  background-color: var(--wechat-sidebar);
+  width: 220px !important;
+  min-width: 220px;
+  background-color: var(--sidebar-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: transform var(--transition-normal);
+  transition: transform var(--transition-normal), background-color var(--transition-slow);
   z-index: 100;
   flex-shrink: 0;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+  border-right: 1px solid var(--sidebar-border);
 }
 
 .sidebar__header {
@@ -291,7 +292,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--sidebar-border);
   flex-shrink: 0;
 }
 
@@ -308,7 +309,7 @@ onMounted(async () => {
   width: 100%;
   height: 44px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .sidebar__logo-icon {
@@ -318,7 +319,7 @@ onMounted(async () => {
 .sidebar__logo-text {
   font-size: 16px;
   font-weight: 700;
-  color: var(--wechat-sidebar-text);
+  color: var(--sidebar-text);
   letter-spacing: 1px;
 }
 
@@ -336,11 +337,11 @@ onMounted(async () => {
   height: 48px;
   line-height: 48px;
   margin: 2px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding-left: 16px !important;
   padding-right: 16px !important;
   font-size: 14px;
-  color: var(--wechat-sidebar-text) !important;
+  color: var(--sidebar-text) !important;
   background-color: transparent !important;
   transition: background-color var(--transition-fast), color var(--transition-fast);
   display: flex;
@@ -349,22 +350,22 @@ onMounted(async () => {
 }
 
 .sidebar__menu :deep(.el-menu-item:hover) {
-  background-color: var(--wechat-sidebar-hover-bg) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
+  background-color: var(--sidebar-bg-hover) !important;
+  color: var(--sidebar-text-active) !important;
 }
 
 .sidebar__menu :deep(.el-menu-item.is-active) {
-  background-color: var(--wechat-sidebar-active-bg) !important;
-  color: #fff !important;
+  background-color: var(--sidebar-bg-active) !important;
+  color: var(--sidebar-text-active) !important;
 }
 
 .sidebar__menu :deep(.el-menu-item.is-active .el-icon) {
-  color: var(--wechat-primary) !important;
+  color: var(--sidebar-icon-active) !important;
 }
 
 .sidebar__menu :deep(.el-menu-item .el-icon) {
   font-size: 17px;
-  color: var(--wechat-sidebar-icon);
+  color: var(--sidebar-icon);
   flex-shrink: 0;
 }
 
@@ -377,11 +378,11 @@ onMounted(async () => {
   height: 48px;
   line-height: 48px;
   margin: 2px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding-left: 16px !important;
   padding-right: 16px !important;
   font-size: 14px;
-  color: var(--wechat-sidebar-text) !important;
+  color: var(--sidebar-text) !important;
   background-color: transparent !important;
   transition: background-color var(--transition-fast), color var(--transition-fast);
   display: flex;
@@ -390,13 +391,13 @@ onMounted(async () => {
 }
 
 .sidebar__menu :deep(.el-sub-menu__title:hover) {
-  background-color: var(--wechat-sidebar-hover-bg) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
+  background-color: var(--sidebar-bg-hover) !important;
+  color: var(--sidebar-text-active) !important;
 }
 
 .sidebar__menu :deep(.el-sub-menu__title .el-icon) {
   font-size: 17px;
-  color: var(--wechat-sidebar-icon);
+  color: var(--sidebar-icon);
   flex-shrink: 0;
 }
 
@@ -420,13 +421,13 @@ onMounted(async () => {
 
 .sidebar__footer {
   padding: 12px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--sidebar-border);
   flex-shrink: 0;
 }
 
 .sidebar__version {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--text-muted);
   text-align: center;
 }
 
@@ -435,29 +436,33 @@ onMounted(async () => {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-bg);
+  backdrop-filter: var(--overlay-blur);
   z-index: 99;
-  backdrop-filter: blur(2px);
 }
 
 /* ── Header ── */
 .header {
-  height: 56px !important;
+  height: var(--header-height) !important;
   display: flex;
   align-items: center;
   padding: 0 20px !important;
-  background-color: var(--wechat-card);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  background-color: var(--header-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--header-border);
+  box-shadow: var(--header-shadow);
   z-index: 10;
   flex-shrink: 0;
   gap: 12px;
+  transition: background-color var(--transition-slow), border-color var(--transition-base);
 }
 
 .header__title {
   flex: 1;
   font-size: 15px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--header-text);
 }
 
 .header__right {
@@ -466,7 +471,7 @@ onMounted(async () => {
   gap: 12px;
 }
 
-/* ── Theme Toggle Button (Lobe Theme style) ── */
+/* ── Theme Toggle Button ── */
 .theme-toggle {
   display: flex;
   align-items: center;
@@ -474,17 +479,18 @@ onMounted(async () => {
   width: 36px;
   height: 36px;
   border: none;
-  background: var(--wechat-bg);
+  background: var(--bg-hover);
   border-radius: var(--radius-md);
   cursor: pointer;
-  color: var(--wechat-text-secondary);
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  color: var(--text-secondary);
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
   flex-shrink: 0;
 }
 .theme-toggle:hover {
-  background: var(--wechat-bg-hover);
-  color: var(--wechat-text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--bg-active);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  transform: scale(1.05);
 }
 .theme-toggle:active {
   transform: scale(0.94);
@@ -506,12 +512,12 @@ onMounted(async () => {
   transition: background-color var(--transition-fast);
 }
 .hamburger:hover {
-  background-color: var(--wechat-bg);
+  background-color: var(--bg-hover);
 }
 .hamburger span {
   display: block;
   height: 2px;
-  background-color: var(--wechat-text);
+  background-color: var(--header-text);
   border-radius: 1px;
   transition: all var(--transition-fast);
 }
@@ -532,17 +538,17 @@ onMounted(async () => {
   gap: 8px;
   cursor: pointer;
   padding: 5px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   transition: background-color var(--transition-fast);
 }
 .user-info:hover {
-  background-color: var(--wechat-bg);
+  background-color: var(--bg-hover);
 }
 .user-avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--wechat-primary);
+  background: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -552,10 +558,10 @@ onMounted(async () => {
 .user-name {
   font-size: 14px;
   font-weight: 500;
-  color: var(--wechat-text);
+  color: var(--header-text);
 }
 .chevron {
-  color: var(--wechat-text-secondary);
+  color: var(--header-text-secondary);
   font-size: 12px;
 }
 
@@ -571,14 +577,14 @@ onMounted(async () => {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  background: var(--wechat-bg);
-  padding: 16px;
-  transition: background-color var(--transition-normal);
+  background: var(--bg-page);
+  padding: var(--space-4);
+  transition: background-color var(--transition-slow);
 }
 
 /* ── Fade Transition ── */
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-base);
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
@@ -595,11 +601,11 @@ onMounted(async () => {
     left: 0;
     top: 0;
     bottom: 0;
-    width: 210px !important;
-    min-width: 210px;
+    width: 220px !important;
+    min-width: 220px;
     transform: translateX(-100%);
-    z-index: 200;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: var(--z-fixed);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
   }
 
   .sidebar--open {
@@ -619,7 +625,7 @@ onMounted(async () => {
   }
 
   .main-content {
-    padding: 12px;
+    padding: var(--space-3);
   }
 }
 </style>

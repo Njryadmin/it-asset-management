@@ -261,12 +261,12 @@ onMounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .filter-bar {
@@ -281,7 +281,7 @@ onMounted(() => {
   padding: 12px 20px;
   display: flex;
   gap: 20px;
-  background: var(--wechat-bg);
+  background: var(--bg-page);
 }
 
 .expand-section {
@@ -292,18 +292,18 @@ onMounted(() => {
 .expand-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
 .json-block {
-  background: var(--wechat-card);
-  border: 1px solid var(--wechat-border-light);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   font-size: 12px;
   font-family: 'Courier New', monospace;
-  color: var(--wechat-text);
+  color: var(--text-primary);
   overflow: auto;
   max-height: 200px;
   white-space: pre-wrap;
@@ -316,4 +316,24 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .audit-page { padding: 14px; }
+}
+@media (max-width: 768px) {
+  .audit-page { padding: 10px; }
+  .card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .filter-bar { flex-direction: column; gap: 8px; }
+  .filter-bar > * { width: 100%; }
+  .filter-bar .el-select { width: 100%; }
+  .filter-bar .el-date-editor { width: 100%; }
+  .expand-content { flex-direction: column; gap: 12px; }
+  .pagination-wrapper { justify-content: center; }
+}
+@media (max-width: 480px) {
+  .audit-page { padding: 8px; }
+  .pagination-wrapper { justify-content: center; flex-wrap: wrap; gap: 8px; }
+}
+
 </style>

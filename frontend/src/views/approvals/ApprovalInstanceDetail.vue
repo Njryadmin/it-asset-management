@@ -277,7 +277,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
   padding: 60px;
 }
 
@@ -288,7 +288,7 @@ onMounted(() => {
 .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .info-grid {
@@ -306,17 +306,17 @@ onMounted(() => {
 
 .info-label {
   font-size: 12px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .info-value {
   font-size: 14px;
-  color: var(--wechat-text);
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .info-value.amount {
-  color: var(--wechat-warning);
+  color: var(--warning);
   font-weight: 600;
 }
 
@@ -335,18 +335,18 @@ onMounted(() => {
 .chain-approver {
   font-weight: 600;
   font-size: 14px;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .chain-comment {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
   padding: 4px 0;
 }
 
 .chain-step {
   font-size: 12px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .action-bar {
@@ -356,4 +356,24 @@ onMounted(() => {
   gap: 12px;
   padding: 16px 0;
 }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .approval-detail-page { padding: 14px; max-width: 100%; }
+}
+@media (max-width: 768px) {
+  .approval-detail-page { padding: 10px; }
+  .info-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chain-list { }
+  .chain-item { padding: 10px 0; }
+  .action-bar { flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .top-bar { flex-wrap: wrap; gap: 8px; }
+}
+@media (max-width: 480px) {
+  .approval-detail-page { padding: 8px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .action-bar { flex-direction: column; align-items: stretch; }
+  .action-bar .el-button { width: 100%; }
+}
+
 </style>

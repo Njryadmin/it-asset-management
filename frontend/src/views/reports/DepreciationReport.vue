@@ -166,7 +166,7 @@ onMounted(() => {
 .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .page-header h2 { margin: 0; font-size: 18px; }
 .summary-row { margin-bottom: 12px; }
-.summary-card { background: var(--wechat-card-bg, #fff); border-radius: 8px; padding: 14px 10px; text-align: center; }
+.summary-card { background: var(--card-bg, #fff); border-radius: 8px; padding: 14px 10px; text-align: center; }
 .summary-label { font-size: 11px; color: #888; margin-bottom: 6px; }
 .summary-value { font-size: 18px; font-weight: 700; }
 .summary-value.highlight { color: var(--el-color-success); }
@@ -194,4 +194,11 @@ onMounted(() => {
   .summary-value { font-size: 15px; }
   .pagination { justify-content: center; }
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+  .depreciation-page { padding: 14px; }
+  .summary-cards { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+}
+
 </style>

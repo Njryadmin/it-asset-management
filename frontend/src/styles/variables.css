@@ -1,0 +1,379 @@
+/* ============================================================
+   Design System Variables — IT Asset Management System
+   Minimal Enterprise (Light) + Modern Glass (Dark)
+   Primary: #3B82F6 (Professional Blue)
+   ============================================================ */
+
+/* ── Font Family ── */
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+}
+
+/* ═══════════════════════════════════════════
+   LIGHT THEME — Minimal Enterprise
+   ═══════════════════════════════════════════ */
+:root {
+  /* ── Primary Colors ── */
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+  --primary-active: #1D4ED8;
+  --primary-bg: #EFF6FF;
+  --primary-bg-hover: #DBEAFE;
+  --primary-text: #1D4ED8;
+  --primary-border: #BFDBFE;
+  --primary-shadow: rgba(59, 130, 246, 0.25);
+
+  /* ── Status Colors ── */
+  --success: #10B981;
+  --success-hover: #059669;
+  --success-bg: #ECFDF5;
+  --success-bg-hover: #D1FAE5;
+  --success-text: #065F46;
+  --success-border: #A7F3D0;
+
+  --warning: #F59E0B;
+  --warning-hover: #D97706;
+  --warning-bg: #FFFBEB;
+  --warning-bg-hover: #FEF3C7;
+  --warning-text: #92400E;
+  --warning-border: #FDE68A;
+
+  --danger: #EF4444;
+  --danger-hover: #DC2626;
+  --danger-bg: #FEF2F2;
+  --danger-bg-hover: #FEE2E2;
+  --danger-text: #991B1B;
+  --danger-border: #FECACA;
+
+  --info: #6366F1;
+  --info-hover: #4F46E5;
+  --info-bg: #EEF2FF;
+  --info-bg-hover: #E0E7FF;
+  --info-text: #3730A3;
+  --info-border: #C7D2FE;
+
+  /* ── Surface / Background ── */
+  --bg-page: #F1F5F9;
+  --bg-page-alt: #E8EDF3;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-hover: #F1F5F9;
+  --bg-active: #E2E8F0;
+  --bg-overlay: rgba(0, 0, 0, 0.04);
+
+  /* ── Border ── */
+  --border: #E2E8F0;
+  --border-hover: #CBD5E1;
+  --border-strong: #94A3B8;
+  --border-focus: #3B82F6;
+
+  /* ── Text ── */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-disabled: #CBD5E1;
+  --text-inverse: #FFFFFF;
+
+  /* ── Shadow — Minimal Enterprise (3 layers) ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+  --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  /* ── Border Radius ── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  /* ── Spacing ── */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Layout ── */
+  --sidebar-width: 220px;
+  --header-height: 56px;
+  --content-max-width: 1400px;
+
+  /* ── Transitions ── */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 350ms ease;
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-Index ── */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+
+  /* ── Sidebar (Light) ── */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-bg-hover: #F1F5F9;
+  --sidebar-bg-active: #EFF6FF;
+  --sidebar-text: #475569;
+  --sidebar-text-active: #2563EB;
+  --sidebar-icon: #94A3B8;
+  --sidebar-icon-active: #3B82F6;
+  --sidebar-border: #E2E8F0;
+  --sidebar-width-collapsed: 64px;
+
+  /* ── Header (Light) ── */
+  --header-bg: #FFFFFF;
+  --header-text: #0F172A;
+  --header-text-secondary: #64748B;
+  --header-border: #E2E8F0;
+  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  /* ── Card (Light) ── */
+  --card-bg: #FFFFFF;
+  --card-bg-hover: #F8FAFC;
+  --card-border: #E2E8F0;
+  --card-border-hover: #CBD5E1;
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-radius: var(--radius-lg);
+
+  /* ── Scrollbar ── */
+  --scrollbar-thumb: #CBD5E1;
+  --scrollbar-thumb-hover: #94A3B8;
+  --scrollbar-track: transparent;
+
+  /* ── Overlay ── */
+  --overlay-bg: rgba(15, 23, 42, 0.4);
+  --overlay-blur: blur(4px);
+
+  /* ── Divider ── */
+  --divider-color: #E2E8F0;
+  --divider-weight: 1px;
+
+  /* ── Brand Accent (for decorative elements) ── */
+  --accent-glow: rgba(59, 130, 246, 0.12);
+  --accent-border: rgba(59, 130, 246, 0.2);
+
+  /* ── Element Plus CSS Variable Map (Light) ── */
+  --el-color-primary: #3B82F6;
+  --el-color-primary-light-3: #60A5FA;
+  --el-color-primary-light-5: #93C5FD;
+  --el-color-primary-light-7: #BFDBFE;
+  --el-color-primary-light-9: #EFF6FF;
+  --el-color-primary-dark-2: #2563EB;
+
+  --el-color-success: #10B981;
+  --el-color-success-light-3: #34D399;
+  --el-color-success-light-5: #6EE7B7;
+  --el-color-success-light-7: #A7F3D0;
+  --el-color-success-light-9: #ECFDF5;
+  --el-color-success-dark-2: #059669;
+
+  --el-color-warning: #F59E0B;
+  --el-color-warning-light-3: #FCD34D;
+  --el-color-warning-light-5: #FDE68A;
+  --el-color-warning-light-7: #FEF3C7;
+  --el-color-warning-light-9: #FFFBEB;
+  --el-color-warning-dark-2: #D97706;
+
+  --el-color-danger: #EF4444;
+  --el-color-danger-light-3: #F87171;
+  --el-color-danger-light-5: #FCA5A5;
+  --el-color-danger-light-7: #FECACA;
+  --el-color-danger-light-9: #FEF2F2;
+  --el-color-danger-dark-2: #DC2626;
+
+  --el-color-info: #6366F1;
+  --el-color-info-light-3: #818CF8;
+  --el-color-info-light-5: #A5B4FC;
+  --el-color-info-light-7: #C7D2FE;
+  --el-color-info-light-9: #EEF2FF;
+  --el-color-info-dark-2: #4F46E5;
+
+  --el-bg-color: #FFFFFF;
+  --el-bg-color-page: #F1F5F9;
+  --el-bg-color-soft: #F8FAFC;
+  --el-bg-color-overlay: #FFFFFF;
+  --el-fill-color-blank: #FFFFFF;
+  --el-fill-color-light: #F8FAFC;
+  --el-fill-color-lighter: #F1F5F9;
+  --el-fill-color-extra-light: #F8FAFC;
+  --el-fill-color-dark: #1E293B;
+  --el-border-color: #E2E8F0;
+  --el-border-color-light: #F1F5F9;
+  --el-border-color-lighter: #F8FAFC;
+  --el-border-color-extra-light: #FFFFFF;
+  --el-border-color-hover: #CBD5E1;
+  --el-text-color-primary: #0F172A;
+  --el-text-color-regular: #475569;
+  --el-text-color-secondary: #94A3B8;
+  --el-text-color-placeholder: #CBD5E1;
+  --el-text-color-disabled: #CBD5E1;
+  --el-input-bg-color: #FFFFFF;
+  --el-input-border-color: #E2E8F0;
+  --el-menu-bg-color: #FFFFFF;
+  --el-menu-hover-bg-color: #F1F5F9;
+  --el-menu-text-color: #475569;
+  --el-menu-active-color: #3B82F6;
+  --el-menu-item-height: 48px;
+  --el-menu-sub-item-height: 40px;
+}
+
+/* ═══════════════════════════════════════════
+   DARK THEME — Modern Glass
+   ═══════════════════════════════════════════ */
+html.dark,
+[data-theme="dark"] {
+  /* ── Surface / Background ── */
+  --bg-page: #09090B;
+  --bg-page-alt: #111113;
+  --bg-card: rgba(24, 24, 27, 0.85);
+  --bg-card-hover: rgba(39, 39, 42, 0.9);
+  --bg-hover: rgba(39, 39, 42, 0.6);
+  --bg-active: rgba(63, 63, 70, 0.7);
+  --bg-overlay: rgba(255, 255, 255, 0.04);
+
+  /* ── Border ── */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --border-focus: #3B82F6;
+
+  /* ── Text ── */
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-disabled: #52525B;
+  --text-inverse: #0F172A;
+
+  /* ── Shadow — Glass depth (dark) ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  --shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  /* ── Sidebar (Dark Glass) ── */
+  --sidebar-bg: rgba(16, 16, 18, 0.92);
+  --sidebar-bg-hover: rgba(39, 39, 42, 0.7);
+  --sidebar-bg-active: rgba(59, 130, 246, 0.12);
+  --sidebar-text: #A1A1AA;
+  --sidebar-text-active: #FAFAFA;
+  --sidebar-icon: #71717A;
+  --sidebar-icon-active: #3B82F6;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+
+  /* ── Header (Dark Glass) ── */
+  --header-bg: rgba(16, 16, 18, 0.88);
+  --header-text: #FAFAFA;
+  --header-text-secondary: #A1A1AA;
+  --header-border: rgba(255, 255, 255, 0.06);
+  --header-shadow: none;
+
+  /* ── Card (Dark Glass) ── */
+  --card-bg: rgba(24, 24, 27, 0.85);
+  --card-bg-hover: rgba(39, 39, 42, 0.9);
+  --card-border: rgba(255, 255, 255, 0.07);
+  --card-border-hover: rgba(255, 255, 255, 0.12);
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --card-radius: var(--radius-xl);
+
+  /* ── Scrollbar ── */
+  --scrollbar-thumb: #3F3F46;
+  --scrollbar-thumb-hover: #52525B;
+  --scrollbar-track: transparent;
+
+  /* ── Overlay ── */
+  --overlay-bg: rgba(0, 0, 0, 0.65);
+  --overlay-blur: blur(8px);
+
+  /* ── Divider ── */
+  --divider-color: rgba(255, 255, 255, 0.07);
+  --divider-weight: 1px;
+
+  /* ── Brand Accent (for decorative elements) ── */
+  --accent-glow: rgba(59, 130, 246, 0.15);
+  --accent-border: rgba(59, 130, 246, 0.25);
+
+  /* ── Element Plus CSS Variable Map (Dark) ── */
+  --el-color-primary: #3B82F6;
+  --el-color-primary-light-3: #60A5FA;
+  --el-color-primary-light-5: #93C5FD;
+  --el-color-primary-light-7: #BFDBFE;
+  --el-color-primary-light-9: rgba(59, 130, 246, 0.1);
+  --el-color-primary-dark-2: #2563EB;
+
+  --el-color-success: #10B981;
+  --el-color-success-light-3: #34D399;
+  --el-color-success-light-5: #6EE7B7;
+  --el-color-success-light-7: #A7F3D0;
+  --el-color-success-light-9: rgba(16, 185, 129, 0.1);
+  --el-color-success-dark-2: #059669;
+
+  --el-color-warning: #F59E0B;
+  --el-color-warning-light-3: #FCD34D;
+  --el-color-warning-light-5: #FDE68A;
+  --el-color-warning-light-7: #FEF3C7;
+  --el-color-warning-light-9: rgba(245, 158, 11, 0.1);
+  --el-color-warning-dark-2: #D97706;
+
+  --el-color-danger: #EF4444;
+  --el-color-danger-light-3: #F87171;
+  --el-color-danger-light-5: #FCA5A5;
+  --el-color-danger-light-7: #FECACA;
+  --el-color-danger-light-9: rgba(239, 68, 68, 0.1);
+  --el-color-danger-dark-2: #DC2626;
+
+  --el-color-info: #818CF8;
+  --el-color-info-light-3: #A5B4FC;
+  --el-color-info-light-5: #C7D2FE;
+  --el-color-info-light-7: #E0E7FF;
+  --el-color-info-light-9: rgba(99, 102, 241, 0.1);
+  --el-color-info-dark-2: #6366F1;
+
+  --el-bg-color: rgba(24, 24, 27, 0.95);
+  --el-bg-color-page: #09090B;
+  --el-bg-color-soft: rgba(39, 39, 42, 0.5);
+  --el-bg-color-overlay: rgba(24, 24, 27, 0.98);
+  --el-fill-color-blank: rgba(24, 24, 27, 0.95);
+  --el-fill-color-light: rgba(39, 39, 42, 0.5);
+  --el-fill-color-lighter: rgba(63, 63, 70, 0.4);
+  --el-fill-color-extra-light: rgba(82, 82, 91, 0.3);
+  --el-fill-color-dark: #09090B;
+  --el-border-color: rgba(255, 255, 255, 0.08);
+  --el-border-color-light: rgba(255, 255, 255, 0.05);
+  --el-border-color-lighter: rgba(255, 255, 255, 0.03);
+  --el-border-color-extra-light: rgba(255, 255, 255, 0.02);
+  --el-border-color-hover: rgba(255, 255, 255, 0.14);
+  --el-text-color-primary: #FAFAFA;
+  --el-text-color-regular: #A1A1AA;
+  --el-text-color-secondary: #71717A;
+  --el-text-color-placeholder: #52525B;
+  --el-text-color-disabled: #52525B;
+  --el-input-bg-color: rgba(39, 39, 42, 0.6);
+  --el-input-border-color: rgba(255, 255, 255, 0.1);
+  --el-menu-bg-color: transparent;
+  --el-menu-hover-bg-color: rgba(39, 39, 42, 0.5);
+  --el-menu-text-color: #A1A1AA;
+  --el-menu-active-color: #3B82F6;
+  --el-menu-item-height: 48px;
+  --el-menu-sub-item-height: 40px;
+}

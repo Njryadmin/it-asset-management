@@ -160,7 +160,7 @@
           <div class="panel__body status-ring-layout">
             <div class="ring-chart-wrap">
               <svg viewBox="0 0 220 220" class="ring-svg">
-                <circle cx="110" cy="110" r="82" fill="none" stroke="var(--wechat-border-light)" stroke-width="18" />
+                <circle cx="110" cy="110" r="82" fill="none" stroke="var(--border)" stroke-width="18" />
                 <circle v-for="(seg, i) in donutSegments" :key="seg.key" cx="110" cy="110" r="82" fill="none"
                   :stroke="seg.color" stroke-width="18" :stroke-dasharray="seg.dashArray" :stroke-dashoffset="seg.dashOffset"
                   stroke-linecap="butt" class="ring-seg" :style="{ animationDelay: i * 100 + 'ms' }" />
@@ -193,7 +193,7 @@
           <div class="panel__body usage-layout">
             <div class="arc-wrap">
               <svg viewBox="0 0 200 120" class="arc-svg">
-                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--wechat-border-light)" stroke-width="16" stroke-linecap="round" />
+                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--border)" stroke-width="16" stroke-linecap="round" />
                 <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" :stroke="usageGaugeColor" stroke-width="16" stroke-linecap="round"
                   :stroke-dasharray="arcDashArray" stroke-dashoffset="0" class="arc-fill" />
               </svg>
@@ -288,7 +288,7 @@
               </div>
             </div>
             <el-empty v-else description="暂无待审批申请" :image-size="50">
-              <template #image><el-icon :size="44" color="var(--wechat-border-light)"><Document /></el-icon></template>
+              <template #image><el-icon :size="44" color="var(--border)"><Document /></el-icon></template>
             </el-empty>
           </div>
         </div>
@@ -385,7 +385,7 @@ const todayInCount = computed(() => {
   return (stats.value.recentAssets || []).filter((a: any) => a.purchaseDate === today || (a.createdAt && dayjs(a.createdAt).format('YYYY-MM-DD') === today)).length
 })
 const todayOutCount = computed(() => { const s = stats.value as any; if (s.todayOut !== undefined) return s.todayOut; return 0 })
-const statusColorMap: Record<string, string> = { inUse: 'var(--wechat-primary)', idle: '#909399', maintenance: '#FF991A', retired: '#FA5151', scrapped: '#C0C4CC' }
+const statusColorMap: Record<string, string> = { inUse: 'var(--primary)', idle: '#909399', maintenance: '#FF991A', retired: '#FA5151', scrapped: '#C0C4CC' }
 const statusLabelMap: Record<string, string> = { inUse: '使用中', idle: '闲置', maintenance: '维护中', retired: '已退役', scrapped: '已报废' }
 const statusOrder = ['inUse','idle','maintenance','retired','scrapped']
 function statusLabel(status: string) { return statusLabelMap[status] || status }
@@ -414,7 +414,7 @@ const statusCardItems = computed<StatusCardItem[]>(() => {
   return statusOrder.map(key => { const count = (stats.value.assetsByStatus as any)?.[key] || 0; return { key, label: statusLabelMap[key] || key, color: statusColorMap[key] || '#909399', count, pct: total ? Math.round((count / total) * 100) : 0 } })
 })
 const overallUsagePct = computed(() => { const total = stats.value.totalAssets || 0; if (!total) return 0; return Math.round(((stats.value.assetsByStatus as any)?.inUse || 0) / total * 100) })
-const usageGaugeColor = computed(() => { const p = overallUsagePct.value; if (p >= 70) return 'var(--wechat-primary)'; if (p >= 40) return '#FF991A'; return '#909399' })
+const usageGaugeColor = computed(() => { const p = overallUsagePct.value; if (p >= 70) return 'var(--primary)'; if (p >= 40) return '#FF991A'; return '#909399' })
 const ARC_LENGTH = Math.PI * 80
 const arcDashArray = computed(() => { const pct = Math.min(overallUsagePct.value, 100) / 100; return `${(pct * ARC_LENGTH).toFixed(2)} ${ARC_LENGTH.toFixed(2)}` })
 async function fetchStats() { try { const r = await dashboardApi.getStats(); stats.value = r.data } catch (e) { console.error(e) } }
@@ -454,17 +454,17 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 .announcement-text { font-size: 13px; font-weight: 500; white-space: nowrap; }
 
 /* Brand Header */
-.brand-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; margin-bottom: 14px; background: var(--wechat-card); border-radius: var(--radius-xl); box-shadow: var(--wechat-shadow-card); border: 1px solid var(--wechat-border-light); position: relative; overflow: hidden; }
+.brand-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; margin-bottom: 14px; background: var(--card-bg); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--border); position: relative; overflow: hidden; }
 .brand-header::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(26,173,25,0.07) 0%,transparent 60%,rgba(26,173,25,0.03) 100%); pointer-events: none; }
 .brand-header__orb { position: absolute; top: -28px; right: 70px; width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle,rgba(26,173,25,0.13) 0%,transparent 70%); pointer-events: none; animation: orb-pulse 4s ease-in-out infinite; }
 .brand-header__left { display: flex; align-items: center; gap: 14px; position: relative; }
 .brand-header__logo img { width: 42px; height: 42px; border-radius: 10px; object-fit: contain; }
 .brand-header__icon { font-size: 38px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; }
-.brand-header__name { font-size: 19px; font-weight: 700; color: var(--wechat-text); line-height: 1.3; }
-.brand-header__sub { font-size: 13px; color: var(--wechat-text-secondary); margin-top: 3px; }
+.brand-header__name { font-size: 19px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+.brand-header__sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
 .brand-header__right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; position: relative; }
-.brand-header__date { font-size: 12px; color: var(--wechat-text-secondary); }
-.brand-header__time { font-size: 24px; font-weight: 700; color: var(--wechat-primary); font-family: 'SF Mono','Monaco','Inconsolata',monospace; line-height: 1; }
+.brand-header__date { font-size: 12px; color: var(--text-secondary); }
+.brand-header__time { font-size: 24px; font-weight: 700; color: var(--primary); font-family: 'SF Mono','Monaco','Inconsolata',monospace; line-height: 1; }
 
 /* Stat Cards */
 .stats-grid { margin-bottom: 14px; }
@@ -496,14 +496,14 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 .stat-card__trend { width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.9); font-size: 14px; flex-shrink: 0; }
 
 /* Panel */
-.panel { background: var(--wechat-card); border-radius: var(--radius-lg); box-shadow: var(--wechat-shadow-card); border: 1px solid var(--wechat-border-light); overflow: hidden; margin-bottom: 14px; transition: box-shadow 240ms ease; }
+.panel { background: var(--card-bg); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden; margin-bottom: 14px; transition: box-shadow 240ms ease; }
 .panel:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); }
 .panel--accent { border-color: rgba(26,173,25,0.2); }
-.panel__header { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid var(--wechat-border-light); }
-.panel__title { font-size: 14px; font-weight: 600; color: var(--wechat-text); flex: 1; }
-.panel__badge { font-size: 12px; color: var(--wechat-text-secondary); background: var(--wechat-bg); padding: 2px 10px; border-radius: 10px; }
+.panel__header { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+.panel__title { font-size: 14px; font-weight: 600; color: var(--text-primary); flex: 1; }
+.panel__badge { font-size: 12px; color: var(--text-secondary); background: var(--bg-page); padding: 2px 10px; border-radius: 10px; }
 .panel__badge--danger { background: #FA5151; color: #fff; padding: 2px 9px; border-radius: 10px; font-weight: 700; }
-.panel__badge--accent { background: var(--wechat-primary); color: #fff; padding: 2px 10px; border-radius: 10px; font-weight: 600; }
+.panel__badge--accent { background: var(--primary); color: #fff; padding: 2px 10px; border-radius: 10px; font-weight: 600; }
 .panel__body { padding: 18px; }
 
 /* Status Ring Layout */
@@ -513,15 +513,15 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 .ring-svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.08)); }
 .ring-seg { transform-origin: center; animation: donut-reveal 0.8s cubic-bezier(0.4,0,0.2,1) both; }
 .ring-core { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.ring-core__pct { font-size: 28px; font-weight: 800; color: var(--wechat-text); line-height: 1; letter-spacing: -1px; }
-.ring-core__sub { font-size: 11px; color: var(--wechat-text-secondary); margin-top: 4px; font-weight: 500; }
+.ring-core__pct { font-size: 28px; font-weight: 800; color: var(--text-primary); line-height: 1; letter-spacing: -1px; }
+.ring-core__sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
 .ring-legend { display: flex; flex-direction: column; gap: 12px; }
 .ring-legend__item { display: flex; flex-direction: column; gap: 5px; }
 .ring-legend__top { display: flex; align-items: center; gap: 8px; }
 .ring-legend__dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.ring-legend__name { font-size: 13px; color: var(--wechat-text-secondary); flex: 1; font-weight: 500; }
+.ring-legend__name { font-size: 13px; color: var(--text-secondary); flex: 1; font-weight: 500; }
 .ring-legend__count { font-size: 17px; font-weight: 800; line-height: 1; }
-.ring-legend__track { height: 5px; background: var(--wechat-bg); border-radius: 3px; overflow: hidden; border: 1px solid var(--wechat-border-light); }
+.ring-legend__track { height: 5px; background: var(--bg-page); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
 .ring-legend__fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.4,0,0.2,1); min-width: 3px; }
 
 /* Usage Layout */
@@ -532,59 +532,59 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 .arc-fill { animation: arc-reveal 1.2s cubic-bezier(0.4,0,0.2,1) both; transition: stroke-dasharray 0.8s ease; }
 .arc-center { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
 .arc-center__pct { font-size: 24px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
-.arc-center__label { font-size: 11px; color: var(--wechat-text-secondary); margin-top: 3px; font-weight: 500; }
+.arc-center__label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
 .arc-ticks { position: absolute; bottom: -4px; left: 0; right: 0; display: flex; justify-content: space-between; }
-.arc-tick { font-size: 10px; color: var(--wechat-text-placeholder); }
+.arc-tick { font-size: 10px; color: var(--text-muted); }
 .usage-pills { display: flex; flex-direction: column; gap: 10px; flex: 1; }
-.usage-pill { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--wechat-bg); border: 1px solid var(--wechat-border-light); border-radius: var(--radius-md); transition: transform 200ms ease,box-shadow 200ms ease; }
+.usage-pill { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg-page); border: 1px solid var(--border); border-radius: var(--radius-md); transition: transform 200ms ease,box-shadow 200ms ease; }
 .usage-pill:hover { transform: translateX(6px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 .usage-pill__dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.usage-pill--green  .usage-pill__dot { background: var(--wechat-primary); }
+.usage-pill--green  .usage-pill__dot { background: var(--primary); }
 .usage-pill--gray   .usage-pill__dot { background: #909399; }
 .usage-pill--orange .usage-pill__dot { background: #FF991A; }
-.usage-pill__label { font-size: 13px; color: var(--wechat-text-secondary); flex: 1; font-weight: 500; }
-.usage-pill__count { font-size: 18px; font-weight: 800; color: var(--wechat-text); }
+.usage-pill__label { font-size: 13px; color: var(--text-secondary); flex: 1; font-weight: 500; }
+.usage-pill__count { font-size: 18px; font-weight: 800; color: var(--text-primary); }
 
 /* Recent Table */
-.asset-code { font-family: 'SF Mono','Consolas',monospace; font-size: 12px; color: var(--wechat-primary); background: var(--wechat-primary-bg); padding: 2px 7px; border-radius: 5px; }
-.price-text { font-weight: 600; color: var(--wechat-text); }
-.date-text { color: var(--wechat-text-secondary); font-size: 12px; }
-:deep(.el-table) { --el-table-border-color: var(--wechat-border-light); --el-table-header-bg-color: var(--wechat-bg); }
-:deep(.el-table .el-table__row:hover > td) { background: var(--wechat-bg) !important; }
+.asset-code { font-family: 'SF Mono','Consolas',monospace; font-size: 12px; color: var(--primary); background: var(--primary-bg); padding: 2px 7px; border-radius: 5px; }
+.price-text { font-weight: 600; color: var(--text-primary); }
+.date-text { color: var(--text-secondary); font-size: 12px; }
+:deep(.el-table) { --el-table-border-color: var(--border); --el-table-header-bg-color: var(--bg-page); }
+:deep(.el-table .el-table__row:hover > td) { background: var(--bg-page) !important; }
 
 /* Purchase List */
 .purchase-list { display: flex; flex-direction: column; }
-.purchase-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px; border-bottom: 1px solid var(--wechat-border-light); gap: 10px; transition: background-color var(--transition-fast); }
-.purchase-item:hover { background: var(--wechat-bg); }
+.purchase-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px; border-bottom: 1px solid var(--border); gap: 10px; transition: background-color var(--transition-fast); }
+.purchase-item:hover { background: var(--bg-page); }
 .purchase-item__left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .purchase-item__icon { width: 34px; height: 34px; border-radius: 9px; background: rgba(255,153,26,0.12); display: flex; align-items: center; justify-content: center; color: #FF991A; font-size: 17px; flex-shrink: 0; }
 .purchase-item__info { display: flex; flex-direction: column; min-width: 0; }
-.purchase-item__title { font-size: 13px; font-weight: 600; color: var(--wechat-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.purchase-item__meta { font-size: 12px; color: var(--wechat-text-secondary); margin-top: 2px; }
+.purchase-item__title { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.purchase-item__meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 .purchase-item__right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-.purchase-item__date { font-size: 11px; color: var(--wechat-text-placeholder); }
+.purchase-item__date { font-size: 11px; color: var(--text-muted); }
 .purchase-footer { padding: 10px 8px 4px; display: flex; justify-content: center; }
 
 /* Quick Actions */
 .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.quick-action { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border-radius: var(--radius-md); cursor: pointer; transition: background-color var(--transition-fast),transform var(--transition-fast),box-shadow var(--transition-fast); background: var(--wechat-bg); border: 1px solid var(--wechat-border-light); }
-.quick-action:hover { background: var(--wechat-border-light); transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+.quick-action { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border-radius: var(--radius-md); cursor: pointer; transition: background-color var(--transition-fast),transform var(--transition-fast),box-shadow var(--transition-fast); background: var(--bg-page); border: 1px solid var(--border); }
+.quick-action:hover { background: var(--border); transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
 .quick-action__icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.quick-action__icon--green  { background: rgba(26,173,25,0.12);  color: var(--wechat-primary); }
+.quick-action__icon--green  { background: rgba(26,173,25,0.12);  color: var(--primary); }
 .quick-action__icon--orange { background: rgba(255,153,26,0.12);  color: #FF991A; }
 .quick-action__icon--blue   { background: rgba(64,158,255,0.12);  color: #409EFF; }
 .quick-action__icon--purple { background: rgba(156,106,222,0.12); color: #9C6ADE; }
-.quick-action__label { font-size: 12px; font-weight: 500; color: var(--wechat-text-secondary); text-align: center; }
+.quick-action__label { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-align: center; }
 
 /* Summary List */
 .summary-list { display: flex; flex-direction: column; }
-.summary-item { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-bottom: 1px solid var(--wechat-border-light); transition: background-color var(--transition-fast),transform var(--transition-fast); cursor: pointer; border-radius: var(--radius-sm); }
+.summary-item { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-bottom: 1px solid var(--border); transition: background-color var(--transition-fast),transform var(--transition-fast); cursor: pointer; border-radius: var(--radius-sm); }
 .summary-item:last-child { border-bottom: none; }
-.summary-item:hover { background: var(--wechat-bg); transform: translateX(4px); }
+.summary-item:hover { background: var(--bg-page); transform: translateX(4px); }
 .summary-item__icon { font-size: 16px; width: 26px; text-align: center; flex-shrink: 0; }
-.summary-item__label { flex: 1; font-size: 13px; color: var(--wechat-text-secondary); }
-.summary-item__value { font-size: 15px; font-weight: 700; color: var(--wechat-text); }
-.summary-item__value--primary { color: var(--wechat-primary); }
+.summary-item__label { flex: 1; font-size: 13px; color: var(--text-secondary); }
+.summary-item__value { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.summary-item__value--primary { color: var(--primary); }
 
 /* Responsive */
 @media (max-width: 768px) {

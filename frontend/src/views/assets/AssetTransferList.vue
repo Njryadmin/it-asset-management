@@ -190,3 +190,28 @@ onMounted(() => {
   justify-content: flex-end;
 }
 </style>
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .asset-transfer-list { padding: 14px; }
+}
+
+@media (max-width: 768px) {
+  .asset-transfer-list { padding: 10px; }
+  .page-header { margin-bottom: 12px; }
+  .page-header h2 { font-size: 16px; }
+  .filter-card { margin-bottom: 12px; }
+  .el-table { font-size: 13px; }
+  .el-table :deep(th.el-table__cell),
+  .el-table :deep(td.el-table__cell) { padding: 8px 4px; }
+  .el-table :deep(.el-table__cell) { min-width: 80px; }
+  .pagination { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .asset-transfer-list { padding: 8px; }
+  .page-header h2 { font-size: 15px; }
+  .pagination { justify-content: center; flex-wrap: wrap; gap: 8px; }
+}
+
+</style>

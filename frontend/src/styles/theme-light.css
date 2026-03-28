@@ -1,0 +1,84 @@
+/* ============================================================
+   Theme Light — Minimal Enterprise Supplement
+   Additions & overrides specific to light mode
+   ============================================================ */
+
+/* ── Glass effect on cards (subtle in light mode) ── */
+html:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Sidebar frosted glass (light mode) ── */
+html:not(.dark) .sidebar {
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--sidebar-border);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Header frosted glass (light mode) ── */
+html:not(.dark) .header {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--header-border);
+  box-shadow: var(--header-shadow);
+}
+
+/* ── Glow effects (light mode — subtle) ── */
+html:not(.dark) .accent-glow {
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+/* ── Primary button gradient (light mode) ── */
+html:not(.dark) .el-button--primary,
+html:not(.dark) .btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px var(--primary-shadow) !important;
+}
+html:not(.dark) .el-button--primary:hover,
+html:not(.dark) .btn-primary:hover {
+  box-shadow: 0 4px 16px var(--primary-shadow) !important;
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+/* ── Stat cards (light mode — colored left border accent) ── */
+html:not(.dark) .stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--stat-accent-color, var(--primary));
+  opacity: 0.7;
+}
+
+/* ── Modern card hover lift (light mode) ── */
+html:not(.dark) .modern-card {
+  border: 1px solid var(--card-border);
+  transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
+}
+html:not(.dark) .modern-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--card-border-hover);
+  transform: translateY(-1px);
+}
+
+/* ── Table striped rows (light mode) ── */
+html:not(.dark) .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: var(--bg-page) !important;
+}
+
+/* ── Page background gradient (light mode — very subtle) ── */
+html:not(.dark) body {
+  background: linear-gradient(180deg, var(--bg-page) 0%, #EDF0F4 100%);
+}

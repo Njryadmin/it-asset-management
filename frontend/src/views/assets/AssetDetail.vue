@@ -657,9 +657,9 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: var(--wechat-bg);
+  background: var(--bg-page);
   border-radius: var(--radius-md);
-  color: var(--wechat-text-placeholder);
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -671,7 +671,7 @@ onMounted(async () => {
 .card-header-title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .info-grid {
@@ -692,13 +692,13 @@ onMounted(async () => {
 
 .info-label {
   font-size: 12px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .info-value {
   font-size: 14px;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .edit-form {
@@ -727,4 +727,22 @@ onMounted(async () => {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .asset-detail-page { padding: 10px; }
+  .top-bar { flex-wrap: wrap; gap: 8px; }
+  .detail-layout { gap: 12px; }
+  .info-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .action-buttons { flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+  .action-buttons .el-button { flex: 1; min-width: 100px; }
+}
+/* ── Small Mobile ── */
+@media (max-width: 480px) {
+  .asset-detail-page { padding: 8px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .action-buttons { flex-direction: column; }
+  .action-buttons .el-button { width: 100%; }
+}
+
 </style>

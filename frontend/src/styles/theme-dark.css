@@ -1,0 +1,306 @@
+/* ============================================================
+   Theme Dark — Modern Glass Supplement
+   Additions & overrides specific to dark mode
+   Backdrop blur, glow effects, glass morphism
+   ============================================================ */
+
+/* ── Glass morphism cards (dark mode) ── */
+html.dark .glass-card,
+[data-theme="dark"] .glass-card {
+  background: rgba(24, 24, 27, 0.75);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ── Sidebar glass (dark mode) ── */
+html.dark .sidebar,
+[data-theme="dark"] .sidebar {
+  background: var(--sidebar-bg) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid var(--sidebar-border);
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Header glass (dark mode) ── */
+html.dark .header,
+[data-theme="dark"] .header {
+  background: var(--header-bg) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--header-border);
+  box-shadow: none;
+}
+
+/* ── Modal / dialog glass (dark mode) ── */
+html.dark .el-dialog,
+[data-theme="dark"] .el-dialog {
+  background: rgba(24, 24, 27, 0.95) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+html.dark .el-drawer,
+[data-theme="dark"] .el-drawer {
+  background: rgba(16, 16, 18, 0.98) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ── Glow effect (dark mode — vivid) ── */
+html.dark .accent-glow,
+[data-theme="dark"] .accent-glow {
+  box-shadow: 0 0 32px var(--accent-glow), 0 0 8px var(--accent-glow);
+}
+
+/* ── Primary button with glow (dark mode) ── */
+html.dark .el-button--primary,
+html.dark .btn-primary,
+[data-theme="dark"] .el-button--primary,
+[data-theme="dark"] .btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.4) !important;
+}
+html.dark .el-button--primary:hover,
+html.dark .btn-primary:hover,
+[data-theme="dark"] .el-button--primary:hover,
+[data-theme="dark"] .btn-primary:hover {
+  box-shadow: 0 4px 24px rgba(59, 130, 246, 0.6) !important;
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+/* ── Stat cards (dark mode — glass + colored glow) ── */
+html.dark .stat-card,
+[data-theme="dark"] .stat-card {
+  background: rgba(24, 24, 27, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+html.dark .stat-card:hover,
+[data-theme="dark"] .stat-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+html.dark .stat-card::before,
+[data-theme="dark"] .stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--stat-accent-color, var(--primary));
+  box-shadow: 0 0 12px var(--stat-accent-color, var(--primary));
+  opacity: 0.8;
+}
+
+/* ── Modern card (dark mode — glass) ── */
+html.dark .modern-card,
+[data-theme="dark"] .modern-card {
+  background: rgba(24, 24, 27, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+html.dark .modern-card:hover,
+[data-theme="dark"] .modern-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ── el-card glass (dark mode) ── */
+html.dark .el-card,
+[data-theme="dark"] .el-card {
+  background: rgba(24, 24, 27, 0.9) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+html.dark .el-card__header,
+[data-theme="dark"] .el-card__header {
+  background: rgba(24, 24, 27, 0.6) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Table (dark mode) ── */
+html.dark .el-table,
+[data-theme="dark"] .el-table {
+  --el-table-border-color: rgba(255, 255, 255, 0.05);
+  --el-table-header-bg-color: rgba(39, 39, 42, 0.5);
+  --el-table-row-hover-bg-color: rgba(39, 39, 42, 0.4);
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  background: transparent !important;
+}
+html.dark .el-table th.el-table__cell,
+[data-theme="dark"] .el-table th.el-table__cell {
+  background: rgba(39, 39, 42, 0.5) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+html.dark .el-table td.el-table__cell,
+[data-theme="dark"] .el-table td.el-table__cell {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  background: transparent !important;
+}
+html.dark .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell,
+[data-theme="dark"] .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+html.dark .el-table__inner-wrapper::before,
+[data-theme="dark"] .el-table__inner-wrapper::before {
+  display: none;
+}
+
+/* ── Input glass (dark mode) ── */
+html.dark .el-input__wrapper,
+[data-theme="dark"] .el-input__wrapper {
+  background: rgba(39, 39, 42, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(8px);
+}
+html.dark .el-input__wrapper:hover,
+[data-theme="dark"] .el-input__wrapper:hover {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  background: rgba(39, 39, 42, 0.8) !important;
+}
+html.dark .el-input__wrapper.is-focus,
+[data-theme="dark"] .el-input__wrapper.is-focus {
+  border-color: var(--primary) !important;
+  background: rgba(39, 39, 42, 0.9) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* ── Select dropdown (dark mode) ── */
+html.dark .el-select-dropdown,
+[data-theme="dark"] .el-select-dropdown {
+  background: rgba(24, 24, 27, 0.98) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+html.dark .el-select-dropdown__item,
+[data-theme="dark"] .el-select-dropdown__item {
+  color: var(--text-secondary);
+}
+html.dark .el-select-dropdown__item.hover,
+html.dark .el-select-dropdown__item:hover,
+[data-theme="dark"] .el-select-dropdown__item.hover,
+[data-theme="dark"] .el-select-dropdown__item:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--text-primary);
+}
+html.dark .el-select-dropdown__item.selected,
+[data-theme="dark"] .el-select-dropdown__item.selected {
+  color: var(--primary) !important;
+  font-weight: 600;
+}
+
+/* ── Dropdown (dark mode) ── */
+html.dark .el-dropdown-menu,
+[data-theme="dark"] .el-dropdown-menu {
+  background: rgba(24, 24, 27, 0.98) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+html.dark .el-dropdown-menu__item,
+[data-theme="dark"] .el-dropdown-menu__item {
+  color: var(--text-secondary);
+}
+html.dark .el-dropdown-menu__item:hover,
+[data-theme="dark"] .el-dropdown-menu__item:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--text-primary);
+}
+
+/* ── Tag (dark mode) ── */
+html.dark .el-tag,
+[data-theme="dark"] .el-tag {
+  background: rgba(39, 39, 42, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* ── Pagination (dark mode) ── */
+html.dark .el-pagination,
+[data-theme="dark"] .el-pagination {
+  --el-pagination-bg-color: rgba(39, 39, 42, 0.5);
+  --el-pagination-button-bg-color: rgba(39, 39, 42, 0.5);
+  --el-pagination-hover-color: var(--primary);
+}
+
+/* ── Tooltip & popover (dark mode) ── */
+html.dark .el-popper,
+html.dark .el-tooltip__popper,
+[data-theme="dark"] .el-popper,
+[data-theme="dark"] .el-tooltip__popper {
+  background: rgba(24, 24, 27, 0.98) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Message (dark mode) ── */
+html.dark .el-message,
+[data-theme="dark"] .el-message {
+  background: rgba(24, 24, 27, 0.95) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Background radial glow (dark mode — page level) ── */
+html.dark body::before,
+[data-theme="dark"] body::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(59, 130, 246, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+html.dark body::after,
+[data-theme="dark"] body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(ellipse, rgba(16, 185, 129, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Scrollbar (dark mode) ── */
+html.dark ::-webkit-scrollbar-thumb,
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+}
+html.dark ::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}

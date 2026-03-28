@@ -668,12 +668,12 @@ onMounted(async () => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .header-actions {
@@ -807,11 +807,25 @@ onMounted(async () => {
 }
 
 .asset-name-link {
-  color: var(--wechat-primary);
+  color: var(--primary);
   text-decoration: none;
   font-weight: 500;
 }
 .asset-name-link:hover {
   text-decoration: underline;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+  .asset-list-page { padding: 14px; }
+}
+/* ── Small Mobile ── */
+@media (max-width: 480px) {
+  .asset-list-page { padding: 8px; }
+  .card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .search-bar { flex-wrap: wrap; gap: 8px; }
+  .search-input { width: 100%; min-width: 0; }
+  .pagination { justify-content: center; flex-wrap: wrap; gap: 8px; }
+}
+
 </style>

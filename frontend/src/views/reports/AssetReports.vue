@@ -191,7 +191,7 @@ function initCategoryChart() {
       type: 'pie',
       radius: ['35%', '65%'],
       avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: 'var(--wechat-bg)', borderWidth: 2 },
+      itemStyle: { borderRadius: 6, borderColor: 'var(--bg-page)', borderWidth: 2 },
       label: { show: true, color: c.text },
       data: distribution.byCategory
     }]
@@ -220,7 +220,7 @@ function initStatusChart() {
       type: 'pie',
       radius: ['35%', '65%'],
       avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: 'var(--wechat-bg)', borderWidth: 2 },
+      itemStyle: { borderRadius: 6, borderColor: 'var(--bg-page)', borderWidth: 2 },
       label: { show: true, color: c.text },
       data
     }]
@@ -416,13 +416,13 @@ onBeforeUnmount(() => {
 .summary-card__value {
   font-size: 26px;
   font-weight: 700;
-  color: var(--wechat-text);
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .summary-card__label {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
@@ -461,7 +461,7 @@ onBeforeUnmount(() => {
 .chart-title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .chart-container {
@@ -489,4 +489,20 @@ onBeforeUnmount(() => {
     font-size: 20px;
   }
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .reports-page { padding: 10px; }
+  .summary-cards { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .chart-card { margin-bottom: 12px; }
+  .pagination { justify-content: center; }
+}
+/* ── Small Mobile ── */
+@media (max-width: 480px) {
+  .reports-page { padding: 8px; }
+  .summary-cards { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .summary-card { padding: 12px 8px !important; }
+  .summary-card__value { font-size: 18px !important; }
+}
+
 </style>

@@ -296,12 +296,12 @@ onMounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .flow-table {
@@ -326,7 +326,7 @@ onMounted(() => {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--wechat-primary);
+  background: var(--primary);
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -338,4 +338,27 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .flow-config-page { padding: 14px; }
+}
+@media (max-width: 768px) {
+  .flow-config-page { padding: 10px; }
+  .card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .header-left { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .flow-list { }
+  .flow-item { padding: 14px 12px; }
+  .flow-item__meta { flex-wrap: wrap; gap: 6px; }
+  .pagination-wrapper { justify-content: center; }
+  .steps-editor .step-row { flex-wrap: wrap; gap: 8px; }
+  .steps-editor .step-row .el-input { min-width: 0; }
+}
+@media (max-width: 480px) {
+  .flow-config-page { padding: 8px; }
+  .pagination-wrapper { justify-content: center; flex-wrap: wrap; gap: 8px; }
+  .steps-editor .step-row { flex-direction: column; }
+  .steps-editor .step-row .step-num { display: none; }
+}
+
 </style>

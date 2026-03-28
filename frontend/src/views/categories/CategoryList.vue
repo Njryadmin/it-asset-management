@@ -390,12 +390,12 @@ onMounted(() => {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--wechat-text);
+  color: var(--text-primary);
 }
 
 .item-count {
   font-size: 13px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .header-actions {
@@ -441,17 +441,17 @@ onMounted(() => {
 }
 
 .category-tree :deep(.el-tree-node__content:hover) {
-  background-color: var(--wechat-bg) !important;
+  background-color: var(--bg-page) !important;
 }
 
 .category-tree :deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background-color: var(--wechat-sidebar-active-bg) !important;
+  background-color: var(--sidebar-bg-active) !important;
 }
 
 .category-tree :deep(.el-tree-node__expand-icon) {
   padding: 20px 8px;
   font-size: 14px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .category-tree :deep(.el-tree-node__expand-icon.is-leaf) {
@@ -497,7 +497,7 @@ onMounted(() => {
 
 .node-name {
   font-weight: 500;
-  color: var(--wechat-text);
+  color: var(--text-primary);
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
@@ -506,7 +506,7 @@ onMounted(() => {
 
 .node-meta {
   font-size: 12px;
-  color: var(--wechat-text-secondary);
+  color: var(--text-secondary);
 }
 
 .node-actions {
@@ -611,4 +611,10 @@ onMounted(() => {
     display: inline;
   }
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+  .category-page { padding: 14px; }
+}
+
 </style>
