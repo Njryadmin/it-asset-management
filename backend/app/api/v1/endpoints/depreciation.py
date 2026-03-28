@@ -89,7 +89,7 @@ async def calculate_asset_depreciation(
     asset_id: int,
     as_of_date: Optional[str] = Query(None, description="计算日期 YYYY-MM-DD"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """计算单个资产的折旧"""
     result = await db.execute(select(Asset).where(Asset.id == asset_id))
@@ -139,7 +139,7 @@ async def list_depreciation(
     keyword: Optional[str] = None,
     as_of_date: Optional[str] = Query(None, description="计算日期 YYYY-MM-DD"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """批量计算资产折旧"""
     now = datetime.strptime(as_of_date, "%Y-%m-%d").date() if as_of_date else date.today()

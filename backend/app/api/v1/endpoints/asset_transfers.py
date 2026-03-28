@@ -20,7 +20,7 @@ router = APIRouter(prefix="/asset-transfers", tags=["资产管理"])
 async def create_transfer_log(
     transfer: AssetTransferRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """创建资产转移/分配记录"""
     # 获取资产信息
@@ -78,7 +78,7 @@ async def create_transfer_log(
 async def get_asset_transfer_history(
     asset_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """获取资产的转移历史"""
     result = await db.execute(
@@ -146,7 +146,7 @@ async def list_transfer_logs(
     page_size: int = Query(20, ge=1, le=100),
     keyword: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """获取转移记录列表"""
     query = select(AssetTransferLog).order_by(desc(AssetTransferLog.created_at))

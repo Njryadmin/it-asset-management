@@ -16,7 +16,7 @@ router = APIRouter(prefix="/reminders", tags=["提醒"])
 async def get_warranty_expiring_assets(
     days: int = Query(30, ge=1, le=365, description="提前提醒天数"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """获取即将过保的资产"""
     today = datetime.utcnow().date()
@@ -52,7 +52,7 @@ async def get_warranty_expiring_assets(
 async def get_maintenance_due(
     days: int = Query(30, ge=1, le=365, description="提前提醒天数"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """获取即将需要维保的资产"""
     today = datetime.utcnow().date()
@@ -89,7 +89,7 @@ async def get_maintenance_due(
 @router.get("/summary")
 async def get_reminder_summary(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """获取提醒摘要（仪表盘用）"""
     today = datetime.utcnow().date()
