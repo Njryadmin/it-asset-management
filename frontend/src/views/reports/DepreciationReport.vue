@@ -6,26 +6,26 @@
     </div>
 
     <!-- Summary Cards -->
-    <el-row :gutter="16" class="summary-row">
-      <el-col :span="6">
+    <el-row :gutter="12" class="summary-row">
+      <el-col :xs="12" :sm="6">
         <div class="summary-card">
           <div class="summary-label">资产原值</div>
           <div class="summary-value">¥{{ formatNumber(summary.totalOriginalValue) }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="6">
         <div class="summary-card">
           <div class="summary-label">当前净值</div>
           <div class="summary-value highlight">¥{{ formatNumber(summary.totalCurrentValue) }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="6">
         <div class="summary-card">
           <div class="summary-label">累计折旧</div>
           <div class="summary-value danger">-¥{{ formatNumber(summary.totalAccumulatedDepreciation) }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="6">
         <div class="summary-card">
           <div class="summary-label">平均折旧率</div>
           <div class="summary-value">{{ summary.totalDepreciationRate }}%</div>
@@ -35,7 +35,7 @@
 
     <!-- Filter -->
     <el-card class="filter-card">
-      <el-form inline>
+      <el-form class="filter-form" inline>
         <el-form-item label="截止日期">
           <el-date-picker v-model="asOfDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" @change="fetchData" />
         </el-form-item>
@@ -51,6 +51,7 @@
 
     <!-- Table -->
     <el-card>
+      <div class="table-scroll">
       <el-table :data="depreciations" v-loading="loading" stripe>
         <el-table-column prop="assetName" label="资产名称" min-width="150">
           <template #default="{ row }">
@@ -90,6 +91,7 @@
           <template #default="{ row }">{{ row.remainingYears }}年</template>
         </el-table-column>
       </el-table>
+      </div>
 
       <div class="pagination">
         <el-pagination
@@ -160,19 +162,36 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.depreciation-page { padding: 20px; }
-.page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-.page-header h2 { margin: 0; }
-.summary-row { margin-bottom: 16px; }
-.summary-card { background: var(--wechat-card-bg, #fff); border-radius: 8px; padding: 16px; text-align: center; }
-.summary-label { font-size: 12px; color: #888; margin-bottom: 8px; }
-.summary-value { font-size: 22px; font-weight: 700; }
+.depreciation-page { padding: 16px; }
+.page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.page-header h2 { margin: 0; font-size: 18px; }
+.summary-row { margin-bottom: 12px; }
+.summary-card { background: var(--wechat-card-bg, #fff); border-radius: 8px; padding: 14px 10px; text-align: center; }
+.summary-label { font-size: 11px; color: #888; margin-bottom: 6px; }
+.summary-value { font-size: 18px; font-weight: 700; }
 .summary-value.highlight { color: var(--el-color-success); }
 .summary-value.danger { color: var(--el-color-danger); }
-.filter-card { margin-bottom: 16px; }
+.filter-card { margin-bottom: 12px; }
 .asset-link { color: var(--el-color-primary); text-decoration: none; }
 .asset-link:hover { text-decoration: underline; }
 .text-danger { color: var(--el-color-danger); }
 .progress-text { font-size: 11px; color: #888; margin-top: 2px; display: block; }
 .pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll :deep(.el-table) { min-width: 900px; }
+@media (max-width: 768px) {
+  .depreciation-page { padding: 12px; }
+  .page-header h2 { font-size: 16px; }
+  .filter-form { display: flex; flex-direction: column; gap: 8px; }
+  .filter-form .el-form-item { margin-bottom: 0; }
+  .summary-value { font-size: 16px; }
+}
+@media (max-width: 480px) {
+  .depreciation-page { padding: 8px; }
+  .page-header { flex-wrap: wrap; }
+  .page-header h2 { font-size: 15px; }
+  .summary-card { padding: 12px 8px; }
+  .summary-value { font-size: 15px; }
+  .pagination { justify-content: center; }
+}
 </style>
