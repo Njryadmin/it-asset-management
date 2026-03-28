@@ -189,7 +189,6 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
-</style>
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
@@ -213,5 +212,4 @@ onMounted(() => {
   .page-header h2 { font-size: 15px; }
   .pagination { justify-content: center; flex-wrap: wrap; gap: 8px; }
 }
-
 </style>
