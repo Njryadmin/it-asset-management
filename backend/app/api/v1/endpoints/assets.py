@@ -11,7 +11,8 @@ from datetime import datetime
 from app.core.database import get_db
 from app.models import Asset, AssetStatus, Category, Supplier, Department, User
 from app.schemas.schemas import AssetCreate, AssetUpdate, AssetResponse, AssetListResponse
-from app.api.v1.endpoints.auth import get_current_active_user, require_admin
+from app.api.v1.endpoints.auth import get_current_active_user
+from app.core.permissions import require_admin
 
 router = APIRouter(prefix="/assets", tags=["资产管理"])
 
