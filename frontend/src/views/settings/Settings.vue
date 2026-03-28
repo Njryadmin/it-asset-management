@@ -30,7 +30,7 @@
               <!-- Logo Upload -->
               <div class="upload-item">
                 <label class="upload-label">站点 LOGO</label>
-                <div class="upload-zone" :class="{ 'has-image': tempLogoUrl }" @click="triggerLogoUpload">
+                <div class="upload-zone logo-zone" :class="{ 'has-image': tempLogoUrl }" @click="triggerLogoUpload">
                   <input ref="logoInputRef" type="file" accept="image/*" hidden @change="onLogoFileChange" />
                   <div v-if="tempLogoUrl" class="preview-overlay">
                     <img :src="tempLogoUrl" class="preview-img" alt="LOGO预览" />
@@ -42,10 +42,26 @@
                   <div v-else class="upload-placeholder">
                     <el-icon class="upload-icon"><Plus /></el-icon>
                     <span class="upload-text">上传LOGO</span>
-                    <span class="upload-hint">建议 200×60px</span>
                   </div>
                 </div>
-                <div class="upload-tip">支持 PNG、JPG、SVG 格式</div>
+                <div class="upload-meta">
+                  <span class="upload-hint">
+                    <span class="hint-tag">建议尺寸</span>
+                    宽 220 × 高 44 像素（等比例）
+                  </span>
+                  <span class="upload-hint">
+                    <span class="hint-tag">实际显示</span>
+                    侧边栏宽度自适应，高度固定 44px
+                  </span>
+                  <span class="upload-format">支持 PNG · JPG · SVG</span>
+                </div>
+                <!-- Logo 侧边栏预览 -->
+                <div v-if="tempLogoUrl" class="logo-preview-bar">
+                  <div class="logo-preview-label">侧边栏预览效果</div>
+                  <div class="logo-preview-sidebar">
+                    <img :src="tempLogoUrl" class="logo-preview-img" alt="logo" />
+                  </div>
+                </div>
               </div>
 
               <!-- Favicon Upload -->
@@ -63,10 +79,29 @@
                   <div v-else class="upload-placeholder">
                     <el-icon class="upload-icon"><Picture /></el-icon>
                     <span class="upload-text">上传图标</span>
-                    <span class="upload-hint">建议 64×64px</span>
                   </div>
                 </div>
-                <div class="upload-tip">支持 PNG、ICO 格式</div>
+                <div class="upload-meta">
+                  <span class="upload-hint">
+                    <span class="hint-tag">建议尺寸</span>
+                    32 × 32 像素（正方形）
+                  </span>
+                  <span class="upload-hint">
+                    <span class="hint-tag">实际显示</span>
+                    浏览器标签 · 32×32px
+                  </span>
+                  <span class="upload-format">支持 PNG · ICO · SVG</span>
+                </div>
+                <!-- Favicon 浏览器标签预览 -->
+                <div v-if="tempFaviconUrl" class="logo-preview-bar">
+                  <div class="logo-preview-label">浏览器标签预览效果</div>
+                  <div class="favicon-preview-bar">
+                    <div class="browser-tab">
+                      <img v-if="tempFaviconUrl" :src="tempFaviconUrl" class="browser-tab-icon" alt="favicon" />
+                      <span class="browser-tab-title">{{ form.site_name || 'IT资产管理系统' }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -651,13 +686,13 @@ onMounted(() => {
 .page-title {
   font-size: 22px;
   font-weight: 700;
-  color: var(--wechat-text, #333);
+  color: var(--text-primary);
   margin: 0 0 6px;
 }
 
 .page-desc {
   font-size: 14px;
-  color: var(--wechat-text-secondary, #666);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -670,10 +705,10 @@ onMounted(() => {
 
 /* ── Settings Cards ── */
 .settings-card {
-  background: var(--wechat-card, #fff);
-  border: 1px solid var(--wechat-border-light, #F0F0F0);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow: var(--wechat-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   margin-bottom: 20px;
 }
@@ -683,8 +718,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 18px 22px;
-  border-bottom: 1px solid var(--wechat-border-light, #F0F0F0);
-  background: var(--wechat-card, #fff);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
 }
 
 .card-title-group {
@@ -704,20 +739,20 @@ onMounted(() => {
   color: #fff;
 }
 
-.site-icon { background: linear-gradient(135deg, #07C160, #1AAD19); }
+.site-icon { background: linear-gradient(135deg, #3B82F6, #2563EB); }
 .basic-icon { background: linear-gradient(135deg, #FF991A, #FFB84D); }
 .theme-icon { background: linear-gradient(135deg, #5862BC, #7B8CDE); }
 
 .card-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--wechat-text, #333);
+  color: var(--text-primary);
   margin: 0;
 }
 
 .card-subtitle {
   font-size: 12px;
-  color: var(--wechat-text-secondary, #999);
+  color: var(--text-muted);
   margin: 2px 0 0;
 }
 
@@ -731,8 +766,8 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 10px;
   padding: 14px 22px;
-  border-top: 1px solid var(--wechat-border-light, #F0F0F0);
-  background: var(--wechat-bg, #F5F5F5);
+  border-top: 1px solid var(--border);
+  background: var(--bg-page);
 }
 
 /* ── Upload Zone ── */
@@ -751,29 +786,31 @@ onMounted(() => {
 .upload-label {
   font-size: 13px;
   font-weight: 500;
-  color: var(--wechat-text-secondary, #666);
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: block;
 }
 
 .upload-zone {
-  width: 180px;
+  width: 200px;
   height: 80px;
-  border: 1.5px dashed var(--wechat-border, #E5E5E5);
-  border-radius: 10px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   overflow: hidden;
   position: relative;
-  transition: all 0.2s;
-  background: var(--wechat-bg, #F5F5F5);
+  transition: all var(--transition-fast);
+  background: var(--bg-page);
 }
 
 .upload-zone:hover {
-  border-color: #1AAD19;
-  background: rgba(26, 173, 25, 0.04);
+  border-color: var(--primary);
+  background: var(--primary-bg);
 }
 
 .upload-zone.has-image {
   border-style: solid;
-  border-color: #1AAD19;
+  border-color: var(--primary);
 }
 
 .favicon-zone {
@@ -792,23 +829,43 @@ onMounted(() => {
 
 .upload-icon {
   font-size: 22px;
-  color: var(--wechat-text-placeholder, #C0C4CC);
+  color: var(--text-muted);
 }
 
 .upload-text {
   font-size: 13px;
-  color: var(--wechat-text-secondary, #666);
+  color: var(--text-secondary);
   font-weight: 500;
+}
+
+.upload-meta {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .upload-hint {
   font-size: 11px;
-  color: var(--wechat-text-placeholder, #C0C4CC);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.upload-tip {
+.hint-tag {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.upload-format {
   font-size: 11px;
-  color: var(--wechat-text-placeholder, #C0C4CC);
+  color: var(--text-muted);
 }
 
 .preview-overlay {
@@ -826,6 +883,67 @@ onMounted(() => {
 
 .favicon-preview {
   object-fit: cover;
+}
+
+/* Logo 侧边栏预览 */
+.logo-preview-bar {
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.logo-preview-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 8px;
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-preview-sidebar {
+  height: 52px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.logo-preview-img {
+  width: 100%;
+  max-height: 36px;
+  object-fit: contain;
+}
+
+/* Favicon 浏览器标签预览 */
+.favicon-preview-bar {
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.browser-tab {
+  height: 36px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.browser-tab-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.browser-tab-title {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .preview-mask {
@@ -871,7 +989,7 @@ onMounted(() => {
 
 .prefix-label {
   font-size: 12px;
-  color: var(--wechat-text-secondary, #666);
+  color: var(--text-secondary);
 }
 
 .inline-fields {
@@ -888,7 +1006,7 @@ onMounted(() => {
 
 .switch-desc {
   font-size: 12px;
-  color: var(--wechat-text-secondary, #666);
+  color: var(--text-secondary);
 }
 
 .backup-days-group {
@@ -899,7 +1017,7 @@ onMounted(() => {
 
 .days-desc {
   font-size: 12px;
-  color: var(--wechat-text-secondary, #666);
+  color: var(--text-secondary);
 }
 
 /* ── Theme Grid ── */
@@ -910,7 +1028,7 @@ onMounted(() => {
 }
 
 .theme-card {
-  border: 2px solid var(--wechat-border-light, #F0F0F0);
+  border: 2px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -919,14 +1037,14 @@ onMounted(() => {
 }
 
 .theme-card:hover {
-  border-color: #1AAD19;
-  box-shadow: 0 4px 16px rgba(26, 173, 25, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
   transform: translateY(-2px);
 }
 
 .theme-card.active {
-  border-color: #1AAD19;
-  box-shadow: 0 0 0 3px rgba(26, 173, 25, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .theme-preview {
@@ -982,17 +1100,17 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  background: var(--wechat-bg, #F5F5F5);
+  background: var(--bg-page);
 }
 
 .theme-name {
   font-size: 13px;
   font-weight: 500;
-  color: var(--wechat-text, #333);
+  color: var(--text-primary);
 }
 
 .theme-check {
-  color: #1AAD19;
+  color: var(--primary);
   font-size: 16px;
 }
 
@@ -1000,7 +1118,7 @@ onMounted(() => {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: #1AAD19;
+  background: var(--primary);
   color: #fff;
   font-size: 10px;
   font-weight: 600;
@@ -1018,10 +1136,10 @@ onMounted(() => {
 }
 
 .preview-card {
-  background: var(--wechat-card, #fff);
-  border: 1px solid var(--wechat-border-light, #F0F0F0);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow: var(--wechat-shadow, 0 2px 8px rgba(0,0,0,0.06));
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -1032,9 +1150,9 @@ onMounted(() => {
   padding: 12px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--wechat-text-secondary, #666);
-  border-bottom: 1px solid var(--wechat-border-light, #F0F0F0);
-  background: var(--wechat-bg, #F5F5F5);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-page);
 }
 
 /* Login Preview */
@@ -1064,19 +1182,19 @@ onMounted(() => {
 
 .login-preview-body {
   padding: 20px;
-  background: var(--wechat-card, #fff);
+  background: var(--bg-card);
 }
 
 .login-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--wechat-text, #333);
+  color: var(--text-primary);
   margin-bottom: 6px;
 }
 
 .login-desc {
   font-size: 12px;
-  color: var(--wechat-text-secondary, #999);
+  color: var(--text-muted);
   margin-bottom: 16px;
   line-height: 1.5;
 }
@@ -1089,7 +1207,7 @@ onMounted(() => {
 
 .login-input {
   height: 34px;
-  background: var(--wechat-bg, #F5F5F5);
+  background: var(--bg-page);
   border-radius: 6px;
 }
 
