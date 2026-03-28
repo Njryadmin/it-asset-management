@@ -11,6 +11,7 @@ from app.core.database import get_db
 from app.models import Category
 from app.schemas.schemas import CategoryCreate, CategoryUpdate, CategoryResponse
 from app.api.v1.endpoints.auth import get_current_active_user
+from app.core.permissions import require_admin
 
 router = APIRouter(prefix="/categories", tags=["分类管理"])
 
@@ -135,7 +136,7 @@ async def download_category_template(
 async def import_categories(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     """批量导入分类(CSV格式)"""
     if not file.filename.endswith('.csv'):
@@ -215,7 +216,7 @@ async def get_category(
 async def create_category(
     category_in: CategoryCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     # Check if code exists
     if category_in.code:
@@ -235,7 +236,7 @@ async def update_category(
     category_id: int,
     category_in: CategoryUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Category).where(Category.id == category_id))
     category = result.scalar_one_or_none()
@@ -261,7 +262,7 @@ async def update_category(
 async def delete_category(
     category_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Category).where(Category.id == category_id))
     category = result.scalar_one_or_none()

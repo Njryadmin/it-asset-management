@@ -11,6 +11,7 @@ from app.core.database import get_db
 from app.models import Supplier
 from app.schemas.schemas import SupplierCreate, SupplierUpdate, SupplierResponse
 from app.api.v1.endpoints.auth import get_current_active_user
+from app.core.permissions import require_admin
 
 router = APIRouter(prefix="/suppliers", tags=["供应商管理"])
 
@@ -109,7 +110,7 @@ async def download_supplier_template(
 async def toggle_supplier_status(
     supplier_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     """切换供应商启用/禁用状态"""
     result = await db.execute(select(Supplier).where(Supplier.id == supplier_id))
@@ -127,7 +128,7 @@ async def toggle_supplier_status(
 async def import_suppliers(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     """批量导入供应商(CSV格式)"""
     if not file.filename.endswith('.csv'):
@@ -205,7 +206,7 @@ async def get_supplier(
 async def create_supplier(
     supplier_in: SupplierCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     if supplier_in.code:
         result = await db.execute(select(Supplier).where(Supplier.code == supplier_in.code))
@@ -224,7 +225,7 @@ async def update_supplier(
     supplier_id: int,
     supplier_in: SupplierUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Supplier).where(Supplier.id == supplier_id))
     supplier = result.scalar_one_or_none()
@@ -243,7 +244,7 @@ async def update_supplier(
 async def delete_supplier(
     supplier_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Supplier).where(Supplier.id == supplier_id))
     supplier = result.scalar_one_or_none()

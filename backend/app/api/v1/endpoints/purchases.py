@@ -13,6 +13,7 @@ from app.schemas.schemas import (
     PurchaseRequestResponse, PurchaseRequestListResponse
 )
 from app.api.v1.endpoints.auth import get_current_active_user
+from app.core.permissions import require_admin
 
 router = APIRouter(prefix="/purchase-requests", tags=["采购管理"])
 
@@ -115,7 +116,7 @@ async def get_purchase_request(
 async def create_purchase_request(
     request_in: PurchaseRequestCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     purchase_request = PurchaseRequest(
         **request_in.model_dump(),
@@ -133,7 +134,7 @@ async def update_purchase_request(
     request_id: int,
     request_in: PurchaseRequestUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
     purchase_request = result.scalar_one_or_none()
@@ -165,7 +166,7 @@ async def update_purchase_request(
 async def submit_purchase_request(
     request_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """提交采购申请并创建审批实例"""
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
@@ -396,7 +397,7 @@ async def mark_as_purchased(
 async def delete_purchase_request(
     request_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """删除采购申请（仅草稿状态）"""
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))

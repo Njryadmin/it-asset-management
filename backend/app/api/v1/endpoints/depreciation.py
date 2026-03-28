@@ -149,7 +149,7 @@ async def list_depreciation(
         Asset.purchase_price.isnot(None),
         Asset.purchase_price > 0,
         Asset.purchase_date.isnot(None),
-        Asset.status.in_(["IN_USE", "IDLE"])
+        Asset.status.in_(["in_use", "idle"])
     )
     
     if keyword:

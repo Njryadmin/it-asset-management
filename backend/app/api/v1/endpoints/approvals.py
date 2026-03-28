@@ -336,7 +336,7 @@ async def approve_approval_instance(
     instance_id: int,
     action_data: ApprovalActionRequest = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
     """审批通过"""
     result = await db.execute(select(ApprovalInstance).where(ApprovalInstance.id == instance_id))
@@ -383,7 +383,7 @@ async def reject_approval_instance(
     instance_id: int,
     action_data: ApprovalActionRequest = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
     """审批拒绝"""
     result = await db.execute(select(ApprovalInstance).where(ApprovalInstance.id == instance_id))

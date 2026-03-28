@@ -126,7 +126,7 @@ async def download_asset_template(
 async def import_assets(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     """批量导入资产(CSV格式)"""
     if not file.filename.endswith('.csv'):
@@ -359,7 +359,7 @@ async def get_asset(
 async def create_asset(
     asset_in: AssetCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     # Check if asset_code exists
     result = await db.execute(select(Asset).where(Asset.asset_code == asset_in.asset_code))
@@ -383,7 +383,7 @@ async def update_asset(
     asset_id: int,
     asset_in: AssetUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Asset).where(Asset.id == asset_id))
     asset = result.scalar_one_or_none()
@@ -416,7 +416,7 @@ async def update_asset(
 async def delete_asset(
     asset_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Asset).where(Asset.id == asset_id))
     asset = result.scalar_one_or_none()

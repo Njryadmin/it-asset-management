@@ -11,6 +11,7 @@ from app.core.database import get_db
 from app.models import Department, User, Asset
 from app.schemas.schemas import DepartmentCreate, DepartmentUpdate, DepartmentResponse
 from app.api.v1.endpoints.auth import get_current_active_user
+from app.core.permissions import require_admin
 
 router = APIRouter(prefix="/departments", tags=["部门管理"])
 
@@ -148,7 +149,7 @@ async def get_department(
 async def create_department(
     department_in: DepartmentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     if department_in.code:
         result = await db.execute(select(Department).where(Department.code == department_in.code))
@@ -167,7 +168,7 @@ async def update_department(
     department_id: int,
     department_in: DepartmentUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Department).where(Department.id == department_id))
     department = result.scalar_one_or_none()
@@ -186,7 +187,7 @@ async def update_department(
 async def delete_department(
     department_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     result = await db.execute(select(Department).where(Department.id == department_id))
     department = result.scalar_one_or_none()
@@ -241,7 +242,7 @@ async def download_department_template(
 async def import_departments(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(require_admin)
 ):
     """批量导入部门(CSV格式)"""
     if not file.filename.endswith('.csv'):

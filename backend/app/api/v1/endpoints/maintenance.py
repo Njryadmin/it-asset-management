@@ -9,6 +9,7 @@ from app.core.database import get_db
 from app.models import User
 from app.models.maintenance_log import AssetMaintenanceLog
 from app.api.v1.endpoints.auth import get_current_active_user
+from app.core.permissions import require_admin
 
 router = APIRouter(prefix="/asset-maintenance-logs", tags=["维保记录"])
 
@@ -119,7 +120,7 @@ async def update_maintenance_log(
 async def delete_maintenance_log(
     log_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
     """删除维保记录"""
     result = await db.execute(select(AssetMaintenanceLog).where(AssetMaintenanceLog.id == log_id))
