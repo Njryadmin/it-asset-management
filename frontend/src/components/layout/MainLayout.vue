@@ -90,6 +90,7 @@
             <span>审批管理</span>
           </template>
           <el-menu-item index="/approvals">
+            <el-icon><Clock /></el-icon>
             <span>待我审批</span>
           </el-menu-item>
           <el-menu-item index="/approval-flows">
@@ -111,15 +112,19 @@
             <span>报表中心</span>
           </template>
           <el-menu-item index="/reports">
+            <el-icon><PieChart /></el-icon>
             <span>资产总览</span>
           </el-menu-item>
           <el-menu-item index="/reports?tab=category">
+            <el-icon><Grid /></el-icon>
             <span>分类分布</span>
           </el-menu-item>
           <el-menu-item index="/reports?tab=department">
+            <el-icon><OfficeBuilding /></el-icon>
             <span>部门分布</span>
           </el-menu-item>
           <el-menu-item index="/reports?tab=importance">
+            <el-icon><TrendCharts /></el-icon>
             <span>重要度分析</span>
           </el-menu-item>
         </el-sub-menu>
@@ -209,7 +214,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { settingsApi } from '@/api/settings'
 import { ElMessageBox } from 'element-plus'
-import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet, Plus } from '@element-plus/icons-vue'
+import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet, Plus, PieChart, TrendCharts, Grid, OfficeBuilding, Clock, Setting } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
