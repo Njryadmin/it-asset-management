@@ -5,7 +5,8 @@ from datetime import datetime
 from typing import Optional
 
 from app.core.database import get_db
-from app.core.permissions import require_admin, get_current_active_user
+from app.core.permissions import require_admin
+from app.api.v1.endpoints.auth import get_current_active_user
 from app.models import User, Asset, AssetTransferLog
 from app.schemas.schemas import (
     AssetTransferLogResponse,

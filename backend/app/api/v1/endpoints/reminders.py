@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from app.core.database import get_db
-from app.core.permissions import get_current_active_user
+from app.api.v1.endpoints.auth import get_current_active_user
 from app.models import User, Asset, AssetMaintenanceLog, SystemSettings
 from app.schemas.schemas import Token
 
