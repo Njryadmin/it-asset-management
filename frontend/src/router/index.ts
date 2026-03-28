@@ -2,6 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+// Extend route meta type
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    adminOnly?: boolean
+  }
+}
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -113,16 +121,39 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
   if (to.meta.requiresAuth !== false && !authStore.isLoggedIn()) {
     next('/login')
-  } else if (to.path === '/login' && authStore.isLoggedIn()) {
-    next('/')
-  } else {
-    next()
+    return
   }
+  
+  if (to.path === '/login' && authStore.isLoggedIn()) {
+    next('/')
+    return
+  }
+  
+  // Check admin-only routes
+  if (to.meta.adminOnly) {
+    // Ensure user data is loaded
+    if (!authStore.user) {
+      try {
+        await authStore.fetchUser()
+      } catch {
+        next('/login')
+        return
+      }
+    }
+    
+    if (!authStore.isAdmin) {
+      // Non-admin trying to access admin page - redirect to dashboard
+      next('/dashboard')
+      return
+    }
+  }
+  
+  next()
 })
 
 export default router

@@ -50,6 +50,10 @@ export const useAuthStore = defineStore('auth', () => {
     return !!token.value
   }
 
+  function isAdmin() {
+    return user.value?.isSuperuser === true
+  }
+
   return {
     user,
     token,
@@ -57,6 +61,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     fetchUser,
-    isLoggedIn
+    isLoggedIn,
+    isAdmin
   }
 })
