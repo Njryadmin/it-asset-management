@@ -130,7 +130,7 @@
 
           <!-- Footer -->
           <div class="login-card__footer">
-            <span>{{ settings.systemName || 'IT资产管理系统' }} · v2.0</span>
+            <span>{{ settings.systemName || 'IT资产管理系统' }} · {{ settings.version || 'v1.0' }}</span>
           </div>
         </div>
       </div>
@@ -162,7 +162,8 @@ const settings = reactive({
   systemName: 'IT资产管理系统',
   site_title: '',
   siteDescription: '',
-  logoUrl: ''
+  logoUrl: '',
+  version: ''
 })
 
 const rules: FormRules = {
@@ -197,6 +198,7 @@ onMounted(async () => {
     if (res.data.systemName) settings.systemName = res.data.systemName
     if (res.data.siteDescription) settings.siteDescription = res.data.siteDescription
     if (res.data.logoUrl) settings.logoUrl = res.data.logoUrl
+    if (res.data.version) settings.version = res.data.version
   } catch {
     // Use defaults
   }
