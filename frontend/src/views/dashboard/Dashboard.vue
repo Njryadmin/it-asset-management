@@ -85,7 +85,71 @@
           </div>
         </div>
       </el-col>
+      <!-- Warranty Expiring Warning -->
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="stat-card stat-card--warning" @click="showReminderDialog = true">
+          <div class="stat-card__glow stat-card__glow--warning"></div>
+          <div class="stat-card__icon"><el-icon><Clock /></el-icon></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ reminderStats.warrantyExpiring7Days || 0 }}</div>
+            <div class="stat-card__label">7天内到期</div>
+          </div>
+        </div>
+      </el-col>
+      <!-- Maintenance Due Warning -->
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="stat-card stat-card--danger" @click="showReminderDialog = true">
+          <div class="stat-card__glow stat-card__glow--danger"></div>
+          <div class="stat-card__icon"><el-icon><Warning /></el-icon></div>
+          <div class="stat-card__body">
+            <div class="stat-card__value">{{ reminderStats.maintenanceDue30Days || 0 }}</div>
+            <div class="stat-card__label">30天维保</div>
+          </div>
+        </div>
+      </el-col>
     </el-row>
+
+    <!-- Reminder Dialog -->
+    <el-dialog v-model="showReminderDialog" title="⚠️ 维保提醒" width="700px">
+      <el-tabs>
+        <el-tab-pane label="即将到期">
+          <el-empty v-if="warrantyExpiring.length === 0" description="暂无即将到期的资产" />
+          <el-table v-else :data="warrantyExpiring" stripe size="small">
+            <el-table-column prop="name" label="资产名称" min-width="120" />
+            <el-table-column prop="assetCode" label="资产编号" width="120" />
+            <el-table-column prop="daysRemaining" label="剩余天数" width="80">
+              <template #default="{ row }">
+                <el-tag :type="row.daysRemaining <= 7 ? 'danger' : 'warning'" size="small">
+                  {{ row.daysRemaining }}天
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="warrantyExpireDate" label="到期日期" width="110">
+              <template #default="{ row }">
+                {{ row.warrantyExpireDate }}
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="维保提醒">
+          <el-empty v-if="maintenanceDue.length === 0" description="暂无维保提醒" />
+          <el-table v-else :data="maintenanceDue" stripe size="small">
+            <el-table-column prop="name" label="资产名称" min-width="120" />
+            <el-table-column prop="assetCode" label="资产编号" width="120" />
+            <el-table-column prop="maintenanceType" label="维保类型" width="100" />
+            <el-table-column prop="daysRemaining" label="剩余天数" width="80">
+              <template #default="{ row }">
+                <el-tag :type="row.daysRemaining <= 7 ? 'danger' : 'warning'" size="small">
+                  {{ row.daysRemaining }}天
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="nextMaintenanceDate" label="维保日期" width="110" />
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
     <el-row :gutter="14" class="content-row">
       <el-col :xs="24" :md="14">
         <div class="panel anim-fade-in-up" style="animation-delay:80ms">
@@ -289,6 +353,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { dashboardApi } from '@/api/dashboard'
 import { settingsApi } from '@/api/settings'
+import { remindersApi } from '@/api/reminders'
 import type { DashboardStats } from '@/types'
 import { useAssetStore } from '@/stores/assets'
 import dayjs from 'dayjs'
@@ -300,6 +365,10 @@ const stats = ref<DashboardStats & { todayIn?: number; todayOut?: number }>({
   totalUsers: 0, totalPurchaseRequests: 0, assetsByStatus: {}, assetsByCategory: {},
   recentAssets: [], pendingPurchaseRequests: [],
 })
+const reminderStats = ref({ warrantyExpiring7Days: 0, warrantyExpiring30Days: 0, maintenanceDue30Days: 0 })
+const warrantyExpiring = ref<any[]>([])
+const maintenanceDue = ref<any[]>([])
+const showReminderDialog = ref(false)
 const currentTime = ref(dayjs().format('HH:mm'))
 const currentDate = computed(() => dayjs().format('YYYY年MM月DD日'))
 const currentWeekday = computed(() => ['周日','周一','周二','周三','周四','周五','周六'][dayjs().day()])
@@ -347,8 +416,20 @@ const usageGaugeColor = computed(() => { const p = overallUsagePct.value; if (p 
 const ARC_LENGTH = Math.PI * 80
 const arcDashArray = computed(() => { const pct = Math.min(overallUsagePct.value, 100) / 100; return `${(pct * ARC_LENGTH).toFixed(2)} ${ARC_LENGTH.toFixed(2)}` })
 async function fetchStats() { try { const r = await dashboardApi.getStats(); stats.value = r.data } catch (e) { console.error(e) } }
+async function fetchReminders() {
+  try {
+    const [summary, warranty, maintenance] = await Promise.all([
+      remindersApi.getSummary(),
+      remindersApi.getWarrantyExpiring(30),
+      remindersApi.getMaintenanceDue(30)
+    ])
+    reminderStats.value = summary.data
+    warrantyExpiring.value = warranty.data.items
+    maintenanceDue.value = maintenance.data.items
+  } catch (e) { console.error(e) }
+}
 async function fetchSettings() { try { const r = await settingsApi.get(); if (r.data) { const d = r.data as any; settings.value.systemName = d.systemName || d.siteTitle || 'IT 资产管理系统'; settings.value.logoUrl = d.logoUrl || ''; settings.value.faviconUrl = d.faviconUrl || ''; settings.value.announcement = d.announcement || ''; settings.value.announcement_enabled = d.announcementEnabled ?? false } } catch (e) { console.error(e) } }
-onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch(() => {}), assetStore.fetchOptions().catch(() => {})]) })
+onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch(() => {}), assetStore.fetchOptions().catch(() => {}), fetchReminders()]) })
 </script>
 
 
@@ -393,6 +474,8 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 .stat-card__glow--purple { background: radial-gradient(circle,rgba(156,106,222,0.28) 0%,transparent 70%); }
 .stat-card__glow--cyan   { background: radial-gradient(circle,rgba(0,188,212,0.28) 0%,transparent 70%); }
 .stat-card__glow--red    { background: radial-gradient(circle,rgba(250,81,81,0.28) 0%,transparent 70%); }
+.stat-card__glow--warning { background: radial-gradient(circle,rgba(255,176,32,0.28) 0%,transparent 70%); }
+.stat-card__glow--danger  { background: radial-gradient(circle,rgba(255,80,80,0.28) 0%,transparent 70%); }
 .stat-card--green  { background: linear-gradient(145deg,#1ead1e 0%,#148a14 100%); box-shadow: 0 6px 22px rgba(26,173,25,0.38),0 2px 8px rgba(26,173,25,0.18); }
 .stat-card--green:hover { box-shadow: 0 10px 32px rgba(26,173,25,0.48),0 4px 12px rgba(26,173,25,0.22); }
 .stat-card--blue   { background: linear-gradient(145deg,#4fa3ff 0%,#337ecc 100%); box-shadow: 0 6px 22px rgba(64,158,255,0.32),0 2px 8px rgba(64,158,255,0.15); }
@@ -400,6 +483,10 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 .stat-card--purple { background: linear-gradient(145deg,#a676de 0%,#7b52b5 100%); box-shadow: 0 6px 22px rgba(156,106,222,0.32),0 2px 8px rgba(156,106,222,0.15); }
 .stat-card--cyan   { background: linear-gradient(145deg,#00c8d4 0%,#0097a7 100%); box-shadow: 0 6px 22px rgba(0,188,212,0.32),0 2px 8px rgba(0,188,212,0.15); }
 .stat-card--red    { background: linear-gradient(145deg,#fa6161 0%,#d94444 100%); box-shadow: 0 6px 22px rgba(250,81,81,0.32),0 2px 8px rgba(250,81,81,0.15); }
+.stat-card--warning { background: linear-gradient(145deg,#ffb020 0%,#e69500 100%); box-shadow: 0 6px 22px rgba(255,176,32,0.32),0 2px 8px rgba(255,176,32,0.15); cursor: pointer; }
+.stat-card--warning:hover { box-shadow: 0 10px 32px rgba(255,176,32,0.45),0 4px 12px rgba(255,176,32,0.2); }
+.stat-card--danger  { background: linear-gradient(145deg,#ff6b6b 0%,#c0392b 100%); box-shadow: 0 6px 22px rgba(255,80,80,0.38),0 2px 8px rgba(255,80,80,0.18); cursor: pointer; }
+.stat-card--danger:hover { box-shadow: 0 10px 32px rgba(255,80,80,0.5),0 4px 12px rgba(255,80,80,0.25); }
 .stat-card__icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; color: #fff; }
 .stat-card__body { flex: 1; min-width: 0; }
 .stat-card__value { font-size: 21px; font-weight: 800; color: #fff; line-height: 1.1; letter-spacing: -0.5px; }
