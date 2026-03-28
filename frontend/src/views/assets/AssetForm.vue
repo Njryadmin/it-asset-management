@@ -239,10 +239,10 @@ onMounted(async () => {
         model: data.model || '',
         location: data.location || '',
         specs: data.specs || '',
-        importance_level: data.importance_level || '',
-        depreciation_years: data.depreciation_years,
-        depreciation_method: data.depreciation_method || '',
-        salvage_rate: data.salvage_rate
+        importance_level: data.importanceLevel || '',
+        depreciation_years: data.depreciationYears,
+        depreciation_method: data.depreciationMethod || '',
+        salvage_rate: data.salvageRate
       })
     } catch (error) {
       ElMessage.error('加载资产数据失败')
