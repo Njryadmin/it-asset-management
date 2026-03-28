@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from app.core.database import get_db
 from app.api.v1.endpoints.auth import get_current_active_user
+from app.core.permissions import require_admin
 from app.models import User, Asset
 
 router = APIRouter(prefix="/depreciation", tags=["资产折旧"])
