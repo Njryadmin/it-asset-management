@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, categories, suppliers, departments, assets, purchases, dashboard, users, settings, audit_logs, approvals, reports, maintenance, asset_transfers, reminders
+from app.api.v1.endpoints import auth, categories, suppliers, departments, assets, purchases, dashboard, users, settings, audit_logs, approvals, reports, maintenance, asset_transfers, reminders, depreciation
 
 api_router = APIRouter()
 
@@ -20,3 +20,4 @@ api_router.include_router(reports.router, tags=["报表"])
 api_router.include_router(maintenance.router)
 api_router.include_router(asset_transfers.router, tags=["资产转移"])
 api_router.include_router(reminders.router, tags=["提醒"])
+api_router.include_router(depreciation.router, tags=["资产折旧"])

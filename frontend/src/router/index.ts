@@ -107,6 +107,12 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true, adminOnly: true }
       },
       {
+        path: 'depreciation',
+        name: 'Depreciation',
+        component: () => import('@/views/reports/DepreciationReport.vue'),
+        meta: { requiresAuth: true, adminOnly: true }
+      },
+      {
         path: 'assets/:id',
         name: 'AssetDetail',
         component: () => import('@/views/assets/AssetDetail.vue'),

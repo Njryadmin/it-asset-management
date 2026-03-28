@@ -82,6 +82,10 @@
           <el-icon><DataAnalysis /></el-icon>
           <span>报表中心</span>
         </el-menu-item>
+        <el-menu-item v-if="authStore.user?.isSuperuser" index="/depreciation">
+          <el-icon><Wallet /></el-icon>
+          <span>折旧报表</span>
+        </el-menu-item>
         <el-menu-item index="/settings">
           <el-icon><Setting /></el-icon>
           <span>系统设置</span>
@@ -166,7 +170,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { settingsApi } from '@/api/settings'
 import { ElMessageBox } from 'element-plus'
-import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight } from '@element-plus/icons-vue'
+import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -194,6 +198,7 @@ const routeTitleMap: Record<string, string> = {
   '/audit': '审计日志',
   '/asset-transfers': '资产转移记录',
   '/reports': '报表中心',
+  '/depreciation': '折旧报表',
   '/settings': '系统设置',
 }
 

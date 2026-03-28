@@ -111,6 +111,10 @@ class Asset(Base):
     purchase_date = Column(Date, nullable=True)  # Plain date without time
     importance_level = Column(String(20), nullable=True)  # critical/important/normal/low
     deleted_at = Column(DateTime(timezone=True), nullable=True)  # Soft delete
+    # Depreciation fields
+    depreciation_years = Column(Integer, nullable=True)  # 折旧年限（年），默认5年
+    depreciation_method = Column(String(20), nullable=True)  # straight-line / declining-balance
+    salvage_rate = Column(Float, nullable=True)  # 残值率（0-1），默认0.05
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
