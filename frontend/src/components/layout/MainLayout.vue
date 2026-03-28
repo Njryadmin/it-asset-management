@@ -28,10 +28,13 @@
         :unique-opened="true"
         @select="onMenuSelect"
       >
+        <!-- 仪表盘 -->
         <el-menu-item index="/">
           <el-icon><Odometer /></el-icon>
           <span>仪表盘</span>
         </el-menu-item>
+
+        <!-- 资产管理（折叠） -->
         <el-sub-menu index="/assets">
           <template #title>
             <el-icon><Box /></el-icon>
@@ -41,51 +44,87 @@
             <el-icon><Box /></el-icon>
             <span>资产列表</span>
           </el-menu-item>
+          <el-menu-item index="/assets/create">
+            <el-icon><Plus /></el-icon>
+            <span>新增资产</span>
+          </el-menu-item>
+          <el-menu-item index="/asset-transfers">
+            <el-icon><RefreshRight /></el-icon>
+            <span>资产转移</span>
+          </el-menu-item>
+          <el-menu-item index="/depreciation">
+            <el-icon><Wallet /></el-icon>
+            <span>折旧报表</span>
+          </el-menu-item>
+          <el-divider style="margin: 8px 0" />
           <el-menu-item index="/categories">
             <el-icon><Grid /></el-icon>
             <span>分类管理</span>
           </el-menu-item>
+          <el-menu-item index="/departments">
+            <el-icon><OfficeBuilding /></el-icon>
+            <span>部门管理</span>
+          </el-menu-item>
+          <el-menu-item index="/suppliers">
+            <el-icon><Shop /></el-icon>
+            <span>供应商管理</span>
+          </el-menu-item>
         </el-sub-menu>
-        <el-menu-item index="/departments">
-          <el-icon><OfficeBuilding /></el-icon>
-          <span>部门管理</span>
-        </el-menu-item>
-        <el-menu-item index="/suppliers">
-          <el-icon><Shop /></el-icon>
-          <span>供应商</span>
-        </el-menu-item>
+
+        <!-- 采购管理 -->
         <el-menu-item index="/purchases">
           <el-icon><ShoppingCart /></el-icon>
-          <span>采购管理</span>
+          <span>采购申请</span>
         </el-menu-item>
+
+        <!-- 用户管理 [admin] -->
         <el-menu-item v-if="authStore.user?.isSuperuser" index="/users">
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
-        <el-menu-item v-if="authStore.user?.isSuperuser" index="/approvals">
-          <el-icon><DocumentChecked /></el-icon>
-          <span>审批管理</span>
-        </el-menu-item>
-        <el-menu-item v-if="authStore.user?.isSuperuser" index="/approval-flows">
-          <el-icon><Setting /></el-icon>
-          <span>流程配置</span>
-        </el-menu-item>
+
+        <!-- 审批管理 [admin]（折叠） -->
+        <el-sub-menu v-if="authStore.user?.isSuperuser" index="/approvals-group">
+          <template #title>
+            <el-icon><DocumentChecked /></el-icon>
+            <span>审批管理</span>
+          </template>
+          <el-menu-item index="/approvals">
+            <span>待我审批</span>
+          </el-menu-item>
+          <el-menu-item index="/approval-flows">
+            <el-icon><Setting /></el-icon>
+            <span>流程配置</span>
+          </el-menu-item>
+        </el-sub-menu>
+
+        <!-- 审计日志 [admin] -->
         <el-menu-item v-if="authStore.user?.isSuperuser" index="/audit">
           <el-icon><Histogram /></el-icon>
           <span>审计日志</span>
         </el-menu-item>
-        <el-menu-item v-if="authStore.user?.isSuperuser" index="/asset-transfers">
-          <el-icon><RefreshRight /></el-icon>
-          <span>资产转移</span>
-        </el-menu-item>
-        <el-menu-item v-if="authStore.user?.isSuperuser" index="/reports">
-          <el-icon><DataAnalysis /></el-icon>
-          <span>报表中心</span>
-        </el-menu-item>
-        <el-menu-item v-if="authStore.user?.isSuperuser" index="/depreciation">
-          <el-icon><Wallet /></el-icon>
-          <span>折旧报表</span>
-        </el-menu-item>
+
+        <!-- 报表中心 [admin]（折叠） -->
+        <el-sub-menu v-if="authStore.user?.isSuperuser" index="/reports-group">
+          <template #title>
+            <el-icon><DataAnalysis /></el-icon>
+            <span>报表中心</span>
+          </template>
+          <el-menu-item index="/reports">
+            <span>资产总览</span>
+          </el-menu-item>
+          <el-menu-item index="/reports?tab=category">
+            <span>分类分布</span>
+          </el-menu-item>
+          <el-menu-item index="/reports?tab=department">
+            <span>部门分布</span>
+          </el-menu-item>
+          <el-menu-item index="/reports?tab=importance">
+            <span>重要度分析</span>
+          </el-menu-item>
+        </el-sub-menu>
+
+        <!-- 系统设置 -->
         <el-menu-item index="/settings">
           <el-icon><Setting /></el-icon>
           <span>系统设置</span>
@@ -170,7 +209,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { settingsApi } from '@/api/settings'
 import { ElMessageBox } from 'element-plus'
-import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet } from '@element-plus/icons-vue'
+import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet, Plus } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()

@@ -122,7 +122,7 @@ const routes: RouteRecordRaw[] = [
         path: 'asset-transfers',
         name: 'AssetTransfers',
         component: () => import('@/views/assets/AssetTransferList.vue'),
-        meta: { requiresAuth: true, adminOnly: true }
+        meta: { requiresAuth: true }
       }
     ]
   }
