@@ -104,12 +104,14 @@ async def download_asset_template(
     writer.writerow([
         '资产编号', '名称', '序列号', '分类名称', '供应商名称', '部门名称',
         '使用人', '状态', '购入日期', '购入价格', '保修期至',
-        '描述', '规格参数', '地区'
+        '描述', '规格参数', '地区', '品牌', '型号', '存放地点',
+        '重要程度', '折旧年限', '折旧方法', '残值率'
     ])
     writer.writerow([
         'ASSET-2026-000001', '示例资产', 'SN123456', '计算机设备', '联想官方旗舰店', '技术部',
         '', 'idle', '2026-01-01', '5000.00', '2027-01-01',
-        '示例描述', '', '上海'
+        '示例描述', '', '上海', '联想', 'ThinkPad X1', 'IT机房',
+        'normal', '5', 'straight-line', '5'
     ])
     output.seek(0)
     bom = '\ufeff'
@@ -222,6 +224,13 @@ async def import_assets(
                 description=row.get('描述') or None,
                 specs=row.get('规格参数') or None,
                 region=row.get('地区') or None,
+                brand=row.get('品牌') or None,
+                model=row.get('型号') or None,
+                location=row.get('存放地点') or None,
+                importance_level=row.get('重要程度') or None,
+                depreciation_years=int(row['折旧年限']) if row.get('折旧年限') else None,
+                depreciation_method=row.get('折旧方法') or None,
+                salvage_rate=float(row['残值率']) if row.get('残值率') else None,
             )
             db.add(asset)
             imported += 1
@@ -278,7 +287,8 @@ async def export_assets(
     writer.writerow([
         '资产编号', '名称', '序列号', '分类名称', '供应商名称', '部门名称',
         '使用人', '状态', '购入日期', '购入价格', '保修期至',
-        '描述', '规格参数', '地区'
+        '描述', '规格参数', '地区', '品牌', '型号', '存放地点',
+        '重要程度', '折旧年限', '折旧方法', '残值率'
     ])
     
     # 预先加载关联数据
@@ -299,9 +309,14 @@ async def export_assets(
             department_map.get(asset.department_id, ''),
             assigned_user, asset.status,
             asset.purchase_date.strftime('%Y-%m-%d') if asset.purchase_date else '',
-            asset.purchase_price, 
+            asset.purchase_price,
             asset.warranty_expire_date.strftime('%Y-%m-%d') if asset.warranty_expire_date else '',
-            asset.description, asset.specs, asset.region or ''
+            asset.description, asset.specs, asset.region or '',
+            asset.brand or '', asset.model or '', asset.location or '',
+            asset.importance_level or '',
+            asset.depreciation_years if asset.depreciation_years else '',
+            asset.depreciation_method or '',
+            asset.salvage_rate if asset.salvage_rate else ''
         ])
     
     output.seek(0)

@@ -68,8 +68,40 @@
         <el-form-item label="备注" prop="description">
           <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入备注" />
         </el-form-item>
+        <el-form-item label="品牌" prop="brand">
+          <el-input v-model="form.brand" placeholder="请输入品牌" maxlength="100" />
+        </el-form-item>
+        <el-form-item label="型号" prop="model">
+          <el-input v-model="form.model" placeholder="请输入型号" maxlength="100" />
+        </el-form-item>
+        <el-form-item label="存放地点" prop="location">
+          <el-input v-model="form.location" placeholder="请输入存放地点" maxlength="200" />
+        </el-form-item>
+        <el-form-item label="规格参数" prop="specs">
+          <el-input v-model="form.specs" placeholder="请输入规格参数" maxlength="500" />
+        </el-form-item>
         <el-form-item label="地区" prop="region">
           <el-input v-model="form.region" placeholder="请输入地区" maxlength="100" />
+        </el-form-item>
+        <el-form-item label="重要程度" prop="importance_level">
+          <el-select v-model="form.importance_level" placeholder="请选择重要程度" clearable>
+            <el-option label="高重要" value="critical" />
+            <el-option label="中重要" value="important" />
+            <el-option label="一般" value="normal" />
+            <el-option label="低重要" value="low" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="折旧年限" prop="depreciation_years">
+          <el-input-number v-model="form.depreciation_years" :min="1" :max="30" placeholder="请输入折旧年限" />
+        </el-form-item>
+        <el-form-item label="折旧方法" prop="depreciation_method">
+          <el-select v-model="form.depreciation_method" placeholder="请选择折旧方法" clearable>
+            <el-option label="直线法" value="straight-line" />
+            <el-option label="双倍余额递减法" value="double-declining" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="残值率(%)" prop="salvage_rate">
+          <el-input-number v-model="form.salvage_rate" :min="0" :max="100" :precision="2" placeholder="请输入残值率" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleSubmit">
@@ -111,14 +143,24 @@ const form = reactive({
   purchase_price: undefined as number | undefined,
   warranty_expire_date: undefined as string | undefined,
   description: '',
-  region: ''
+  region: '',
+  brand: '',
+  model: '',
+  location: '',
+  specs: '',
+  importance_level: '' as '' | 'critical' | 'important' | 'normal' | 'low',
+  depreciation_years: undefined as number | undefined,
+  depreciation_method: '' as '' | 'straight-line' | 'double-declining',
+  salvage_rate: undefined as number | undefined
 })
 
 const rules: FormRules = {
   name: [{ required: true, message: '请输入资产名称', trigger: 'blur' }],
   asset_code: [{ required: true, message: '请输入资产编号', trigger: 'blur' }],
   category_id: [{ required: true, message: '请选择资产分类', trigger: 'change' }],
-  status: [{ required: true, message: '请选择资产状态', trigger: 'change' }]
+  status: [{ required: true, message: '请选择资产状态', trigger: 'change' }],
+  depreciation_years: [{ type: 'number', min: 1, max: 30, message: '折旧年限需在1-30之间', trigger: 'blur' }],
+  salvage_rate: [{ type: 'number', min: 0, max: 100, message: '残值率需在0-100之间', trigger: 'blur' }]
 }
 
 const flatCategories = computed(() => {
@@ -192,7 +234,15 @@ onMounted(async () => {
         purchase_price: data.purchasePrice,
         warranty_expire_date: data.warrantyExpireDate,
         description: data.description,
-        region: data.region || ''
+        region: data.region || '',
+        brand: data.brand || '',
+        model: data.model || '',
+        location: data.location || '',
+        specs: data.specs || '',
+        importance_level: data.importance_level || '',
+        depreciation_years: data.depreciation_years,
+        depreciation_method: data.depreciation_method || '',
+        salvage_rate: data.salvage_rate
       })
     } catch (error) {
       ElMessage.error('加载资产数据失败')
