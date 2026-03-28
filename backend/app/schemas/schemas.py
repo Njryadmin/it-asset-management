@@ -279,3 +279,41 @@ class ListResponse(BaseModel):
 
 CategoryResponse.model_rebuild()
 DepartmentResponse.model_rebuild()
+
+
+# Asset Transfer Log schemas
+class AssetTransferLogBase(BaseModel):
+    asset_id: int
+    from_user_id: int | None = None
+    to_user_id: int | None = None
+    from_department_id: int | None = None
+    to_department_id: int | None = None
+    transfer_type: str  # assign, transfer, revoke
+    reason: str | None = None
+
+
+class AssetTransferLogCreate(AssetTransferLogBase):
+    pass
+
+
+class AssetTransferLogResponse(AssetTransferLogBase):
+    id: int
+    operator_id: int
+    created_at: datetime
+    asset_name: str | None = None
+    from_user_name: str | None = None
+    to_user_name: str | None = None
+    from_department_name: str | None = None
+    to_department_name: str | None = None
+    operator_name: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class AssetTransferRequest(BaseModel):
+    """资产转移/分配请求"""
+    asset_id: int
+    to_user_id: int | None = None
+    to_department_id: int | None = None
+    reason: str | None = None

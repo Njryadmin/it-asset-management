@@ -157,3 +157,26 @@ class PurchaseRequest(Base):
     category = relationship("Category")
     supplier = relationship("Supplier", back_populates="purchase_requests")
     requester = relationship("User", back_populates="purchase_requests")
+
+
+class AssetTransferLog(Base):
+    """资产转移记录"""
+    __tablename__ = "asset_transfer_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    asset_id = Column(Integer, ForeignKey("assets.id"), nullable=False)
+    from_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # 原使用人
+    to_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # 新使用人
+    from_department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)  # 原部门
+    to_department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)  # 新部门
+    transfer_type = Column(String(50), nullable=False)  # assign/transfer/revoke
+    reason = Column(Text, nullable=True)  # 转移原因
+    operator_id = Column(Integer, ForeignKey("users.id"), nullable=False)  # 操作人
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    asset = relationship("Asset")
+    from_user = relationship("User", foreign_keys=[from_user_id])
+    to_user = relationship("User", foreign_keys=[to_user_id])
+    from_department = relationship("Department", foreign_keys=[from_department_id])
+    to_department = relationship("Department", foreign_keys=[to_department_id])
+    operator = relationship("User", foreign_keys=[operator_id])
