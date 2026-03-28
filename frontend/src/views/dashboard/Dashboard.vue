@@ -232,7 +232,8 @@
             <el-button size="small" type="primary" plain @click="$router.push('/assets')">全部资产</el-button>
           </div>
           <div class="panel__body" style="padding:0">
-            <el-table v-if="stats.recentAssets?.length" :data="stats.recentAssets" style="width:100%" class="recent-table">
+            <div v-if="stats.recentAssets?.length" class="recent-table-wrap">
+              <el-table :data="stats.recentAssets" class="recent-table">
               <el-table-column prop="name" label="资产名称" min-width="150" show-overflow-tooltip />
               <el-table-column prop="assetCode" label="编号" width="130">
                 <template #default="{ row }"><span class="asset-code">{{ row.assetCode || '—' }}</span></template>
@@ -254,6 +255,7 @@
                 </template>
               </el-table-column>
             </el-table>
+            </div>
             <el-empty v-else description="暂无资产记录" :image-size="60">
               <el-button type="primary" @click="$router.push('/assets/create')">立即添加</el-button>
             </el-empty>
@@ -615,6 +617,16 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 @media (max-width: 480px) {
   .stat-card { min-height: 80px; }
   .stat-card__value { font-size: 20px !important; }
+  .dashboard { padding: 0 8px 20px; }
+}
+
+.recent-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recent-table {
+  min-width: 600px;
 }
 </style>
 
