@@ -20,7 +20,7 @@ def calculate_straight_line(purchase_price: float, purchase_date: date, now: dat
         return {"originalValue": 0, "currentValue": 0, "accumulatedDepreciation": 0,
                 "depreciationRate": 0, "usedYears": 0, "netValueRate": 0}
     
-    salvage_value = purchase_price * salvage_rate
+    salvage_value = purchase_price * salvage_rate / 100
     depreciable_amount = purchase_price - salvage_value
     annual_depreciation = depreciable_amount / years if years > 0 else 0
     
@@ -52,7 +52,7 @@ def calculate_declining_balance(purchase_price: float, purchase_date: date, now:
         return {"originalValue": 0, "currentValue": 0, "accumulatedDepreciation": 0,
                 "depreciationRate": 0, "usedYears": 0, "netValueRate": 0}
     
-    salvage_value = purchase_price * salvage_rate
+    salvage_value = purchase_price * salvage_rate / 100
     rate = (1 / years * 2) if years > 0 else 0  # 双倍折旧率
     
     days_used = (now - purchase_date).days
