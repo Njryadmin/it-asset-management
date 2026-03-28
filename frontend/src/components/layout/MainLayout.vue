@@ -458,6 +458,22 @@ onMounted(async () => {
   font-size: 16px;
 }
 
+/* Sub-menu item active state */
+.sidebar__menu :deep(.el-sub-menu .el-menu-item.is-active) {
+  background-color: var(--sidebar-bg-active) !important;
+  color: var(--sidebar-text-active) !important;
+  border-radius: var(--radius-md);
+}
+
+.sidebar__menu :deep(.el-sub-menu .el-menu-item.is-active .el-icon) {
+  color: var(--sidebar-icon-active) !important;
+}
+
+/* Sub-menu opened state - parent title icon */
+.sidebar__menu :deep(.el-sub-menu.is-opened > .el-sub-menu__title .el-icon) {
+  color: var(--sidebar-icon-active) !important;
+}
+
 .sidebar__footer {
   padding: 12px 20px;
   border-top: 1px solid var(--sidebar-border);
