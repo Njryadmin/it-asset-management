@@ -42,6 +42,19 @@ export const assetsApi = {
     region?: string;
   }, filename?: string) {
     return downloadFile('/assets/export', params, filename)
+  },
+
+  batchDelete(assetIds: number[]) {
+    return request.post('/assets/batch-delete', assetIds)
+  },
+
+  batchTransfer(data: {
+    asset_ids: number[]
+    to_department_id?: number
+    to_user_id?: number
+    reason?: string
+  }) {
+    return request.post('/assets/batch-transfer', data)
   }
 }
 

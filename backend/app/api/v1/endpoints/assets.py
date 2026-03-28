@@ -410,3 +410,87 @@ async def delete_asset(
     await db.delete(asset)
     await db.commit()
     return {"message": "删除成功"}
+
+
+@router.post("/batch-delete")
+async def batch_delete_assets(
+    asset_ids: list[int],
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """批量删除资产"""
+    if len(asset_ids) > 100:
+        raise HTTPException(status_code=400, detail="单次最多删除100条记录")
+    
+    result = await db.execute(select(Asset).where(Asset.id.in_(asset_ids)))
+    assets = result.scalars().all()
+    
+    if len(assets) != len(asset_ids):
+        found_ids = {a.id for a in assets}
+        missing = set(asset_ids) - found_ids
+        raise HTTPException(status_code=404, detail=f"部分资产不存在: {missing}")
+    
+    for asset in assets:
+        await db.delete(asset)
+    
+    await db.commit()
+    return {"message": f"成功删除 {len(assets)} 条资产"}
+
+
+@router.post("/batch-transfer")
+async def batch_transfer_assets(
+    request: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """批量转移资产"""
+    asset_ids: list[int] = request.get("asset_ids", [])
+    to_department_id: int | None = request.get("to_department_id")
+    to_user_id: int | None = request.get("to_user_id")
+    reason: str | None = request.get("reason")
+    
+    if not asset_ids:
+        raise HTTPException(status_code=400, detail="请选择要转移的资产")
+    if len(asset_ids) > 100:
+        raise HTTPException(status_code=400, detail="单次最多转移100条记录")
+    if not to_department_id and not to_user_id:
+        raise HTTPException(status_code=400, detail="请指定目标部门或目标使用人")
+    
+    # 获取资产
+    result = await db.execute(select(Asset).where(Asset.id.in_(asset_ids)))
+    assets = result.scalars().all()
+    
+    if len(assets) != len(asset_ids):
+        raise HTTPException(status_code=404, detail="部分资产不存在")
+    
+    # 获取目标用户/部门信息
+    from_user_ids = {a.assigned_to for a in assets if a.assigned_to}
+    from_dept_ids = {a.department_id for a in assets if a.department_id}
+    
+    # 创建转移记录
+    from app.models import AssetTransferLog, User, Department
+    
+    transfer_logs = []
+    for asset in assets:
+        log = AssetTransferLog(
+            asset_id=asset.id,
+            from_user_id=asset.assigned_to,
+            to_user_id=to_user_id,
+            from_department_id=asset.department_id,
+            to_department_id=to_department_id,
+            transfer_type="batch_transfer",
+            reason=f"[批量转移] {reason}" if reason else "[批量转移]",
+            operator_id=current_user.id
+        )
+        transfer_logs.append(log)
+        
+        # 更新资产
+        if to_user_id is not None:
+            asset.assigned_to = to_user_id
+        if to_department_id is not None:
+            asset.department_id = to_department_id
+    
+    db.add_all(transfer_logs)
+    await db.commit()
+    
+    return {"message": f"成功转移 {len(assets)} 条资产", "count": len(assets)}

@@ -6,8 +6,21 @@
           <div class="header-left">
             <h3 class="page-title">资产管理</h3>
             <span class="item-count">共 {{ assetStore.total }} 条</span>
+            <el-tag v-if="selectedAssets.length > 0" type="primary" size="small" class="selection-tag">
+              已选择 {{ selectedAssets.length }} 项
+            </el-tag>
           </div>
-          <div class="header-actions">
+          <div class="header-actions" v-if="selectedAssets.length > 0">
+            <el-button type="danger" @click="handleBatchDelete">
+              <el-icon><Delete /></el-icon>
+              批量删除 ({{ selectedAssets.length }})
+            </el-button>
+            <el-button type="warning" @click="showBatchTransferDialog = true">
+              <el-icon><RefreshRight /></el-icon>
+              批量转移
+            </el-button>
+          </div>
+          <div class="header-actions" v-else>
             <el-button @click="showFilterDrawer = true">
               <el-icon><Filter /></el-icon>
               筛选
@@ -112,7 +125,8 @@
       </div>
 
       <!-- Table -->
-      <el-table :data="assetStore.assets" v-loading="assetStore.loading" style="width: 100%" class="data-table">
+      <el-table :data="assetStore.assets" v-loading="assetStore.loading" style="width: 100%" class="data-table" @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="45" />
         <template v-for="col in columns" :key="col.key">
           <el-table-column v-if="col.visible && col.key === 'name'" prop="name" label="资产名称" min-width="150">
             <template #default="{ row }">
@@ -258,16 +272,42 @@
       </template>
     </el-dialog>
   </div>
+
+  <!-- Batch Transfer Dialog -->
+  <el-dialog v-model="showBatchTransferDialog" title="批量转移资产" width="500px" class="custom-dialog">
+    <el-form :model="batchTransferForm" label-width="100px">
+      <el-form-item label="目标部门">
+        <el-select v-model="batchTransferForm.departmentId" placeholder="选择部门" clearable filterable>
+          <el-option v-for="dept in departmentStore.departments" :key="dept.id" :label="dept.name" :value="dept.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="目标使用人">
+        <el-select v-model="batchTransferForm.userId" placeholder="选择使用人" clearable filterable>
+          <el-option v-for="user in userStore.users" :key="user.id" :label="user.fullName || user.username" :value="user.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="转移原因">
+        <el-input v-model="batchTransferForm.reason" type="textarea" :rows="2" placeholder="请输入转移原因" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="showBatchTransferDialog = false">取消</el-button>
+      <el-button type="primary" @click="confirmBatchTransfer" :loading="batchTransferLoading">确认转移</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetStore } from '@/stores/assets'
+import { useDepartmentStore } from '@/stores/departments'
+import { useUserStore } from '@/stores/users'
 import { assetsApi } from '@/api/assets'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useColumnSettings } from '@/composables/useColumnSettings'
 import type { ColumnOption } from '@/composables/useColumnSettings'
+import type { Asset } from '@/types'
 import dayjs from 'dayjs'
 
 const defaultColumns: ColumnOption[] = [
@@ -300,10 +340,20 @@ const {
 
 const router = useRouter()
 const assetStore = useAssetStore()
+const departmentStore = useDepartmentStore()
+const userStore = useUserStore()
 const token = localStorage.getItem('token') || ''
 const importUrl = '/api/v1/assets/import'
 const uploadRef = ref()
 const showImportDialog = ref(false)
+const selectedAssets = ref<Asset[]>([])
+const showBatchTransferDialog = ref(false)
+const batchTransferLoading = ref(false)
+const batchTransferForm = reactive({
+  departmentId: null as number | null,
+  userId: null as number | null,
+  reason: ''
+})
 const showFilterDrawer = ref(false)
 
 // Legacy reference - table now uses 'columns' from composable
@@ -370,6 +420,58 @@ function statusTagType(status: string) {
     scrapped: 'info'
   }
   return map[status] || 'info'
+}
+
+function handleSelectionChange(selection: Asset[]) {
+  selectedAssets.value = selection
+}
+
+async function handleBatchDelete() {
+  const count = selectedAssets.value.length
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${count} 项资产吗？此操作不可恢复。`,
+      '批量删除确认',
+      { confirmButtonText: '确认删除', cancelButtonText: '取消', type: 'warning' }
+    )
+    const ids = selectedAssets.value.map(a => a.id)
+    await assetsApi.batchDelete(ids)
+    ElMessage.success(`成功删除 ${count} 项资产`)
+    selectedAssets.value = []
+    await assetStore.fetchAssets()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量删除失败')
+    }
+  }
+}
+
+async function confirmBatchTransfer() {
+  if (!batchTransferForm.departmentId && !batchTransferForm.userId) {
+    ElMessage.warning('请至少选择目标部门或目标使用人')
+    return
+  }
+  batchTransferLoading.value = true
+  try {
+    const ids = selectedAssets.value.map(a => a.id)
+    await assetsApi.batchTransfer({
+      asset_ids: ids,
+      to_department_id: batchTransferForm.departmentId || undefined,
+      to_user_id: batchTransferForm.userId || undefined,
+      reason: batchTransferForm.reason || undefined
+    })
+    ElMessage.success(`成功转移 ${ids.length} 项资产`)
+    showBatchTransferDialog.value = false
+    selectedAssets.value = []
+    batchTransferForm.departmentId = null
+    batchTransferForm.userId = null
+    batchTransferForm.reason = ''
+    await assetStore.fetchAssets()
+  } catch (error) {
+    ElMessage.error('批量转移失败')
+  } finally {
+    batchTransferLoading.value = false
+  }
 }
 
 function handleActionCommand(cmd: string, row: any) {
@@ -530,6 +632,8 @@ function downloadTemplate() {
 onMounted(async () => {
   await assetStore.fetchOptions()
   await assetStore.fetchAssets()
+  await departmentStore.fetchDepartments()
+  await userStore.fetchUsers()
 })
 </script>
 
