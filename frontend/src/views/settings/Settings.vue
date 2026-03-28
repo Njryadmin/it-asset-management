@@ -243,7 +243,7 @@
         <div class="settings-card anim-fade-in-up" style="animation-delay: 120ms">
           <div class="card-header">
             <div class="card-title-group">
-              <div class="card-icon" style="background: linear-gradient(135deg, #FF9500, #FF6B00);">
+              <div class="card-icon theme-icon">
                 <el-icon><Bell /></el-icon>
               </div>
               <div>
@@ -741,7 +741,7 @@ onMounted(() => {
 
 .site-icon { background: linear-gradient(135deg, #3B82F6, #2563EB); }
 .basic-icon { background: linear-gradient(135deg, #FF991A, #FFB84D); }
-.theme-icon { background: linear-gradient(135deg, #5862BC, #7B8CDE); }
+.theme-icon { background: linear-gradient(135deg, var(--primary), var(--primary-hover, #2563EB)); }
 
 .card-title {
   font-size: 16px;
