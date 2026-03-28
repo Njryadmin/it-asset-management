@@ -162,6 +162,9 @@ class AssetBase(BaseModel):
     model: Optional[str] = None
     location: Optional[str] = None
     importance_level: Optional[str] = None
+    depreciation_years: Optional[int] = None
+    depreciation_method: Optional[str] = None
+    salvage_rate: Optional[float] = None
 
 
 class AssetCreate(AssetBase):
