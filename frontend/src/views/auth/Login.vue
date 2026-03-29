@@ -423,9 +423,10 @@ async function handleLogin() {
 /* Mobile brand */
 .mobile-brand {
   display: none;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 32px;
 }
 .mobile-brand__img { width: auto; height: auto; max-width: 120px; max-height: 40px; object-fit: contain; }
@@ -433,6 +434,7 @@ async function handleLogin() {
   font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
+  text-align: center;
 }
 
 /* Header */
