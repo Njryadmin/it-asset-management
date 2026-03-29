@@ -717,6 +717,8 @@ onMounted(async () => {
   background-color: var(--card-bg) !important;
   overflow: visible;
   z-index: var(--z-dropdown) !important;
+  max-width: calc(100vw - 32px);
+  position: relative;
 }
 .el-dropdown-menu::before {
   display: none;
