@@ -708,4 +708,17 @@ onMounted(async () => {
     padding: var(--space-3);
   }
 }
+
+/* Dropdown menu fix - ensure proper rendering */
+.el-dropdown-menu {
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-xl) !important;
+  background-color: var(--card-bg) !important;
+  overflow: visible;
+  z-index: var(--z-dropdown) !important;
+}
+.el-dropdown-menu::before {
+  display: none;
+}
 </style>

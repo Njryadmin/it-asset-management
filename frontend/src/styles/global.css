@@ -447,8 +447,19 @@ body {
   border-radius: var(--radius-lg) !important;
   border: 1px solid var(--border) !important;
   box-shadow: var(--shadow-lg) !important;
-  padding: var(--space-1) !important;
+  padding: 4px !important;
   background-color: var(--card-bg) !important;
+  margin-top: 4px;
+  overflow: visible;
+}
+.el-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
 }
 .el-dropdown-menu__item {
   border-radius: var(--radius-md) !important;
