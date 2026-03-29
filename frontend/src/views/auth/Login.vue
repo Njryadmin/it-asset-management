@@ -12,17 +12,6 @@
       <div class="brand-panel">
         <div class="brand-panel__grid"></div>
         <div class="brand-panel__content">
-          <!-- Logo -->
-          <div class="brand-logo">
-            <img v-if="settings.logoUrl" :src="settings.logoUrl" alt="Logo" class="brand-logo__img" />
-            <svg v-else class="brand-logo__svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2.5"/>
-              <path d="M4 16h40" stroke="currentColor" stroke-width="2.5"/>
-              <circle cx="12" cy="12" r="2" fill="currentColor"/>
-              <circle cx="20" cy="12" r="2" fill="currentColor"/>
-              <path d="M14 26h8M14 32h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </div>
           <!-- System name -->
           <h1 class="brand-title">{{ settings.systemName || 'IT资产管理系统' }}</h1>
           <!-- Tagline -->
