@@ -355,8 +355,7 @@ onMounted(async () => {
   height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 8px 0;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--sidebar-border);
   flex-shrink: 0;
 }
@@ -364,7 +363,6 @@ onMounted(async () => {
 .sidebar__logo {
   display: flex;
   align-items: center;
-  justify-content: center;
   cursor: pointer;
   width: 100%;
   padding: 0;

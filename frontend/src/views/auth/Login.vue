@@ -150,7 +150,7 @@ import { ElMessage } from 'element-plus'
 const router = useRouter()
 const authStore = useAuthStore()
 const formRef = ref<FormInstance>()
-const theme = ref<'light' | 'dark'>('dark')
+const theme = ref<'light' | 'dark'>('light')
 
 const form = reactive({
   username: '',
@@ -345,7 +345,7 @@ async function handleLogin() {
   transition: transform 0.3s ease;
 }
 .brand-logo:hover { transform: scale(1.05); }
-.brand-logo__img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+.brand-logo__img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
 .brand-logo__svg { width: 36px; height: 36px; }
 
 .brand-title {
