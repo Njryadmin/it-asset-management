@@ -816,6 +816,8 @@ onMounted(() => {
 .favicon-zone {
   width: 80px;
   height: 80px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
 }
 
 .upload-placeholder {
@@ -872,6 +874,8 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
 }
 
 .preview-img {
@@ -882,7 +886,8 @@ onMounted(() => {
 }
 
 .favicon-preview {
-  object-fit: cover;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
 }
 
 /* Logo 侧边栏预览 */
