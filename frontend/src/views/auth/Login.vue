@@ -324,7 +324,7 @@ async function handleLogin() {
   position: relative;
   z-index: 2;
   text-align: center;
-  padding: 52px 44px;
+  padding: 60px 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -332,24 +332,25 @@ async function handleLogin() {
 }
 
 .brand-logo {
-  width: 68px; height: 68px;
+  width: 88px; height: 88px;
   background: rgba(59, 130, 246, 0.15);
-  border-radius: 18px;
+  border-radius: 20px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid rgba(59, 130, 246, 0.3);
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   color: var(--primary);
   transition: transform 0.3s ease;
+  overflow: hidden;
 }
 .brand-logo:hover { transform: scale(1.05); }
-.brand-logo__img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
-.brand-logo__svg { width: 36px; height: 36px; }
+.brand-logo__img { width: 100%; height: 100%; object-fit: contain; }
+.brand-logo__svg { width: 44px; height: 44px; }
 
 .brand-title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   letter-spacing: 2px;
   text-shadow: 0 2px 12px rgba(59, 130, 246, 0.4);
 }
@@ -357,7 +358,7 @@ async function handleLogin() {
 .brand-tagline {
   font-size: 14px;
   color: rgba(59, 130, 246, 0.85);
-  margin: 0 0 40px;
+  margin: 0 0 48px;
   font-weight: 500;
   letter-spacing: 4px;
 }
