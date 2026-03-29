@@ -187,11 +187,8 @@ onMounted(async () => {
     form.remember = true
   }
 
-  // Detect theme from document
-  const docTheme = document.documentElement.getAttribute('data-theme')
-  if (docTheme === 'light') theme.value = 'light'
-  else if (docTheme === 'dark') theme.value = 'dark'
-  else theme.value = 'dark'
+  // Always use light theme for login page
+  theme.value = 'light'
 
   try {
     const res: any = await settingsApi.get()
