@@ -431,10 +431,10 @@ async function handleLogin() {
   display: none;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 32px;
 }
-.mobile-brand__img { width: 36px; height: 36px; object-fit: contain; }
+.mobile-brand__img { width: auto; height: auto; max-width: 120px; max-height: 40px; object-fit: contain; }
 .mobile-brand__name {
   font-size: 18px;
   font-weight: 700;
