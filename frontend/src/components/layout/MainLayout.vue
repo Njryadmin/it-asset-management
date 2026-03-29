@@ -105,29 +105,11 @@
           <span>审计日志</span>
         </el-menu-item>
 
-        <!-- 报表中心 [admin]（折叠） -->
-        <el-sub-menu v-if="authStore.user?.isSuperuser" index="/reports-group">
-          <template #title>
-            <el-icon aria-hidden="true"><DataAnalysis /></el-icon>
-            <span>报表中心</span>
-          </template>
-          <el-menu-item index="/reports">
-            <el-icon aria-hidden="true"><PieChart /></el-icon>
-            <span>资产总览</span>
-          </el-menu-item>
-          <el-menu-item index="/reports?tab=category">
-            <el-icon aria-hidden="true"><Grid /></el-icon>
-            <span>分类分布</span>
-          </el-menu-item>
-          <el-menu-item index="/reports?tab=department">
-            <el-icon aria-hidden="true"><OfficeBuilding /></el-icon>
-            <span>部门分布</span>
-          </el-menu-item>
-          <el-menu-item index="/reports?tab=importance">
-            <el-icon aria-hidden="true"><TrendCharts /></el-icon>
-            <span>重要度分析</span>
-          </el-menu-item>
-        </el-sub-menu>
+        <!-- 报表中心 [admin] -->
+        <el-menu-item v-if="authStore.user?.isSuperuser" index="/reports">
+          <el-icon aria-hidden="true"><DataAnalysis /></el-icon>
+          <span>报表中心</span>
+        </el-menu-item>
 
         <!-- 系统设置 -->
         <el-menu-item index="/settings">
@@ -235,7 +217,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { settingsApi } from '@/api/settings'
 import { ElMessageBox } from 'element-plus'
-import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet, Plus, PieChart, TrendCharts, Grid, OfficeBuilding, Clock, Setting } from '@element-plus/icons-vue'
+import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet, Plus, Grid, OfficeBuilding, Clock, Setting } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
