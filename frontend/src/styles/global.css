@@ -657,3 +657,34 @@ body {
     padding: 0 var(--space-2);
   }
 }
+
+/* ── Accessibility: Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity var(--transition-base);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active, .fade-leave-active {
+    transition: none;
+  }
+}
+
+/* ── Accessibility: Minimum Touch Targets (44px) ── */
+.el-button,
+.el-menu-item,
+.el-pagination button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.el-button.is-icon-only {
+  padding: 8px;
+}

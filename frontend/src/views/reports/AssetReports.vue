@@ -96,7 +96,11 @@
           <div ref="categoryChartRef" class="chart-container" v-loading="chartsLoading" />
         </el-card>
         <el-card class="chart-card chart-card--wide" v-if="distribution.byCategory.length === 0 && !chartsLoading">
-          <el-empty description="暂无分类数据" />
+          <el-empty description="暂无分类数据">
+            <template #image>
+              <div style="font-size: 48px; text-align: center;">📭</div>
+            </template>
+          </el-empty>
         </el-card>
       </template>
 
@@ -170,6 +174,9 @@
         </el-card>
         <el-card class="chart-card chart-card--wide" v-if="distribution.byImportance.length === 0 && !chartsLoading">
           <el-empty description="暂无重要度数据，请先在资产中设置重要度等级">
+            <template #image>
+              <div style="font-size: 48px; text-align: center;">📭</div>
+            </template>
             <el-button type="primary" size="small" @click="$router.push('/assets')">去管理资产</el-button>
           </el-empty>
         </el-card>

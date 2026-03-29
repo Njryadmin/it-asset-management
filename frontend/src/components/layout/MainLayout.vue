@@ -30,108 +30,108 @@
       >
         <!-- 仪表盘 -->
         <el-menu-item index="/">
-          <el-icon><Odometer /></el-icon>
+          <el-icon aria-hidden="true"><Odometer /></el-icon>
           <span>仪表盘</span>
         </el-menu-item>
 
         <!-- 资产管理（折叠） -->
         <el-sub-menu index="/assets">
           <template #title>
-            <el-icon><Box /></el-icon>
+            <el-icon aria-hidden="true"><Box /></el-icon>
             <span>资产管理</span>
           </template>
           <el-menu-item index="/assets">
-            <el-icon><Box /></el-icon>
+            <el-icon aria-hidden="true"><Box /></el-icon>
             <span>资产列表</span>
           </el-menu-item>
           <el-menu-item index="/assets/create">
-            <el-icon><Plus /></el-icon>
+            <el-icon aria-hidden="true"><Plus /></el-icon>
             <span>新增资产</span>
           </el-menu-item>
           <el-menu-item index="/asset-transfers">
-            <el-icon><RefreshRight /></el-icon>
+            <el-icon aria-hidden="true"><RefreshRight /></el-icon>
             <span>资产转移</span>
           </el-menu-item>
           <el-menu-item index="/depreciation">
-            <el-icon><Wallet /></el-icon>
+            <el-icon aria-hidden="true"><Wallet /></el-icon>
             <span>折旧报表</span>
           </el-menu-item>
           <el-divider style="margin: 8px 0" />
           <el-menu-item index="/categories">
-            <el-icon><Grid /></el-icon>
+            <el-icon aria-hidden="true"><Grid /></el-icon>
             <span>分类管理</span>
           </el-menu-item>
           <el-menu-item index="/departments">
-            <el-icon><OfficeBuilding /></el-icon>
+            <el-icon aria-hidden="true"><OfficeBuilding /></el-icon>
             <span>部门管理</span>
           </el-menu-item>
           <el-menu-item index="/suppliers">
-            <el-icon><Shop /></el-icon>
+            <el-icon aria-hidden="true"><Shop /></el-icon>
             <span>供应商管理</span>
           </el-menu-item>
         </el-sub-menu>
 
         <!-- 采购管理 -->
         <el-menu-item index="/purchases">
-          <el-icon><ShoppingCart /></el-icon>
+          <el-icon aria-hidden="true"><ShoppingCart /></el-icon>
           <span>采购申请</span>
         </el-menu-item>
 
         <!-- 用户管理 [admin] -->
         <el-menu-item v-if="authStore.user?.isSuperuser" index="/users">
-          <el-icon><User /></el-icon>
+          <el-icon aria-hidden="true"><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
 
         <!-- 审批管理 [admin]（折叠） -->
         <el-sub-menu v-if="authStore.user?.isSuperuser" index="/approvals-group">
           <template #title>
-            <el-icon><DocumentChecked /></el-icon>
+            <el-icon aria-hidden="true"><DocumentChecked /></el-icon>
             <span>审批管理</span>
           </template>
           <el-menu-item index="/approvals">
-            <el-icon><Clock /></el-icon>
+            <el-icon aria-hidden="true"><Clock /></el-icon>
             <span>待我审批</span>
           </el-menu-item>
           <el-menu-item index="/approval-flows">
-            <el-icon><Setting /></el-icon>
+            <el-icon aria-hidden="true"><Setting /></el-icon>
             <span>流程配置</span>
           </el-menu-item>
         </el-sub-menu>
 
         <!-- 审计日志 [admin] -->
         <el-menu-item v-if="authStore.user?.isSuperuser" index="/audit">
-          <el-icon><Histogram /></el-icon>
+          <el-icon aria-hidden="true"><Histogram /></el-icon>
           <span>审计日志</span>
         </el-menu-item>
 
         <!-- 报表中心 [admin]（折叠） -->
         <el-sub-menu v-if="authStore.user?.isSuperuser" index="/reports-group">
           <template #title>
-            <el-icon><DataAnalysis /></el-icon>
+            <el-icon aria-hidden="true"><DataAnalysis /></el-icon>
             <span>报表中心</span>
           </template>
           <el-menu-item index="/reports">
-            <el-icon><PieChart /></el-icon>
+            <el-icon aria-hidden="true"><PieChart /></el-icon>
             <span>资产总览</span>
           </el-menu-item>
           <el-menu-item index="/reports?tab=category">
-            <el-icon><Grid /></el-icon>
+            <el-icon aria-hidden="true"><Grid /></el-icon>
             <span>分类分布</span>
           </el-menu-item>
           <el-menu-item index="/reports?tab=department">
-            <el-icon><OfficeBuilding /></el-icon>
+            <el-icon aria-hidden="true"><OfficeBuilding /></el-icon>
             <span>部门分布</span>
           </el-menu-item>
           <el-menu-item index="/reports?tab=importance">
-            <el-icon><TrendCharts /></el-icon>
+            <el-icon aria-hidden="true"><TrendCharts /></el-icon>
             <span>重要度分析</span>
           </el-menu-item>
         </el-sub-menu>
 
         <!-- 系统设置 -->
         <el-menu-item index="/settings">
-          <el-icon><Setting /></el-icon>
+          <el-icon aria-hidden="true"><Setting /></el-icon>
           <span>系统设置</span>
         </el-menu-item>
       </el-menu>
@@ -143,6 +143,27 @@
 
     <!-- Main Area -->
     <el-container class="main-area">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb-bar" v-if="$route.path !== '/'">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path.startsWith('/assets')">资产管理</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/assets' || $route.path === '/assets/create'">{{ $route.path === '/assets/create' ? '新增资产' : '资产列表' }}</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/categories'">分类管理</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/departments'">部门管理</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/suppliers'">供应商管理</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/purchases'">采购申请</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/users'">用户管理</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/approvals' || $route.path === '/approvals-group'">审批管理</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/approval-flows'">流程配置</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/reports' || $route.path.startsWith('/reports/')">报表中心</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/depreciation'">折旧报表</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/asset-transfers'">资产转移</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/maintenance'">维保记录</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/settings'">系统设置</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
 
       <!-- Header -->
       <el-header class="header">
@@ -499,6 +520,14 @@ onMounted(async () => {
   background: var(--overlay-bg);
   backdrop-filter: var(--overlay-blur);
   z-index: 99;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb-bar {
+  padding: 8px 20px;
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 /* ── Header ── */

@@ -27,7 +27,11 @@
       <!-- Loading -->
       <div v-loading="loading" class="card-list anim-fade-in-up">
         <!-- Empty state -->
-        <el-empty v-if="!loading && approvals.length === 0" :description="emptyDescription" />
+        <el-empty v-if="!loading && approvals.length === 0" :description="emptyDescription">
+          <template #image>
+            <div style="font-size: 48px; text-align: center;">📭</div>
+          </template>
+        </el-empty>
 
         <!-- Approval cards -->
         <div v-else class="approval-grid">

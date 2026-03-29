@@ -170,6 +170,16 @@
   --accent-glow: rgba(59, 130, 246, 0.12);
   --accent-border: rgba(59, 130, 246, 0.2);
 
+  /* ── Text Scale ── */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+  --text-4xl: 30px;
+
   /* ── Element Plus CSS Variable Map (Light) ── */
   --el-color-primary: #3B82F6;
   --el-color-primary-light-3: #60A5FA;
