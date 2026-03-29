@@ -17,7 +17,7 @@
       <div v-loading="loading">
         <el-table :data="flows" stripe class="flow-table">
           <el-table-column prop="name" label="流程名称" min-width="160" />
-          <el-table-column prop="flowCode" label="流程编号" width="140" />
+          <el-table-column prop="flowCode" label="流程编号" min-width="160" show-overflow-tooltip />
           <el-table-column prop="applicableTo" label="适用对象" width="140">
             <template #default="{ row }">
               {{ applicableToLabel(row.applicableTo) }}
@@ -35,7 +35,7 @@
               {{ row.steps?.length || 0 }} 步
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column label="操作" width="140" fixed="right">
             <template #default="{ row }">
               <el-button size="small" type="primary" link @click="openEditDialog(row)">编辑</el-button>
               <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
