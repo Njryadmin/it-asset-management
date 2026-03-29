@@ -135,9 +135,9 @@ approval_flows_router = APIRouter(prefix="/approval-flows", tags=["审批流程"
 @approval_flows_router.get("", response_model=ApprovalFlowListResponse)
 async def list_approval_flows(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
-    """获取审批流程模板列表"""
+    """获取审批流程模板列表（管理员）"""
     query = select(ApprovalFlow).where(ApprovalFlow.is_active == True)
     result = await db.execute(query)
     items = result.scalars().all()
@@ -189,9 +189,9 @@ async def update_approval_flow(
 async def get_approval_flow(
     flow_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
-    """获取审批流程模板详情"""
+    """获取审批流程模板详情（管理员）"""
     result = await db.execute(select(ApprovalFlow).where(ApprovalFlow.id == flow_id))
     flow = result.scalar_one_or_none()
     if not flow:
@@ -260,9 +260,33 @@ async def list_my_pending_approvals(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """获取当前用户待审批的实例"""
-    query = select(ApprovalInstance).where(
+    """获取当前用户待审批的实例（仅显示当前用户尚未处理过的）"""
+    # Filter: exclude instances where current user already took action (approve/reject)
+    # by checking if their approver_id appears in the approval_chain
+    subq = select(ApprovalInstance.id).where(
         ApprovalInstance.status == "pending"
+    )
+    # Get IDs of instances this user has already acted on
+    all_pending = await db.execute(subq)
+    pending_ids = [r[0] for r in all_pending.all()]
+    
+    already_acted = set()
+    if pending_ids:
+        from sqlalchemy import cast, String
+        for pid in pending_ids:
+            result = await db.execute(
+                select(ApprovalInstance).where(ApprovalInstance.id == pid)
+            )
+            inst = result.scalar_one_or_none()
+            if inst and inst.approval_chain:
+                for step in inst.approval_chain:
+                    if isinstance(step, dict) and step.get("approver_id") == current_user.id:
+                        already_acted.add(pid)
+    
+    # Exclude instances user already acted on
+    query = select(ApprovalInstance).where(
+        ApprovalInstance.status == "pending",
+        ~ApprovalInstance.id.in_(already_acted) if already_acted else True
     ).order_by(ApprovalInstance.created_at.desc())
     count_result = await db.execute(select(func.count()).select_from(query.subquery()))
     total = count_result.scalar() or 0

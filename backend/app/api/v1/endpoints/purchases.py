@@ -224,11 +224,9 @@ async def approve_purchase_request(
     request_id: int,
     comment: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """审批通过采购申请（仅管理员）- 通过审批实例工作流"""
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="只有管理员可以审批")
 
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
     purchase_request = result.scalar_one_or_none()
@@ -287,11 +285,9 @@ async def reject_purchase_request(
     request_id: int,
     comment: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """拒绝采购申请（仅管理员）- 通过审批实例工作流"""
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="只有管理员可以审批")
 
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
     purchase_request = result.scalar_one_or_none()
@@ -338,11 +334,9 @@ async def mark_as_purchased(
     request_id: int,
     actual_price: Optional[float] = None,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
     """标记为已采购（仅管理员）- 同时自动在资产表中创建资产记录"""
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="只有管理员可以操作")
 
     result = await db.execute(select(PurchaseRequest).where(PurchaseRequest.id == request_id))
     purchase_request = result.scalar_one_or_none()

@@ -85,9 +85,9 @@ async def list_maintenance_logs(
 async def create_maintenance_log(
     data: MaintenanceLogCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
-    """创建维保记录"""
+    """创建维保记录（管理员）"""
     log = AssetMaintenanceLog(**data.model_dump())
     db.add(log)
     await db.commit()
@@ -100,9 +100,9 @@ async def update_maintenance_log(
     log_id: int,
     data: MaintenanceLogUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(require_admin),
 ):
-    """更新维保记录"""
+    """更新维保记录（管理员）"""
     result = await db.execute(select(AssetMaintenanceLog).where(AssetMaintenanceLog.id == log_id))
     log = result.scalar_one_or_none()
     if not log:
