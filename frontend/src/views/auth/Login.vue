@@ -156,9 +156,9 @@ const rules: FormRules = {
 }
 
 const stats = [
-  { value: '2,847', label: '在册资产', pct: 72 },
-  { value: '98.6%', label: '盘点完成率', pct: 98 },
-  { value: '156', label: '本月新增', pct: 45 }
+  { value: '—', label: '在册资产', pct: 0 },
+  { value: '—', label: '盘点完成率', pct: 0 },
+  { value: '—', label: '本月新增', pct: 0 }
 ]
 
 // Load site settings
