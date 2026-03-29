@@ -402,7 +402,7 @@ onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch((
 .dashboard { max-width: 1400px; margin: 0 auto; padding: 0 4px 28px; }
 
 /* Announcement */
-.announcement-bar { background: linear-gradient(135deg,#ff9500 0%,#ff6b00 100%); color: #fff; overflow: hidden; border-radius: var(--radius-lg); margin-bottom: 14px; box-shadow: 0 4px 16px rgba(255,149,0,0.35); }
+.announcement-bar { background: linear-gradient(135deg,#3B82F6 0%,#2563EB 100%); color: #fff; overflow: hidden; border-radius: var(--radius-lg); margin-bottom: 14px; box-shadow: 0 4px 16px rgba(59,130,246,0.35); }
 .announcement-inner { display: flex; align-items: center; padding: 10px 0; animation: marquee 28s linear infinite; }
 .announcement-icon { font-size: 16px; flex-shrink: 0; padding: 0 12px; }
 .announcement-text { font-size: 13px; font-weight: 500; white-space: nowrap; }
