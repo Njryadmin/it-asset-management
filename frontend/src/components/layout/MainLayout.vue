@@ -543,6 +543,7 @@ onMounted(async () => {
   flex-shrink: 0;
   gap: 12px;
   transition: background-color var(--transition-slow), border-color var(--transition-base);
+  overflow: hidden;
 }
 
 .header__title {
@@ -556,6 +557,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 /* ── Theme Toggle Button ── */
@@ -627,6 +630,8 @@ onMounted(async () => {
   padding: 5px 10px;
   border-radius: var(--radius-md);
   transition: background-color var(--transition-fast);
+  max-width: 180px;
+  overflow: hidden;
 }
 .user-info:hover {
   background-color: var(--bg-hover);
@@ -641,11 +646,17 @@ onMounted(async () => {
   justify-content: center;
   color: #fff;
   font-size: 14px;
+  flex-shrink: 0;
 }
 .user-name {
   font-size: 14px;
   font-weight: 500;
   color: var(--header-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  max-width: 100px;
 }
 .chevron {
   color: var(--header-text-secondary);
