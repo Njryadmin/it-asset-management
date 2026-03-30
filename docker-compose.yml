@@ -90,7 +90,23 @@ services:
       dockerfile: Dockerfile
     ports:
       # 前端页面端口（宿主机:容器）
+      # HTTPS 端口映射（SSL 启用时使用）
       - "3030:80"
+      - "30443:443"
+    environment:
+      # ---------- SSL 配置（可选） ----------
+      # SSL 证书路径（容器内），设置为空则禁用 HTTPS
+      # 示例: /etc/nginx/ssl/cert.pem
+      - NGINX_SERVER_NAME=${NGINX_SERVER_NAME:-localhost}
+      # SSL 证书和私钥（需同时设置才会启用 HTTPS）
+      - SSL_CERT_PATH=${SSL_CERT_PATH:-}
+      - SSL_KEY_PATH=${SSL_KEY_PATH:-}
+      # CA 证书链（可选）
+      - SSL_CA_PATH=${SSL_CA_PATH:-}
+    volumes:
+      # SSL 证书目录（启用 HTTPS 时挂载，设置为宿主机证书目录路径）
+      # 示例: /opt/ssl:/etc/nginx/ssl:ro
+      - ${SSL_CERT_DIR:-}:/etc/nginx/ssl:ro
     depends_on:
       # 等待后端启动后再构建前端（避免前端构建时后端未就绪）
       - backend

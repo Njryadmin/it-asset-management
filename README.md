@@ -165,6 +165,43 @@ docker-compose up -d
 | REDIS_PORT | Redis 端口 | 6379 |
 | SECRET_KEY | JWT 密钥 | (需设置) |
 
+### HTTPS/SSL 配置（可选）
+
+| 变量名 | 描述 | 默认值 |
+|--------|------|--------|
+| NGINX_SERVER_NAME | 域名/主机名 | localhost |
+| SSL_CERT_PATH | 证书路径（容器内），设置后启用 HTTPS | (空=禁用) |
+| SSL_KEY_PATH | 私钥路径（容器内） | (空) |
+| SSL_CA_PATH | CA 证书链路径（可选） | (空) |
+| SSL_CERT_DIR | 宿主机证书目录挂载路径 | /dev/null |
+
+**示例 — 启用 HTTPS：**
+
+```bash
+# .env 文件
+SSL_CERT_DIR=/opt/ssl
+SSL_CERT_PATH=/etc/nginx/ssl/cert.pem
+SSL_KEY_PATH=/etc/nginx/ssl/key.pem
+NGINX_SERVER_NAME=it.yourdomain.com
+```
+
+同时需要修改 `docker-compose.yml` 中的端口映射，HTTPS 端口 30443 需自行在防火墙开放。
+
+**生成免费自签证书（仅供测试）：**
+```bash
+mkdir -p /opt/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /opt/ssl/key.pem -out /opt/ssl/cert.pem \
+  -subj "/C=CN/ST=Shanghai/L=Shanghai/O=IT/CN=yourdomain.com"
+```
+
+**Let's Encrypt 证书（生产推荐）：**
+```bash
+certbot certonly --nginx -d it.yourdomain.com \
+  --cert-name it-asset-management \
+  --deploy-hook "cp -L /etc/letsencrypt/live/it.yourdomain.com/fullchain.pem /opt/ssl/cert.pem && cp -L /etc/letsencrypt/live/it.yourdomain.com/privkey.pem /opt/ssl/key.pem"
+```
+
 ---
 
 ## GitHub Actions

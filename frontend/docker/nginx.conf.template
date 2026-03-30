@@ -1,0 +1,45 @@
+# HTTP server
+server {
+    listen 80;
+    server_name ${NGINX_SERVER_NAME};
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Redirect HTTP to HTTPS if SSL is configured
+    # Only triggers when SSL_CERT_PATH is not empty
+    set $do_https_redirect 0;
+    {{#SSL_CERT_PATH}}set $do_https_redirect 1;{{/SSL_CERT_PATH}}
+
+    # Handle SPA routes - all routes serve index.html except actual files
+    location / {
+        try_files $uri @spa;
+    }
+
+    location @spa {
+        try_files /index.html =404;
+    }
+
+    # Serve static assets - only actual files with known extensions
+    location ~ ^/assets/.+\.[a-zA-Z0-9]+$ {
+        try_files $uri =404;
+    }
+
+    location /api {
+        proxy_pass http://backend:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header Authorization $http_authorization;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /static {
+        proxy_pass http://backend:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
