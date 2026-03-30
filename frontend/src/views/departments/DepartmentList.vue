@@ -89,9 +89,11 @@
           <el-table-column v-if="col.visible && col.key === 'code'" prop="code" label="编码" width="120" />
           <el-table-column v-if="col.visible && col.key === 'description'" prop="description" label="描述" min-width="200" show-overflow-tooltip />
         </template>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" min-width="120" fixed="right">
           <template #default="{ row }">
-            <span class="action-link" @click="showDialog('edit', row)"><el-icon><Edit /></el-icon><span>编辑</span></span><span class="action-link action-link--danger" @click="handleDelete(row.id)"><el-icon><Delete /></el-icon><span>删除</span></span>
+            <div class="action-btn-group">
+              <span class="action-link" @click="showDialog('edit', row)"><el-icon><Edit /></el-icon><span>编辑</span></span><span class="action-link action-link--danger" @click="handleDelete(row.id)"><el-icon><Delete /></el-icon><span>删除</span></span>
+            </div>
           </template>
         </el-table-column>
       </el-table>

@@ -35,11 +35,17 @@
               {{ row.steps?.length || 0 }} 步
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="160" fixed="right" align="center">
+          <el-table-column label="操作" min-width="120" fixed="right">
             <template #default="{ row }">
-              <div style="display: flex; gap: 6px; justify-content: center;">
-                <el-button size="small" type="primary" link @click="openEditDialog(row)">编辑</el-button>
-                <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+              <div class="action-btn-group">
+                <span class="action-link" @click="openEditDialog(row)">
+                  <el-icon><Edit /></el-icon>
+                  <span>编辑</span>
+                </span>
+                <span class="action-link action-link--danger" @click="handleDelete(row)">
+                  <el-icon><Delete /></el-icon>
+                  <span>删除</span>
+                </span>
               </div>
             </template>
           </el-table-column>

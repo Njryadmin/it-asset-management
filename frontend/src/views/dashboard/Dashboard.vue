@@ -212,9 +212,12 @@
               <el-table-column prop="createdAt" label="添加时间" width="155">
                 <template #default="{ row }"><span class="date-text">{{ formatDate(row.createdAt) }}</span></template>
               </el-table-column>
-              <el-table-column label="操作" width="90" fixed="right">
+              <el-table-column label="操作" min-width="80" fixed="right">
                 <template #default="{ row }">
-                  <el-button type="primary" link size="small" @click="$router.push('/assets/' + row.id + '/edit')">详情</el-button>
+                  <span class="action-link" @click="$router.push('/assets/' + row.id + '/edit')">
+                    <el-icon><View /></el-icon>
+                    <span>详情</span>
+                  </span>
                 </template>
               </el-table-column>
             </el-table>

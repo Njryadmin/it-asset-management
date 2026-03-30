@@ -102,20 +102,22 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" min-width="180" fixed="right">
           <template #default="{ row }">
-            <span class="action-link" @click="showDialog('edit', row)">
-              <el-icon><Edit /></el-icon>
-              <span>编辑</span>
-            </span>
-            <span class="action-link" :class="row.isActive ? 'action-link--warning' : 'action-link--success'" @click="handleToggleStatus(row)">
-              <el-icon><Switch /></el-icon>
-              <span>{{ row.isActive ? '禁用' : '启用' }}</span>
-            </span>
-            <span class="action-link action-link--danger" @click="handleDelete(row.id)">
-              <el-icon><Delete /></el-icon>
-              <span>删除</span>
-            </span>
+            <div class="action-btn-group">
+              <span class="action-link" @click="showDialog('edit', row)">
+                <el-icon><Edit /></el-icon>
+                <span>编辑</span>
+              </span>
+              <span class="action-link" :class="row.isActive ? 'action-link--warning' : 'action-link--success'" @click="handleToggleStatus(row)">
+                <el-icon><Switch /></el-icon>
+                <span>{{ row.isActive ? '禁用' : '启用' }}</span>
+              </span>
+              <span class="action-link action-link--danger" @click="handleDelete(row.id)">
+                <el-icon><Delete /></el-icon>
+                <span>删除</span>
+              </span>
+            </div>
           </template>
         </el-table-column>
       </el-table>

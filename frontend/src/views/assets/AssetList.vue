@@ -183,16 +183,18 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" min-width="120" fixed="right">
           <template #default="{ row }">
-            <span class="action-link" @click="$router.push(`/assets/${row.id}/edit`)">
-              <el-icon><Edit /></el-icon>
-              <span>编辑</span>
-            </span>
-            <span class="action-link action-link--danger" @click="handleDelete(row.id)">
-              <el-icon><Delete /></el-icon>
-              <span>删除</span>
-            </span>
+            <div class="action-btn-group">
+              <span class="action-link" @click="$router.push(`/assets/${row.id}/edit`)">
+                <el-icon><Edit /></el-icon>
+                <span>编辑</span>
+              </span>
+              <span class="action-link action-link--danger" @click="handleDelete(row.id)">
+                <el-icon><Delete /></el-icon>
+                <span>删除</span>
+              </span>
+            </div>
           </template>
         </el-table-column>
       </el-table>

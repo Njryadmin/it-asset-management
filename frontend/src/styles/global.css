@@ -699,3 +699,66 @@ body {
 .el-button.is-icon-only {
   padding: 8px;
 }
+
+/* ── Action Link Buttons (统一操作按钮样式) ── */
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.action-link:hover {
+  background-color: var(--primary-bg);
+  color: var(--primary);
+}
+
+.action-link .el-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.action-link span {
+  line-height: 1;
+}
+
+/* Status variants */
+.action-link--success {
+  color: var(--success);
+}
+.action-link--success:hover {
+  background-color: var(--success-bg);
+  color: var(--success);
+}
+
+.action-link--warning {
+  color: var(--warning);
+}
+.action-link--warning:hover {
+  background-color: var(--warning-bg);
+  color: var(--warning);
+}
+
+.action-link--danger {
+  color: var(--danger);
+}
+.action-link--danger:hover {
+  background-color: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Action button group wrapper */
+.action-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
