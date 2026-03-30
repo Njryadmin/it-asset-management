@@ -24,15 +24,18 @@ class Settings(BaseSettings):
     REDIS_URL: Optional[str] = None
 
     # JWT
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    SECRET_KEY: str = ""  # Must be set via env or will be auto-generated
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
 
-    # CORS
+    # Security
+    ALLOW_PUBLIC_REGISTRATION: bool = False  # Set to True only if public registration is needed
+    LOGIN_RATE_LIMIT: str = "5/minute"  # Brute force protection
+
+    # CORS - should be overridden via BACKEND_CORS_ORIGINS env var in production
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://localhost:3000",
-        "http://192.168.10.1:3030",
         "http://127.0.0.1:3030",
     ]
 
@@ -41,13 +44,15 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
-settings = Settings()
+_settings = Settings()
 
-# SECURITY: If SECRET_KEY is default and not set via env, use a stable default for development
-# In production, always set SECRET_KEY environment variable
-if settings.SECRET_KEY == "your-secret-key-change-in-production":
-    # Use a stable default for development - NOT recommended for production
-    settings.SECRET_KEY = "it-asset-mgmt-dev-secret-key-do-not-use-in-production"
+# SECURITY: Generate SECRET_KEY at runtime if not provided via environment variable
+# This ensures each startup gets a unique key. For production, always set SECRET_KEY env var.
+if not _settings.SECRET_KEY:
+    _settings.SECRET_KEY = secrets.token_urlsafe(32)
+    print("WARNING: SECRET_KEY auto-generated at runtime. Set SECRET_KEY env var for production!")
+
+settings = _settings
 
 # Build DATABASE_URL
 if not settings.DATABASE_URL:

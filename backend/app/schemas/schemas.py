@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 from datetime import datetime, date
 
@@ -11,7 +11,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(..., min_length=8, description="密码至少8个字符")
     is_superuser: bool = False
 
 
@@ -29,6 +29,7 @@ class UserResponse(UserBase):
     id: int
     is_active: bool
     is_superuser: bool
+    password_change_required: bool = False
     created_at: datetime
 
 
@@ -51,6 +52,11 @@ class TokenPayload(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str
+    new_password: str
 
 
 # ============ Category Schemas ============

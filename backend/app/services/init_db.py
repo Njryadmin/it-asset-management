@@ -10,17 +10,25 @@ import asyncio
 async def create_default_admin(db: AsyncSession):
     """Create default admin user"""
     result = await db.execute(select(User).where(User.username == "admin"))
-    if not result.scalar_one_or_none():
+    existing_admin = result.scalar_one_or_none()
+    
+    if not existing_admin:
         admin = User(
             username="admin",
             email="admin@example.com",
             full_name="系统管理员",
             hashed_password=get_password_hash("admin123"),
             is_superuser=True,
-            is_active=True
+            is_active=True,
+            password_change_required=True  # SECURITY: Force password change on first login
         )
         db.add(admin)
         print("Created default admin user.")
+    else:
+        # SECURITY: Mark existing admin as requiring password change
+        if not existing_admin.password_change_required:
+            existing_admin.password_change_required = True
+            print("Updated admin user: password_change_required=True")
 
 
 async def create_sample_data(db: AsyncSession):
