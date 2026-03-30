@@ -1,10 +1,13 @@
 <template>
   <div class="asset-form">
-    <el-card>
+    <el-card v-loading="mountedLoading">
       <template #header>
         <span>{{ isEdit ? '编辑资产' : '新增资产' }}</span>
       </template>
-      <el-form
+      <div v-if="mountedLoading" class="loading-placeholder">
+        <el-skeleton :rows="8" animated />
+      </div>
+      <el-form v-show="!mountedLoading"
         ref="formRef"
         :model="form"
         :rules="rules"
@@ -128,6 +131,7 @@ const route = useRoute()
 const assetStore = useAssetStore()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
+const mountedLoading = ref(true)  // Show skeleton until options are loaded
 const assetId = computed(() => Number(route.params.id))
 const isEdit = computed(() => !!assetId.value)
 
@@ -217,7 +221,7 @@ async function handleSubmit() {
 
 onMounted(async () => {
   try {
-    await assetStore.fetchOptions().catch(() => {})
+    await assetStore.fetchOptions()
 
     if (isEdit.value) {
       const response = await assetsApi.get(assetId.value)
@@ -250,6 +254,8 @@ onMounted(async () => {
       ElMessage.error('加载资产数据失败')
       router.push('/assets')
     }
+  } finally {
+    mountedLoading.value = false
   }
 })
 </script>
