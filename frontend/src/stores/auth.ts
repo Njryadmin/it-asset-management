@@ -15,7 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = response.data.accessToken
       localStorage.setItem('token', response.data.accessToken)
       await fetchUser()
-      return true
+      return response.data
     } catch (error) {
       throw error
     } finally {

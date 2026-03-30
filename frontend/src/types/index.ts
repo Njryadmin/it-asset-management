@@ -16,6 +16,7 @@ export interface User {
   fullName: string | null
   isActive: boolean
   isSuperuser: boolean
+  passwordChangeRequired?: boolean
   createdAt: string
 }
 
@@ -48,6 +49,7 @@ export interface LoginRequest {
 export interface Token {
   accessToken: string
   tokenType: string
+  passwordChangeRequired?: boolean
 }
 
 // Category types

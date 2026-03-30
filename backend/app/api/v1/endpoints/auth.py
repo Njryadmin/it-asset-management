@@ -64,19 +64,17 @@ async def login(
     if not user.is_active:
         raise HTTPException(status_code=400, detail="用户已被禁用")
     
-    # SECURITY: Force password change on first login
-    if user.password_change_required:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="首次登录必须修改密码",
-            headers={"X-Password-Change-Required": "true"}
-        )
+    # SECURITY: Note password_change_required but allow login
+    # Frontend should prompt to change password after successful login
     
     access_token = create_access_token(
         data={"sub": user.id, "username": user.username},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    return Token(access_token=access_token)
+    return Token(
+        access_token=access_token,
+        password_change_required=user.password_change_required
+    )
 
 
 @router.post("/register", response_model=UserResponse)

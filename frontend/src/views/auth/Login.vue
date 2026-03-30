@@ -120,12 +120,36 @@
       </div>
     </div>
   </div>
+
+  <!-- First-time password change dialog -->
+  <el-dialog
+    v-model="newPasswordDialogVisible"
+    title="首次登录请修改密码"
+    width="90%"
+    max-width="400px"
+    :close-on-click-modal="false"
+    class="custom-dialog"
+  >
+    <el-form>
+      <el-form-item label="新密码" required>
+        <el-input v-model="newPassword" type="password" placeholder="请输入新密码（至少8位）" show-password />
+      </el-form-item>
+      <el-form-item label="确认密码" required>
+        <el-input v-model="confirmPassword" type="password" placeholder="请再次输入新密码" show-password @keyup.enter="handlePasswordChange" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="newPasswordDialogVisible = false">取消</el-button>
+      <el-button type="primary" :loading="passwordChangeLoading" @click="handlePasswordChange">确认修改</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { authApi } from '@/api/auth'
 import { settingsApi } from '@/api/settings'
 import { User, Lock } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -153,6 +177,33 @@ const settings = reactive({
 const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+}
+
+const newPasswordDialogVisible = ref(false)
+const newPassword = ref('')
+const confirmPassword = ref('')
+const passwordChangeLoading = ref(false)
+
+async function handlePasswordChange() {
+  if (newPassword.value.length < 8) {
+    ElMessage.error('密码长度至少8位')
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    ElMessage.error('两次输入的密码不一致')
+    return
+  }
+  passwordChangeLoading.value = true
+  try {
+    await authApi.changePassword(undefined, newPassword.value)
+    ElMessage.success('密码修改成功，即将进入系统')
+    newPasswordDialogVisible.value = false
+    router.push('/')
+  } catch {
+    // Error handled by interceptor
+  } finally {
+    passwordChangeLoading.value = false
+  }
 }
 
 const stats = [
@@ -191,7 +242,7 @@ async function handleLogin() {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        await authStore.login({ username: form.username, password: form.password })
+        const result = await authStore.login({ username: form.username, password: form.password })
 
         // Remember credentials if checked
         if (form.remember) {
@@ -202,8 +253,14 @@ async function handleLogin() {
           localStorage.removeItem('remember_me')
         }
 
-        ElMessage.success('登录成功')
-        router.push('/')
+        if (result?.passwordChangeRequired) {
+          // First login - force password change before proceeding
+          ElMessage.warning('首次登录必须修改密码')
+          newPasswordDialogVisible.value = true
+        } else {
+          ElMessage.success('登录成功')
+          router.push('/')
+        }
       } catch {
         // Error handled by interceptor
       }

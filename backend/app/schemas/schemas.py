@@ -42,6 +42,7 @@ class UserListResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    password_change_required: bool = False
 
 
 class TokenPayload(BaseModel):

@@ -8,16 +8,23 @@ export const authApi = {
     params.append('password', data.password)
     return request.post<Token>('/auth/login', params)
   },
-  
+
   register(data: { username: string; email: string; password: string; full_name?: string }) {
     return request.post<User>('/auth/register', data)
   },
-  
+
   getMe() {
     return request.get<User>('/auth/me')
   },
-  
+
   logout() {
     return request.post('/auth/logout')
+  },
+
+  changePassword(oldPassword: string | undefined, newPassword: string) {
+    return request.post('/auth/change-password', {
+      old_password: oldPassword,
+      new_password: newPassword
+    })
   }
 }
