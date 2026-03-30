@@ -29,7 +29,7 @@
             <div class="upload-row">
               <!-- Logo Upload -->
               <div class="upload-item">
-                <label class="upload-label">站点 LOGO</label>
+                <span class="upload-label">站点 LOGO</span>
                 <div class="upload-zone logo-zone" :class="{ 'has-image': tempLogoUrl }" @click="triggerLogoUpload">
                   <input ref="logoInputRef" type="file" accept="image/*" hidden @change="onLogoFileChange" />
                   <div v-if="tempLogoUrl" class="preview-overlay">
@@ -66,7 +66,7 @@
 
               <!-- Favicon Upload -->
               <div class="upload-item">
-                <label class="upload-label">站点图标</label>
+                <span class="upload-label">站点图标</span>
                 <div class="upload-zone favicon-zone" :class="{ 'has-image': tempFaviconUrl }" @click="triggerFaviconUpload">
                   <input ref="faviconInputRef" type="file" accept="image/*" hidden @change="onFaviconFileChange" />
                   <div v-if="tempFaviconUrl" class="preview-overlay">
