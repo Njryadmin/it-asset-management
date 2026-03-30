@@ -629,9 +629,11 @@ function exportCsv() {
 }
 
 onMounted(async () => {
-  await assetStore.fetchOptions()
-  await fetchAll()
-  window.addEventListener('resize', resizeCharts)
+  try {
+    await assetStore.fetchOptions().catch(() => {})
+    await fetchAll().catch(() => {})
+    window.addEventListener('resize', resizeCharts)
+  } catch (e) { /* ignore */ }
 })
 
 onBeforeUnmount(() => {

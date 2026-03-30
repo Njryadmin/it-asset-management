@@ -632,10 +632,12 @@ function downloadTemplate() {
 }
 
 onMounted(async () => {
-  await assetStore.fetchOptions()
-  await assetStore.fetchAssets()
-  await departmentStore.fetchDepartments()
-  await userStore.fetchUsers()
+  try {
+    await assetStore.fetchOptions()
+    await assetStore.fetchAssets()
+    await departmentStore.fetchDepartments()
+    await userStore.fetchUsers()
+  } catch (e) { /* ignore - UI handles empty state */ }
 })
 </script>
 

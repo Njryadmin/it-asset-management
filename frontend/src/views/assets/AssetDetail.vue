@@ -617,17 +617,19 @@ async function saveAsset() {
 }
 
 onMounted(async () => {
-  await assetStore.fetchOptions()
-  await fetchAsset()
-  if (activeTab.value === 'log') {
-    await fetchAuditLogs()
-  }
-  if (activeTab.value === 'maintenance') {
-    await fetchMaintenanceLogs()
-  }
-  if (activeTab.value === 'attachments') {
-    await fetchAttachments()
-  }
+  try {
+    await assetStore.fetchOptions()
+    await fetchAsset()
+    if (activeTab.value === 'log') {
+      await fetchAuditLogs().catch(() => {})
+    }
+    if (activeTab.value === 'maintenance') {
+      await fetchMaintenanceLogs().catch(() => {})
+    }
+    if (activeTab.value === 'attachments') {
+      await fetchAttachments().catch(() => {})
+    }
+  } catch (e) { /* ignore */ }
 })
 </script>
 

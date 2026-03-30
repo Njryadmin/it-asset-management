@@ -216,10 +216,10 @@ async function handleSubmit() {
 }
 
 onMounted(async () => {
-  await assetStore.fetchOptions()
-  
-  if (isEdit.value) {
-    try {
+  try {
+    await assetStore.fetchOptions().catch(() => {})
+
+    if (isEdit.value) {
       const response = await assetsApi.get(assetId.value)
       const data = response.data
       Object.assign(form, {
@@ -244,7 +244,9 @@ onMounted(async () => {
         depreciation_method: data.depreciationMethod || '',
         salvage_rate: data.salvageRate
       })
-    } catch (error) {
+    }
+  } catch (error) {
+    if (isEdit.value) {
       ElMessage.error('加载资产数据失败')
       router.push('/assets')
     }

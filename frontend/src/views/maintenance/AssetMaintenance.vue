@@ -330,8 +330,10 @@ async function handleDelete(row: MaintenanceLog) {
 }
 
 onMounted(async () => {
-  await assetStore.fetchAssets()
-  await fetchLogs()
+  try {
+    await assetStore.fetchAssets()
+    await fetchLogs()
+  } catch (e) { /* ignore */ }
 })
 </script>
 
