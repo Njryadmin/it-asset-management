@@ -54,6 +54,18 @@ request.interceptors.response.use(
       localStorage.removeItem('token')
       router.push('/login')
       ElMessage.error('登录已过期，请重新登录')
+    } else if (error.response?.status === 403) {
+      // Silently handle 403 on admin-only endpoints (e.g. reminders, depreciation, audit)
+      // The UI already hides admin-only features from non-admins, so suppress the toast
+      const adminOnlyPaths = ['/reminders', '/depreciation', '/audit', '/approval-flows']
+      const isAdminOnlyRequest = adminOnlyPaths.some(p => error.config?.url?.includes(p))
+      if (!isAdminOnlyRequest) {
+        ElMessage.error(error.response?.data?.detail || '无权限访问')
+      }
+      // Also suppress for the general detail message if it's a known admin-only error
+      if (error.response?.data?.detail === '需要管理员权限') {
+        // suppress - feature is hidden from non-admin UI anyway
+      }
     } else if (error.response?.data?.detail) {
       ElMessage.error(error.response.data.detail)
     } else {
