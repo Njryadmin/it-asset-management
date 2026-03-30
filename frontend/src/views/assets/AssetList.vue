@@ -81,7 +81,7 @@
               <el-icon><Upload /></el-icon>
               导入
             </el-button>
-            <el-button type="primary" @click="$router.push('/assets/create')">
+            <el-button type="primary" @click="createAsset">
               <el-icon><Plus /></el-icon>
               新增资产
             </el-button>
@@ -297,12 +297,58 @@
       <el-button type="primary" @click="confirmBatchTransfer" :loading="batchTransferLoading">确认转移</el-button>
     </template>
   </el-dialog>
+
+  <!-- 新增资产对话框 -->
+  <el-dialog v-model="createDialogVisible" title="新增资产" width="90%" max-width="560px" class="custom-dialog" @close="resetCreateForm">
+    <el-form :model="createForm" label-width="100px">
+      <el-form-item label="资产名称" required>
+        <el-input v-model="createForm.name" placeholder="请输入资产名称" />
+      </el-form-item>
+      <el-form-item label="资产编号" required>
+        <el-input v-model="createForm.assetCode" placeholder="请输入资产编号" />
+      </el-form-item>
+      <el-form-item label="分类">
+        <el-select v-model="createForm.categoryId" placeholder="请选择分类" clearable style="width: 100%;">
+          <el-option v-for="c in flatCategories" :key="c.id" :label="c.name" :value="c.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="供应商">
+        <el-select v-model="createForm.supplierId" placeholder="请选择供应商" clearable style="width: 100%;">
+          <el-option v-for="s in assetStore.suppliers" :key="s.id" :label="s.name" :value="s.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="所属部门">
+        <el-select v-model="createForm.departmentId" placeholder="请选择部门" clearable style="width: 100%;">
+          <el-option v-for="d in flatDepartments" :key="d.id" :label="d.name" :value="d.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="createForm.status" style="width: 100%;">
+          <el-option label="闲置" value="idle" />
+          <el-option label="在用" value="in_use" />
+          <el-option label="维修中" value="maintenance" />
+          <el-option label="已报废" value="scrapped" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="购入日期">
+        <el-date-picker v-model="createForm.purchaseDate" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" style="width: 100%;" />
+      </el-form-item>
+      <el-form-item label="购入价格">
+        <el-input-number v-model="createForm.purchasePrice" :min="0" :precision="2" placeholder="0.00" style="width: 100%;" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="createDialogVisible = false">取消</el-button>
+      <el-button type="primary" :loading="createLoading" @click="handleCreate">确认创建</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAssetStore } from '@/stores/assets'
+import type { AssetStatus } from '@/types'
 import { useDepartmentStore } from '@/stores/departments'
 import { useUserStore } from '@/stores/users'
 import { assetsApi } from '@/api/assets'
@@ -351,6 +397,18 @@ const showImportDialog = ref(false)
 const selectedAssets = ref<Asset[]>([])
 const showBatchTransferDialog = ref(false)
 const batchTransferLoading = ref(false)
+const createDialogVisible = ref(false)
+const createLoading = ref(false)
+const createForm = reactive({
+  name: '',
+  assetCode: '',
+  categoryId: null as number | null,
+  supplierId: null as number | null,
+  departmentId: null as number | null,
+  status: 'idle',
+  purchaseDate: '',
+  purchasePrice: null as number | null,
+})
 const batchTransferForm = reactive({
   departmentId: null as number | null,
   userId: null as number | null,
@@ -473,6 +531,50 @@ async function confirmBatchTransfer() {
     ElMessage.error('批量转移失败')
   } finally {
     batchTransferLoading.value = false
+  }
+}
+
+function createAsset() {
+  resetCreateForm()
+  createDialogVisible.value = true
+}
+
+function resetCreateForm() {
+  createForm.name = ''
+  createForm.assetCode = ''
+  createForm.categoryId = null
+  createForm.supplierId = null
+  createForm.departmentId = null
+  createForm.status = 'idle'
+  createForm.purchaseDate = ''
+  createForm.purchasePrice = null
+}
+
+async function handleCreate() {
+  if (!createForm.name || !createForm.assetCode) {
+    ElMessage.error('请填写资产名称和资产编号')
+    return
+  }
+  createLoading.value = true
+  try {
+    const payload: Record<string, unknown> = {
+      name: createForm.name,
+      asset_code: createForm.assetCode,
+      status: createForm.status as AssetStatus,
+    }
+    if (createForm.categoryId != null) payload.category_id = createForm.categoryId
+    if (createForm.supplierId != null) payload.supplier_id = createForm.supplierId
+    if (createForm.departmentId != null) payload.department_id = createForm.departmentId
+    if (createForm.purchaseDate) payload.purchase_date = createForm.purchaseDate
+    if (createForm.purchasePrice != null) payload.purchase_price = createForm.purchasePrice
+    await assetsApi.create(payload as any)
+    ElMessage.success('资产创建成功')
+    createDialogVisible.value = false
+    await assetStore.fetchAssets()
+  } catch {
+    // error handled by interceptor
+  } finally {
+    createLoading.value = false
   }
 }
 

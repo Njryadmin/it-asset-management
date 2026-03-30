@@ -120,7 +120,13 @@
 
           <!-- Footer -->
           <div class="login-card__footer">
-            <span>{{ settings.systemName || 'IT资产管理系统' }} · {{ settings.version || 'v1.0' }}</span>
+            <span>{{ settings.systemName || 'IT资产管理系统' }}</span>
+            <span v-if="settings.version"> · {{ settings.version }}</span>
+            <span v-if="settings.companyName || settings.contactEmail || settings.contactPhone"> · </span>
+            <span v-if="settings.contactPhone">{{ settings.contactPhone }}</span>
+            <span v-if="settings.contactPhone && settings.contactEmail"> / </span>
+            <span v-if="settings.contactEmail">{{ settings.contactEmail }}</span>
+            <span v-if="settings.companyName"> · {{ settings.companyName }}</span>
           </div>
         </div>
       </div>
@@ -189,10 +195,12 @@ const form = reactive({
 
 const settings = reactive({
   systemName: 'IT资产管理系统',
-  site_title: '',
   siteDescription: '',
   logoUrl: '',
-  version: ''
+  version: '',
+  companyName: '',
+  contactEmail: '',
+  contactPhone: ''
 })
 
 const rules: FormRules = {
@@ -252,6 +260,9 @@ onMounted(async () => {
     if (res.data.siteDescription) settings.siteDescription = res.data.siteDescription
     if (res.data.logoUrl) settings.logoUrl = res.data.logoUrl
     if (res.data.version) settings.version = res.data.version
+    if (res.data.companyName) settings.companyName = res.data.companyName
+    if (res.data.contactEmail) settings.contactEmail = res.data.contactEmail
+    if (res.data.contactPhone) settings.contactPhone = res.data.contactPhone
   } catch {
     // Use defaults
   }

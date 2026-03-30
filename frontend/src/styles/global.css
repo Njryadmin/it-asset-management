@@ -392,6 +392,17 @@ body {
   border: 1px solid var(--border);
   box-shadow: var(--shadow-xl) !important;
   background-color: var(--card-bg) !important;
+  /* Enforce sensible max-width for custom-dialog */
+  width: 90%;
+}
+.custom-dialog {
+  max-width: 560px;
+}
+.custom-dialog--wide {
+  max-width: 860px;
+}
+.custom-dialog--asset {
+  max-width: 1060px;
 }
 .el-dialog__header {
   padding: var(--space-5) var(--space-6) !important;

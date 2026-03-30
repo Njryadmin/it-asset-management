@@ -13,10 +13,9 @@ declare module 'vue-router' {
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
-    meta: { title: '登录' },
+    meta: { title: '登录' , requiresAuth: false  },
     name: 'Login',
     component: () => import('@/views/auth/Login.vue'),
-    meta: { requiresAuth: false }
   },
   {
     path: '/',
@@ -38,12 +37,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '资产管理' },
         name: 'Assets',
         component: () => import('@/views/assets/AssetList.vue')
-      },
-      {
-        path: 'assets/create',
-        meta: { title: '新增资产' },
-        name: 'AssetCreate',
-        component: () => import('@/views/assets/AssetForm.vue')
       },
       {
         path: 'assets/:id/edit',
@@ -89,59 +82,51 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'audit',
-        meta: { title: '审计日志' },
+        meta: { title: '审计日志' , requiresAuth: true, adminOnly: true  },
         name: 'AuditLog',
         component: () => import('@/views/audit/AuditLogList.vue'),
-        meta: { requiresAuth: true, adminOnly: true }
       },
       {
         path: 'approvals',
-        meta: { title: '我的申请' },
+        meta: { title: '我的申请' , requiresAuth: true  },
         name: 'Approvals',
         component: () => import('@/views/approvals/ApprovalList.vue'),
-        meta: { requiresAuth: true }
       },
       {
         path: 'approval-instances/:id',
-        meta: { title: '审批详情' },
+        meta: { title: '审批详情' , requiresAuth: true  },
         name: 'ApprovalInstanceDetail',
         component: () => import('@/views/approvals/ApprovalInstanceDetail.vue'),
-        meta: { requiresAuth: true }
       },
       {
         path: 'approval-flows',
-        meta: { title: '审批流程' },
+        meta: { title: '审批流程' , requiresAuth: true, adminOnly: true  },
         name: 'ApprovalFlowConfig',
         component: () => import('@/views/approvals/ApprovalFlowConfig.vue'),
-        meta: { requiresAuth: true, adminOnly: true }
       },
       {
         path: 'reports',
-        meta: { title: '统计报表' },
+        meta: { title: '统计报表' , requiresAuth: true, adminOnly: true  },
         name: 'AssetReports',
         component: () => import('@/views/reports/AssetReports.vue'),
-        meta: { requiresAuth: true, adminOnly: true }
       },
       {
         path: 'depreciation',
-        meta: { title: '折旧管理' },
+        meta: { title: '折旧管理' , requiresAuth: true, adminOnly: true  },
         name: 'Depreciation',
         component: () => import('@/views/reports/DepreciationReport.vue'),
-        meta: { requiresAuth: true, adminOnly: true }
       },
       {
         path: 'assets/:id',
-        meta: { title: '资产详情' },
+        meta: { title: '资产详情' , requiresAuth: true  },
         name: 'AssetDetail',
         component: () => import('@/views/assets/AssetDetail.vue'),
-        meta: { requiresAuth: true }
       },
       {
         path: 'asset-transfers',
-        meta: { title: '资产调拨' },
+        meta: { title: '资产调拨' , requiresAuth: true  },
         name: 'AssetTransfers',
         component: () => import('@/views/assets/AssetTransferList.vue'),
-        meta: { requiresAuth: true }
       }
     ]
   }
