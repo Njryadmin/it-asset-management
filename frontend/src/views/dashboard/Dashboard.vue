@@ -385,7 +385,15 @@ async function fetchDepreciation() {
   } catch (e) { console.error(e) }
 }
 async function fetchSettings() { try { const r = await settingsApi.get(); if (r.data) { const d = r.data as any; settings.value.systemName = d.systemName || d.siteTitle || 'IT 资产管理系统'; settings.value.logoUrl = d.logoUrl || ''; settings.value.faviconUrl = d.faviconUrl || ''; settings.value.announcement = d.announcement || ''; settings.value.announcement_enabled = d.announcementEnabled ?? false } } catch (e) { console.error(e) } }
-onMounted(async () => { await Promise.all([fetchStats(), fetchSettings().catch(() => {}), assetStore.fetchOptions().catch(() => {}), fetchReminders(), fetchDepreciation()]) })
+onMounted(async () => {
+  await Promise.all([
+    fetchStats(),
+    fetchSettings().catch(() => {}),
+    assetStore.fetchOptions().catch(() => {}),
+    fetchReminders().catch(() => {}),
+    fetchDepreciation().catch(() => {})
+  ])
+})
 </script>
 
 

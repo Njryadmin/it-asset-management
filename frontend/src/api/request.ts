@@ -41,7 +41,27 @@ function camelToSnake(obj: any): any {
   return obj
 }
 
-// Response interceptor - convert snake_case to camelCase
+// Paths that require admin privileges on the backend
+const ADMIN_ONLY_PATHS = [
+  '/reminders',
+  '/depreciation',
+  '/audit',
+  '/approval-flows',
+  '/approval_flows',
+]
+
+function isAdminOnlyError(error: any): boolean {
+  if (error?.response?.status !== 403) return false
+  const url = error.config?.url || ''
+  const detail = error.response?.data?.detail
+  // Known admin-only endpoint paths
+  if (ADMIN_ONLY_PATHS.some(p => url.includes(p))) return true
+  // Known admin-only error messages
+  if (detail === '需要管理员权限' || detail === '无权限') return true
+  return false
+}
+
+// Response interceptor
 request.interceptors.response.use(
   (response) => {
     if (response.data && typeof response.data === 'object') {
@@ -49,28 +69,37 @@ request.interceptors.response.use(
     }
     return response
   },
-  (error) => {
-    if (error.response?.status === 401) {
+  async (error) => {
+    const originalRequest = error.config
+
+    // Retry once on network errors (no response) — not on 4xx or already retried
+    if (!originalRequest._retry && !error.response && axios.isAxiosError(error)) {
+      originalRequest._retry = true
+      try {
+        const res = await request(originalRequest)
+        return res
+      } catch (retryError) {
+        error = retryError as any
+      }
+    }
+
+    const status = error.response?.status
+
+    if (status === 401) {
       localStorage.removeItem('token')
       router.push('/login')
       ElMessage.error('登录已过期，请重新登录')
-    } else if (error.response?.status === 403) {
-      // Silently handle 403 on admin-only endpoints (e.g. reminders, depreciation, audit)
-      // The UI already hides admin-only features from non-admins, so suppress the toast
-      const adminOnlyPaths = ['/reminders', '/depreciation', '/audit', '/approval-flows']
-      const isAdminOnlyRequest = adminOnlyPaths.some(p => error.config?.url?.includes(p))
-      if (!isAdminOnlyRequest) {
+    } else if (status === 403) {
+      // Admin-only endpoints: silently suppress known admin-only errors
+      if (!isAdminOnlyError(error)) {
         ElMessage.error(error.response?.data?.detail || '无权限访问')
-      }
-      // Also suppress for the general detail message if it's a known admin-only error
-      if (error.response?.data?.detail === '需要管理员权限') {
-        // suppress - feature is hidden from non-admin UI anyway
       }
     } else if (error.response?.data?.detail) {
       ElMessage.error(error.response.data.detail)
-    } else {
+    } else if (!originalRequest._retry) {
       ElMessage.error('请求失败，请稍后重试')
     }
+
     return Promise.reject(error)
   }
 )
@@ -82,19 +111,19 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
+
     // Convert camelCase to snake_case for request body (skip FormData/URLSearchParams)
-    if (config.data && typeof config.data === 'object' && 
-        !String(config.headers['Content-Type'] || '').includes('multipart/form-data') && 
+    if (config.data && typeof config.data === 'object' &&
+        !String(config.headers['Content-Type'] || '').includes('multipart/form-data') &&
         !(config.data instanceof URLSearchParams)) {
       config.data = camelToSnake(config.data)
     }
-    
+
     // Convert params
     if (config.params && typeof config.params === 'object') {
       config.params = camelToSnake(config.params)
     }
-    
+
     return config
   },
   (error) => {
@@ -113,7 +142,7 @@ export function downloadFile(url: string, params?: Record<string, any>, filename
       return acc
     }, {} as Record<string, string>)
   ).toString() : ''
-  
+
   return fetch(`${request.defaults.baseURL}${url}${queryParams}`, {
     headers: { Authorization: `Bearer ${token}` }
   }).then(response => {

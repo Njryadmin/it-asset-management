@@ -12,11 +12,14 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
+# Install perl for template processing
+RUN apk add --no-cache perl
+
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy nginx template and entrypoint script
-COPY docker/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY docker/nginx.conf /etc/nginx/nginx.conf.template
 COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 

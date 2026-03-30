@@ -104,9 +104,8 @@ services:
       # CA 证书链（可选）
       - SSL_CA_PATH=${SSL_CA_PATH:-}
     volumes:
-      # SSL 证书目录（启用 HTTPS 时挂载，设置为宿主机证书目录路径）
-      # 示例: /opt/ssl:/etc/nginx/ssl:ro
-      - ${SSL_CERT_DIR:-}:/etc/nginx/ssl:ro
+      # SSL 证书目录
+      - /www:/etc/nginx/ssl:ro
     depends_on:
       # 等待后端启动后再构建前端（避免前端构建时后端未就绪）
       - backend
