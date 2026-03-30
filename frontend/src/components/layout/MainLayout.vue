@@ -44,10 +44,6 @@
             <el-icon aria-hidden="true"><Box /></el-icon>
             <span>资产列表</span>
           </el-menu-item>
-          <el-menu-item index="/assets/create">
-            <el-icon aria-hidden="true"><Plus /></el-icon>
-            <span>新增资产</span>
-          </el-menu-item>
           <el-menu-item index="/asset-transfers">
             <el-icon aria-hidden="true"><RefreshRight /></el-icon>
             <span>资产转移</span>
@@ -131,7 +127,7 @@
         <el-breadcrumb separator="/">
           <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
           <el-breadcrumb-item v-if="$route.path.startsWith('/assets')">资产管理</el-breadcrumb-item>
-          <el-breadcrumb-item v-if="$route.path === '/assets' || $route.path === '/assets/create'">{{ $route.path === '/assets/create' ? '新增资产' : '资产列表' }}</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="$route.path === '/assets'">资产列表</el-breadcrumb-item>
           <el-breadcrumb-item v-if="$route.path === '/categories'">分类管理</el-breadcrumb-item>
           <el-breadcrumb-item v-if="$route.path === '/departments'">部门管理</el-breadcrumb-item>
           <el-breadcrumb-item v-if="$route.path === '/suppliers'">供应商管理</el-breadcrumb-item>
@@ -217,7 +213,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { settingsApi } from '@/api/settings'
 import { ElMessageBox } from 'element-plus'
-import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet, Plus, Grid, OfficeBuilding, Clock, Setting } from '@element-plus/icons-vue'
+import { Sunny, Moon, DocumentChecked, Histogram, DataAnalysis, RefreshRight, Wallet, Grid, OfficeBuilding, Clock, Setting } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -347,12 +343,14 @@ onMounted(async () => {
   align-items: center;
   cursor: pointer;
   width: 100%;
-  padding: 0;
+  padding: 12px 16px;
+  min-height: 64px;
+  box-sizing: border-box;
 }
 
 .sidebar__logo-img {
   width: 100%;
-  height: 44px;
+  max-height: 56px;
   object-fit: contain;
   border-radius: var(--radius-md);
 }
