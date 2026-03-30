@@ -7,6 +7,11 @@
     <div class="bg-glow bg-glow--2"></div>
     <div class="bg-glow bg-glow--3"></div>
 
+    <!-- Top page logo -->
+    <div class="login-page-logo">
+      <img v-if="settings.logoUrl" :src="settings.logoUrl" alt="Logo" class="login-page-logo__img" />
+    </div>
+
     <div class="login-wrapper">
       <!-- Left brand panel (hidden on mobile) -->
       <div class="brand-panel">
@@ -303,6 +308,20 @@ async function handleLogin() {
 
 <style scoped>
 /* ─── CSS Variables (use new design token system) ──── */
+/* Top page logo */
+.login-page-logo {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+.login-page-logo__img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
 .login-page {
   /* Brand accent glow */
   --glow-color: rgba(59, 130, 246, 0.15);
