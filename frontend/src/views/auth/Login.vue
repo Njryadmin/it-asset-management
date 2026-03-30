@@ -70,23 +70,29 @@
           >
             <el-form-item prop="username" class="form-item">
               <el-input
+                id="username"
+                name="username"
                 v-model="form.username"
                 placeholder="用户名"
                 :prefix-icon="User"
                 size="large"
                 clearable
+                autocomplete="username"
                 class="form-input"
               />
             </el-form-item>
 
             <el-form-item prop="password" class="form-item">
               <el-input
+                id="password"
+                name="password"
                 v-model="form.password"
                 type="password"
                 placeholder="密码"
                 :prefix-icon="Lock"
                 size="large"
                 show-password
+                autocomplete="current-password"
                 @keyup.enter="handleLogin"
                 class="form-input"
               />
@@ -132,10 +138,25 @@
   >
     <el-form>
       <el-form-item label="新密码" required>
-        <el-input v-model="newPassword" type="password" placeholder="请输入新密码（至少8位）" show-password />
+        <el-input
+          id="new-password"
+          v-model="newPassword"
+          type="password"
+          placeholder="请输入新密码（至少8位）"
+          show-password
+          autocomplete="new-password"
+        />
       </el-form-item>
       <el-form-item label="确认密码" required>
-        <el-input v-model="confirmPassword" type="password" placeholder="请再次输入新密码" show-password @keyup.enter="handlePasswordChange" />
+        <el-input
+          id="confirm-password"
+          v-model="confirmPassword"
+          type="password"
+          placeholder="请再次输入新密码"
+          show-password
+          autocomplete="new-password"
+          @keyup.enter="handlePasswordChange"
+        />
       </el-form-item>
     </el-form>
     <template #footer>

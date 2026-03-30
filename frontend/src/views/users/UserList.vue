@@ -136,13 +136,13 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="90%" max-width="500px" class="custom-dialog">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" placeholder="请输入用户名" :disabled="dialogMode === 'edit'" />
+          <el-input id="user-username" name="username" v-model="form.username" placeholder="请输入用户名" :disabled="dialogMode === 'edit'" />
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email" placeholder="请输入邮箱" />
+          <el-input id="user-email" name="email" v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
         <el-form-item label="姓名">
-          <el-input v-model="form.full_name" placeholder="请输入姓名" />
+          <el-input id="user-fullname" name="full_name" v-model="form.full_name" placeholder="请输入姓名" />
         </el-form-item>
         <el-form-item v-if="dialogMode === 'create'" label="密码" prop="password">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
