@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload, joinedload
 from typing import Optional
 import csv
 import io
-from datetime import datetime
+from datetime import datetime, date
 
 from app.core.database import get_db
 from app.models import Asset, AssetStatus, Category, Supplier, Department, User
@@ -141,17 +141,21 @@ async def import_assets(
     errors = []
     skipped = 0
     
-    # 预先加载所有名称映射
+    # 预先加载所有名称映射（避免 N+1）
     category_map = {c.name: c.id for c in (await db.execute(select(Category))).scalars().all()}
     supplier_map = {s.name: s.id for s in (await db.execute(select(Supplier))).scalars().all()}
     department_map = {d.name: d.id for d in (await db.execute(select(Department))).scalars().all()}
-    # 用户名称映射
     user_name_map = {}
     for u in (await db.execute(select(User.username, User.full_name))).scalars().all():
         user_name_map[u.username] = u.id
         if u.full_name:
             user_name_map[u.full_name] = u.id
-    
+
+    # 预先查询已存在的 asset_code，避免逐行查询
+    existing_codes = {code for code, in await db.execute(select(Asset.asset_code)).all()}
+
+    pending_assets = []  # 先收集，最后统一事务提交
+
     for row_num, row in enumerate(reader, start=2):
         try:
             # Check required fields
@@ -159,56 +163,47 @@ async def import_assets(
                 errors.append(f"第{row_num}行: 缺少必填字段(资产编号/名称)")
                 skipped += 1
                 continue
-            
-            # Check if asset_code exists
-            result = await db.execute(select(Asset).where(Asset.asset_code == row['资产编号']))
-            if result.scalar_one_or_none():
+
+            # Check if asset_code exists (using preloaded set)
+            if row['资产编号'] in existing_codes:
                 errors.append(f"第{row_num}行: 资产编号 {row['资产编号']} 已存在，跳过")
                 skipped += 1
                 continue
-            
+
             # Parse category name -> id
-            category_id = None
-            if row.get('分类名称'):
-                category_id = category_map.get(row['分类名称'])
-                if not category_id:
-                    errors.append(f"第{row_num}行: 分类 '{row['分类名称']}' 不存在")
-                    skipped += 1
-                    continue
-            
+            category_id = category_map.get(row.get('分类名称')) if row.get('分类名称') else None
+            if row.get('分类名称') and not category_id:
+                errors.append(f"第{row_num}行: 分类 '{row['分类名称']}' 不存在")
+                skipped += 1
+                continue
+
             # Parse supplier name -> id
-            supplier_id = None
-            if row.get('供应商名称'):
-                supplier_id = supplier_map.get(row['供应商名称'])
-                # supplier_id can be None if not found, so just warning
-                
-            # Parse department name -> id  
-            department_id = None
-            if row.get('部门名称'):
-                department_id = department_map.get(row['部门名称'])
-                # department_id can be None if not found
-            
+            supplier_id = supplier_map.get(row.get('供应商名称')) if row.get('供应商名称') else None
+
+            # Parse department name -> id
+            department_id = department_map.get(row.get('部门名称')) if row.get('部门名称') else None
+
             # Parse date fields
             purchase_date = None
             if row.get('购入日期'):
                 try:
-                    purchase_date = datetime.strptime(row['购入日期'], '%Y-%m-%d')
+                    purchase_date = date.strptime(row['购入日期'], '%Y-%m-%d')
                 except ValueError:
                     pass
-            
+
             warranty_expire_date = None
             if row.get('保修期至'):
                 try:
                     warranty_expire_date = datetime.strptime(row['保修期至'], '%Y-%m-%d')
                 except ValueError:
                     pass
-            
+
             status_str = row.get('状态', 'idle')
             try:
                 status = AssetStatus(status_str)
             except ValueError:
                 status = AssetStatus.idle
-            
+
             asset = Asset(
                 name=row['名称'],
                 asset_code=row['资产编号'],
@@ -232,14 +227,23 @@ async def import_assets(
                 depreciation_method=row.get('折旧方法') or None,
                 salvage_rate=float(row['残值率']) if row.get('残值率') else None,
             )
-            db.add(asset)
+            pending_assets.append(asset)
+            existing_codes.add(row['资产编号'])  # 防止同一 CSV 内重复编号
             imported += 1
-            
+
         except Exception as e:
             errors.append(f"第{row_num}行: {str(e)}")
             skipped += 1
-    
-    await db.commit()
+
+    # 统一事务提交，失败则全部回滚
+    if pending_assets:
+        try:
+            db.add_all(pending_assets)
+            await db.commit()
+        except Exception:
+            await db.rollback()
+            errors.append(f"批量插入失败，已回滚所有更改，请检查数据后重试")
+            imported = 0
     
     return {
         "message": f"导入完成",

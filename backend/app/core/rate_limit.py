@@ -79,13 +79,29 @@ def rate_limit(limit: str = "5/minute"):
     e.g., "5/minute", "10/5m", "3/1h"
     """
     def parse_limit(limit_str: str) -> tuple[int, int]:
-        """Parse limit string into (count, window_seconds)."""
+        """Parse limit string into (count, window_seconds).
+        
+        Supported window formats:
+        - "5/minute", "5/minutes" → 5 requests per 60 seconds
+        - "10/m"               → 10 requests per 60 seconds
+        - "3/1h", "3/hour"    → 3 requests per 3600 seconds
+        """
         count_str, window_str = limit_str.split("/")
         count = int(count_str)
-        unit = window_str[-1]
-        value = int(window_str[:-1])
         
-        multipliers = {"s": 1, "m": 60, "h": 3600, "d": 86400}
+        # Normalize: strip trailing 's' from words like 'minutes'/'hours'
+        normalized = window_str.rstrip("s")  # "minutes" → "minute"
+        unit = normalized[-1]
+        value_str = normalized[:-1]
+        
+        if not value_str.isdigit():
+            # Full word without trailing s, e.g. "minute" → value=1
+            value = 1
+            unit = normalized  # use full word as key
+        else:
+            value = int(value_str)
+        
+        multipliers = {"s": 1, "m": 60, "h": 3600, "d": 86400, "minute": 60, "hour": 3600, "day": 86400}
         if unit not in multipliers:
             raise ValueError(f"Invalid time unit: {unit}")
         window_seconds = value * multipliers[unit]

@@ -97,7 +97,7 @@ class Asset(Base):
     assigned_to = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     status = Column(Enum(AssetStatus), default=AssetStatus.IDLE, nullable=False)
-    purchase_date = Column(DateTime(timezone=True), nullable=True)
+    purchase_date = Column(Date, nullable=True)  # 购入日期（纯日期，无时间）
     purchase_price = Column(Float, nullable=True)
     warranty_expire_date = Column(DateTime(timezone=True), nullable=True)
     
@@ -109,13 +109,12 @@ class Asset(Base):
     brand = Column(String(100), nullable=True)
     model = Column(String(100), nullable=True)
     location = Column(String(200), nullable=True)
-    purchase_date = Column(Date, nullable=True)  # Plain date without time
     importance_level = Column(String(20), nullable=True)  # critical/important/normal/low
     deleted_at = Column(DateTime(timezone=True), nullable=True)  # Soft delete
     # Depreciation fields
     depreciation_years = Column(Integer, nullable=True)  # 折旧年限（年），默认5年
     depreciation_method = Column(String(20), nullable=True)  # straight-line / declining-balance
-    salvage_rate = Column(Float, nullable=True)  # 残值率（0-1），默认0.05
+    salvage_rate = Column(Float, nullable=True)  # 残值率（百分比形式，如 5 表示 5%，非 0.05）
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

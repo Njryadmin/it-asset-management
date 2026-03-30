@@ -48,9 +48,10 @@ _settings = Settings()
 
 # SECURITY: Generate SECRET_KEY at runtime if not provided via environment variable
 # This ensures each startup gets a unique key. For production, always set SECRET_KEY env var.
+import sys
 if not _settings.SECRET_KEY:
     _settings.SECRET_KEY = secrets.token_urlsafe(32)
-    print("WARNING: SECRET_KEY auto-generated at runtime. Set SECRET_KEY env var for production!")
+    print("WARNING: SECRET_KEY auto-generated at runtime. Set SECRET_KEY env var for production!", file=sys.stderr)
 
 settings = _settings
 

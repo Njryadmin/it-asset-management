@@ -29,7 +29,7 @@ async def get_warranty_expiring_assets(
             Asset.warranty_expire_date >= today,
             Asset.warranty_expire_date <= expire_threshold,
             Asset.status.in_(["in_use", "idle"])
-        ).order_by(Asset.warranty_expire_date)
+        ).order_by(Asset.warranty_expire_date).limit(500)
     )
     assets = result.scalars().all()
     
@@ -67,7 +67,7 @@ async def get_maintenance_due(
             AssetMaintenanceLog.next_maintenance_date.isnot(None),
             AssetMaintenanceLog.next_maintenance_date >= today,
             AssetMaintenanceLog.next_maintenance_date <= due_threshold
-        ).order_by(AssetMaintenanceLog.next_maintenance_date)
+        ).order_by(AssetMaintenanceLog.next_maintenance_date).limit(500)
     )
     rows = result.all()
     

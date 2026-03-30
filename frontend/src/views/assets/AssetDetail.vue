@@ -178,10 +178,16 @@
                   </template>
                 </el-table-column>
                 <el-table-column prop="description" label="备注" show-overflow-tooltip />
-                <el-table-column label="操作" width="120" fixed="right">
+                <el-table-column label="操作" min-width="120" fixed="right">
                   <template #default="{ row }">
-                    <el-button link type="primary" size="small" @click="openMaintenanceDialog(row)">编辑</el-button>
-                    <el-button link type="danger" size="small" @click="deleteMaintenanceLog(row.id)">删除</el-button>
+                    <div class="action-btn-group">
+                      <span class="action-link" @click="openMaintenanceDialog(row)">
+                        <el-icon><Edit /></el-icon><span>编辑</span>
+                      </span>
+                      <span class="action-link action-link--danger" @click="deleteMaintenanceLog(row.id)">
+                        <el-icon><Delete /></el-icon><span>删除</span>
+                      </span>
+                    </div>
                   </template>
                 </el-table-column>
               </el-table>
@@ -249,10 +255,16 @@
                     {{ dayjs(row.created_at).format('YYYY-MM-DD HH:mm') }}
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="100" fixed="right">
+                <el-table-column label="操作" min-width="120" fixed="right">
                   <template #default="{ row }">
-                    <el-button link type="primary" size="small" @click="downloadAttachment(row)">下载</el-button>
-                    <el-button link type="danger" size="small" @click="deleteAttachment(row.id)">删除</el-button>
+                    <div class="action-btn-group">
+                      <span class="action-link" @click="downloadAttachment(row)">
+                        <el-icon><Download /></el-icon><span>下载</span>
+                      </span>
+                      <span class="action-link action-link--danger" @click="deleteAttachment(row.id)">
+                        <el-icon><Delete /></el-icon><span>删除</span>
+                      </span>
+                    </div>
                   </template>
                 </el-table-column>
               </el-table>

@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import User, Category, Supplier, Department, Asset, AssetStatus
@@ -5,6 +6,8 @@ from app.models import SystemSettings  # noqa: F401 - ensures table is created o
 from app.core.security import get_password_hash
 from app.core.database import AsyncSessionLocal, init_db
 import asyncio
+
+logger = logging.getLogger(__name__)
 
 
 async def create_default_admin(db: AsyncSession):
@@ -23,12 +26,12 @@ async def create_default_admin(db: AsyncSession):
             password_change_required=True  # SECURITY: Force password change on first login
         )
         db.add(admin)
-        print("Created default admin user.")
+        logger.info("Created default admin user.")
     else:
         # SECURITY: Mark existing admin as requiring password change
         if not existing_admin.password_change_required:
             existing_admin.password_change_required = True
-            print("Updated admin user: password_change_required=True")
+            logger.info("Updated admin user: password_change_required=True")
 
 
 async def create_sample_data(db: AsyncSession):
@@ -50,7 +53,7 @@ async def create_sample_data(db: AsyncSession):
             created_categories.append(cat_data["name"])
     
     if created_categories:
-        print(f"Created categories: {', '.join(created_categories)}")
+        logger.info(f"Created categories: {', '.join(created_categories)}")
 
 
 async def create_sample_suppliers(db: AsyncSession):
@@ -71,7 +74,7 @@ async def create_sample_suppliers(db: AsyncSession):
             created.append(sup_data["name"])
     
     if created:
-        print(f"Created suppliers: {', '.join(created)}")
+        logger.info(f"Created suppliers: {', '.join(created)}")
 
 
 async def create_sample_departments(db: AsyncSession):
@@ -93,7 +96,7 @@ async def create_sample_departments(db: AsyncSession):
             created.append(dept_data["name"])
     
     if created:
-        print(f"Created departments: {', '.join(created)}")
+        logger.info(f"Created departments: {', '.join(created)}")
 
 
 async def init_sample_data():
@@ -108,9 +111,9 @@ async def init_sample_data():
             await create_sample_suppliers(db)
             await create_sample_departments(db)
             await db.commit()
-            print("Sample data initialization completed!")
+            logger.info("Sample data initialization completed.")
         except Exception as e:
-            print(f"Error initializing sample data: {e}")
+            logger.error(f"Error initializing sample data: {e}")
             await db.rollback()
 
 
