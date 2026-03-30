@@ -343,14 +343,14 @@ onMounted(async () => {
   align-items: center;
   cursor: pointer;
   width: 100%;
-  padding: 12px 16px;
-  min-height: 64px;
+  padding: 16px 20px;
+  min-height: 72px;
   box-sizing: border-box;
 }
 
 .sidebar__logo-img {
   width: 100%;
-  max-height: 56px;
+  max-height: 80px;
   object-fit: contain;
   border-radius: var(--radius-md);
 }
