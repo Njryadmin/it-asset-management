@@ -402,12 +402,12 @@ const createLoading = ref(false)
 const createForm = reactive({
   name: '',
   assetCode: '',
-  categoryId: null as number | null,
-  supplierId: null as number | null,
-  departmentId: null as number | null,
-  status: 'idle',
+  categoryId: undefined as number | undefined,
+  supplierId: undefined as number | undefined,
+  departmentId: undefined as number | undefined,
+  status: 'idle' as AssetStatus,
   purchaseDate: '',
-  purchasePrice: null as number | null,
+  purchasePrice: undefined as number | undefined,
 })
 const batchTransferForm = reactive({
   departmentId: null as number | null,
@@ -417,7 +417,6 @@ const batchTransferForm = reactive({
 const showFilterDrawer = ref(false)
 
 // Legacy reference - table now uses 'columns' from composable
-const columnOptions = ref(defaultColumns)
 
 const tempParams = reactive({
   keyword: '',
@@ -542,12 +541,12 @@ function createAsset() {
 function resetCreateForm() {
   createForm.name = ''
   createForm.assetCode = ''
-  createForm.categoryId = null
-  createForm.supplierId = null
-  createForm.departmentId = null
+  createForm.categoryId = undefined
+  createForm.supplierId = undefined
+  createForm.departmentId = undefined
   createForm.status = 'idle'
   createForm.purchaseDate = ''
-  createForm.purchasePrice = null
+  createForm.purchasePrice = undefined
 }
 
 async function handleCreate() {
@@ -560,13 +559,13 @@ async function handleCreate() {
     const payload: Record<string, unknown> = {
       name: createForm.name,
       asset_code: createForm.assetCode,
-      status: createForm.status as AssetStatus,
+      status: createForm.status,
     }
-    if (createForm.categoryId != null) payload.category_id = createForm.categoryId
-    if (createForm.supplierId != null) payload.supplier_id = createForm.supplierId
-    if (createForm.departmentId != null) payload.department_id = createForm.departmentId
+    if (createForm.categoryId !== undefined) payload.category_id = createForm.categoryId
+    if (createForm.supplierId !== undefined) payload.supplier_id = createForm.supplierId
+    if (createForm.departmentId !== undefined) payload.department_id = createForm.departmentId
     if (createForm.purchaseDate) payload.purchase_date = createForm.purchaseDate
-    if (createForm.purchasePrice != null) payload.purchase_price = createForm.purchasePrice
+    if (createForm.purchasePrice !== undefined) payload.purchase_price = createForm.purchasePrice
     await assetsApi.create(payload as any)
     ElMessage.success('资产创建成功')
     createDialogVisible.value = false

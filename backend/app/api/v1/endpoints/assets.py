@@ -211,7 +211,8 @@ async def import_assets(
                 category_id=category_id,
                 supplier_id=supplier_id,
                 department_id=department_id,
-                assigned_to=user_name_map.get(row.get('使用人')) if row.get('使用人') else None,
+                # assigned_to: 外键ID，从 user_name_map 取值
+                assigned_to=(assigned_to_name := row.get('使用人')) and user_name_map.get(assigned_to_name),
                 status=status,
                 purchase_date=purchase_date,
                 purchase_price=float(row['购入价格']) if row.get('购入价格') else None,
@@ -427,7 +428,9 @@ async def delete_asset(
     if not asset:
         raise HTTPException(status_code=404, detail="资产不存在")
     
-    await db.delete(asset)
+    # 软删除：设置 deleted_at 时间戳
+    asset.deleted_at = datetime.utcnow()
+    db.add(asset)
     await db.commit()
     return {"message": "删除成功"}
 
@@ -451,8 +454,9 @@ async def batch_delete_assets(
         raise HTTPException(status_code=404, detail=f"部分资产不存在: {missing}")
     
     for asset in assets:
-        await db.delete(asset)
-    
+        asset.deleted_at = datetime.utcnow()
+        db.add(asset)
+
     await db.commit()
     return {"message": f"成功删除 {len(assets)} 条资产"}
 
