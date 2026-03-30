@@ -97,7 +97,7 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <span class="action-link" @click="showDialog('edit', row)">
               <el-icon><Edit /></el-icon>
@@ -106,6 +106,10 @@
             <span class="action-link" :class="row.isActive ? 'action-link--warning' : 'action-link--success'" @click="handleToggleStatus(row)">
               <el-icon><Switch /></el-icon>
               <span>{{ row.isActive ? '禁用' : '启用' }}</span>
+            </span>
+            <span class="action-link action-link--warning" @click="handleResetPassword(row)">
+              <el-icon><Key /></el-icon>
+              <span>重置密码</span>
             </span>
             <span class="action-link action-link--danger" @click="handleDelete(row.id)">
               <el-icon><Delete /></el-icon>
@@ -163,6 +167,26 @@
         <el-button type="primary" @click="handleChangePassword">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- Password Reset Dialog -->
+    <el-dialog v-model="resetPasswordDialogVisible" title="重置密码" width="90%" max-width="420px" class="custom-dialog">
+      <div v-if="tempPassword" class="reset-password-result">
+        <p class="reset-password-tip">临时密码（请复制保存）：</p>
+        <el-input v-model="tempPassword" readonly click-to-select class="temp-password-input">
+          <template #append>
+            <el-button @click="copyTempPassword" :icon="CopyDocument">复制</el-button>
+          </template>
+        </el-input>
+        <p class="reset-password-note">⚠️ 用户首次登录后必须修改密码</p>
+      </div>
+      <div v-else class="reset-password-loading">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>正在重置密码...</span>
+      </div>
+      <template #footer>
+        <el-button @click="resetPasswordDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -175,6 +199,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import type { User } from '@/types'
 import { useColumnSettings } from '@/composables/useColumnSettings'
 import type { ColumnOption } from '@/composables/useColumnSettings'
+import { CopyDocument, Loading } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 
 const defaultColumns: ColumnOption[] = [
@@ -205,6 +230,9 @@ const dialogMode = ref<'create' | 'edit'>('create')
 const currentId = ref<number | null>(null)
 const passwordDialogVisible = ref(false)
 const passwordUserId = ref<number | null>(null)
+const resetPasswordDialogVisible = ref(false)
+const tempPassword = ref('')
+const resetPasswordUsername = ref('')
 const newPassword = ref('')
 
 const form = reactive({
@@ -300,6 +328,32 @@ async function handleChangePassword() {
     passwordDialogVisible.value = false
   } catch (error) {
     // Error handled by interceptor
+  }
+}
+
+async function handleResetPassword(row: User) {
+  try {
+    const confirmed = await ElMessageBox.confirm(
+      `确定要重置用户「${row.username}」的密码吗？重置后将生成新的临时密码。`,
+      '重置密码',
+      { confirmButtonText: '确定重置', cancelButtonText: '取消', type: 'warning' }
+    )
+    resetPasswordUsername.value = row.username
+    tempPassword.value = ''
+    resetPasswordDialogVisible.value = true
+    const res = await usersApi.resetPassword(row.id)
+    tempPassword.value = res.data.temp_password
+  } catch (error) {
+    // User cancelled or error
+  }
+}
+
+async function copyTempPassword() {
+  try {
+    await navigator.clipboard.writeText(tempPassword.value)
+    ElMessage.success('临时密码已复制到剪贴板')
+  } catch {
+    ElMessage.error('复制失败，请手动选择文本复制')
   }
 }
 
@@ -521,5 +575,11 @@ onMounted(() => {
   .search-input { width: 100%; min-width: 0; }
   .pagination { justify-content: center; flex-wrap: wrap; gap: 8px; }
 }
+
+.reset-password-result { display: flex; flex-direction: column; gap: 12px; }
+.reset-password-tip { font-size: 14px; color: var(--text-primary); margin: 0; }
+.temp-password-input { font-family: 'SF Mono','Monaco',monospace; font-size: 18px; }
+.reset-password-note { font-size: 12px; color: var(--text-secondary); margin: 0; }
+.reset-password-loading { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 0; color: var(--text-secondary); }
 
 </style>

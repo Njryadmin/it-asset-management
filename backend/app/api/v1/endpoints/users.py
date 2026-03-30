@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import Optional, List
+import secrets
 
 from app.core.database import get_db
 from app.models import User
@@ -212,3 +213,33 @@ async def change_password(
     user.hashed_password = get_password_hash(password_data.new_password)
     await db.commit()
     return {"message": "密码修改成功"}
+
+
+class PasswordResetResponse(BaseModel):
+    temp_password: str
+    message: str
+
+
+@router.post("/{user_id}/reset-password", response_model=PasswordResetResponse)
+async def reset_user_password(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    """管理员重置用户密码 - 生成随机临时密码"""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+
+    # Generate a random 12-character temp password
+    temp_password = secrets.token_urlsafe(8)[:12]
+    user.hashed_password = get_password_hash(temp_password)
+    # Force password change on next login
+    user.password_change_required = True
+    await db.commit()
+
+    return PasswordResetResponse(
+        temp_password=temp_password,
+        message=f"密码已重置，请将临时密码 {temp_password} 告知用户"
+    )

@@ -47,5 +47,9 @@ export const usersApi = {
 
   toggleStatus(id: number) {
     return request.post(`/users/${id}/toggle-status`)
+  },
+
+  resetPassword(id: number) {
+    return request.post<{ temp_password: string; message: string }>(`/users/${id}/reset-password`)
   }
 }
