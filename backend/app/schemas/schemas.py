@@ -56,7 +56,7 @@ class LoginRequest(BaseModel):
 
 
 class PasswordChangeRequest(BaseModel):
-    old_password: str
+    old_password: str | None = None
     new_password: str
 
 

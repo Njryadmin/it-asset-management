@@ -128,12 +128,18 @@ async def change_password(
     db: AsyncSession = Depends(get_db)
 ):
     """Change password for current user."""
-    # Verify old password
-    if not verify_password(password_data.old_password, current_user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="旧密码错误"
-        )
+    # If forced password change (admin reset), skip old password verification
+    if not current_user.password_change_required:
+        if not password_data.old_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="请提供旧密码"
+            )
+        if not verify_password(password_data.old_password, current_user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="旧密码错误"
+            )
     
     # Update password
     current_user.hashed_password = get_password_hash(password_data.new_password)

@@ -167,7 +167,7 @@
     </el-form>
     <template #footer>
       <el-button @click="newPasswordDialogVisible = false">取消</el-button>
-      <el-button type="primary" :loading="passwordChangeLoading" @click="handlePasswordChange">确认修改</el-button>
+      <el-button type="primary" :loading="passwordChangeLoading" :disabled="passwordChangeLoading" @click="handlePasswordChange">确认修改</el-button>
     </template>
   </el-dialog>
 </template>
@@ -214,6 +214,7 @@ const confirmPassword = ref('')
 const passwordChangeLoading = ref(false)
 
 async function handlePasswordChange() {
+  if (passwordChangeLoading.value) return
   if (newPassword.value.length < 8) {
     ElMessage.error('密码长度至少8位')
     return
@@ -229,8 +230,6 @@ async function handlePasswordChange() {
     newPasswordDialogVisible.value = false
     router.push('/')
   } catch {
-    // Error handled by interceptor
-  } finally {
     passwordChangeLoading.value = false
   }
 }
